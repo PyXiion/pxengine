@@ -1,8 +1,8 @@
 #include <iostream>
 
 #include <easy/profiler.h>
-#include "engine/engine.hpp"
-#include "engine/system/general.hpp"
+#include "../engine/engine.hpp"
+#include "../engine/system/general.hpp"
 
 int main()
 {
