@@ -23,11 +23,11 @@ px::gl::Renderer::~Renderer()
 
 }
 
-void px::gl::Renderer::setProjectionMatrix(px::Matrix4x4 projection_matrix)
+void px::gl::Renderer::setProjectionMatrix(glm::mat4 projection_matrix)
 {
 }
 
-void px::gl::Renderer::setViewMatrix(px::Matrix4x4 view_matrix)
+void px::gl::Renderer::setViewMatrix(glm::mat4 view_matrix)
 {
 }
 

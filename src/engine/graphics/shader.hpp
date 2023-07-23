@@ -2,8 +2,7 @@
 #include <string>
 #include <memory>
 
-#include "../common/vector2.hpp"
-#include "../common/vector3.hpp"
+#include "../math/vector.hpp"
 
 namespace px
 {

@@ -1,6 +1,7 @@
 #include "transform.hpp"
+#include <glm/gtc/matrix_transform.hpp>
 
-px::Transform::Transform(px::Vector3 position, Vector3 eulerAngles)
+px::Transform::Transform(glm::vec3 position, glm::vec3 eulerAngles)
   : m_transform()
   , m_isCached(false)
   , m_position(position)
@@ -8,8 +9,10 @@ px::Transform::Transform(px::Vector3 position, Vector3 eulerAngles)
 {
 }
 
-const px::Matrix4x4 &px::Transform::getTransformMatrix() const
+const glm::mat4 &px::Transform::getTransformMatrix()
 {
+  if (!m_isCached)
+    calculate();
   return m_transform;
 }
 
@@ -17,7 +20,7 @@ void px::Transform::calculate()
 {
   m_isCached = true;
 
-  m_transform.reset();
-  m_transform.rotate(m_rotation);
-  m_transform.move(m_position);
+  m_transform = glm::mat4(1.0f);
+  
+  m_transform = glm::translate(m_transform, m_position);
 }

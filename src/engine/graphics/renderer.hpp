@@ -1,9 +1,9 @@
 #pragma once
 #include <string>
 #include <memory>
+#include <glm/glm.hpp>
 #include "shader.hpp"
 #include "vertex_array.hpp"
-#include "../common/matrix4x4.hpp"
 
 namespace px
 {
@@ -12,8 +12,8 @@ namespace px
   public:
     virtual ~Renderer() {};
 
-    virtual void setProjectionMatrix(Matrix4x4 projection_matrix) = 0;
-    virtual void setViewMatrix(Matrix4x4 view_matrix) = 0;
+    virtual void setProjectionMatrix(glm::mat4 projection_matrix) = 0;
+    virtual void setViewMatrix(glm::mat4 view_matrix) = 0;
 
     virtual void setViewportSize(int left, int top, int width, int height) = 0;
 

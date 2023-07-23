@@ -10,8 +10,8 @@ namespace px::gl
     Renderer(Window &window);
     ~Renderer();
 
-    void setProjectionMatrix(Matrix4x4 projection_matrix) override;
-    void setViewMatrix(Matrix4x4 view_matrix) override;
+    void setProjectionMatrix(glm::mat4 projection_matrix) override;
+    void setViewMatrix(glm::mat4 view_matrix) override;
 
     void setViewportSize(int left, int top, int width, int height) override;
 
