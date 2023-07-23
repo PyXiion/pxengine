@@ -30,6 +30,14 @@ void px::Engine::run()
 
     m_deltaTime = fpsLimiter.sleep();
   }
+  m_window->close();
+
+  // Завершение работы
+
+  m_tickThreadShouldStop = true;
+  m_tickLoopThread->join();
+
+  onExit(*this);
 }
 
 void px::Engine::loadModule(const std::string &path)
@@ -43,10 +51,14 @@ void px::Engine::init()
 
   m_window = std::make_unique<Window>("PXE", 800, 600);
 
-  // TODO choose OpenGL or Vulkan
+  // TODO выбор между OpenGL или Vulkan
   if (true)
   {
     m_renderer = std::make_unique<gl::Renderer>(*m_window);
+  }
+  else
+  {
+    // ...
   }
 
   m_window->onFramebufferResize.append([this](int width, int height)
@@ -57,12 +69,15 @@ void px::Engine::init()
   m_scriptEngine = std::make_unique<ScriptEngine>();
   m_scriptEngine->bindAll();
 
-  m_tickLoopThread = std::make_unique<std::jthread>(std::bind(&Engine::tickThread, this));
+  m_tickLoopThread = std::make_unique<std::thread>(std::bind(&Engine::tickThread, this));
+
+  // Инициализация всего остального
+  onInit(*this);
 }
 
 void px::Engine::loop()
 {
-  EASY_BLOCK("px::Engine::loop");
+  EASY_BLOCK("Engine draw update");
 
   m_window->pollEvents();
   m_renderer->clear();
@@ -82,6 +97,7 @@ void px::Engine::draw()
 
 void px::Engine::tickThread()
 {
+  EASY_THREAD_SCOPE("Tick thread");
   FrameLimiter tickLimiter(m_maxTps);
 
   while (!m_tickThreadShouldStop)
@@ -93,7 +109,12 @@ void px::Engine::tickThread()
 
 void px::Engine::tickLoop()
 {
-  onTick(m_tickDeltaTime * m_speed);
+  EASY_BLOCK("Engine tick");
+  float deltaTime = m_tickDeltaTime * m_speed; 
+
+  onPreTick(deltaTime);
+  onTick(deltaTime);
+  onPostTick(deltaTime);
 }
 
 

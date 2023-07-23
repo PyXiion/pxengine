@@ -26,20 +26,29 @@ namespace px
     Renderer &getRenderer();
     ScriptEngine &getScriptEngine();
 
+    // События
     eventpp::CallbackList<void (Engine &)> onInit;
+    eventpp::CallbackList<void (Engine &)> onExit; 
 
+    eventpp::CallbackList<void ()> onGuiDraw; 
+
+    eventpp::CallbackList<void (float)> onPreTick;
     eventpp::CallbackList<void (float)> onTick;
+    eventpp::CallbackList<void (float)> onPostTick;
+
+    eventpp::CallbackList<void (float)> onPreUpdate;
     eventpp::CallbackList<void (float)> onUpdate;
+    eventpp::CallbackList<void (float)> onPostUpdate;
 
   private:
     std::unique_ptr<Window> m_window;
     std::unique_ptr<Renderer> m_renderer;
     std::unique_ptr<ScriptEngine> m_scriptEngine;
 
-    std::unique_ptr<std::jthread> m_tickLoopThread;
+    std::unique_ptr<std::thread> m_tickLoopThread;
 
-    const int m_maxFps;
-    const int m_maxTps;
+    int m_maxFps;
+    int m_maxTps;
 
     float m_speed;
     float m_deltaTime;
