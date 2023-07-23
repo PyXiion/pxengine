@@ -7,6 +7,7 @@ px::World::World(px::Engine &engine)
 
 px::World::~World()
 {
+  
 }
 
 
@@ -17,3 +18,7 @@ px::Engine &px::World::getEngine()
   return m_engine;
 }
 
+void px::World::destroyObject(GameObjectIter &iterator)
+{
+  m_gameObjects.erase(iterator);
+}
