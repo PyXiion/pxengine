@@ -19,7 +19,7 @@ float px::FrameLimiter::sleep()
   m_target = now + m_frameDelta;
 
   using ms = std::chrono::duration<float, std::milli>;
-  float deltaTime = std::chrono::duration_cast<ms>(now - m_lastFrame).count();
+  float deltaTime = std::chrono::duration_cast<ms>(now - m_lastFrame).count() / 1000.0f;
 
   m_lastFrame = now;
 
