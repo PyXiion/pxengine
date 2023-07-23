@@ -9,6 +9,8 @@ include_directories(
 )
 
 add_subdirectory(ext/glad)
+add_subdirectory(ext/imgui)
+
 add_subdirectory(src/engine)
 add_subdirectory(src/game)
 
