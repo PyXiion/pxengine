@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 include_directories(
   ext/glad/include
+  ext/args
 )
 
 add_subdirectory(ext/glad)
