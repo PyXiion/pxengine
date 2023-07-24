@@ -1,21 +1,22 @@
 #pragma once
-#include <glm/glm.hpp>
+#include "../math/vector.hpp"
+#include "../math/matrix.hpp"
 
 namespace px
 {
   class Transform
   {
   public:
-    Transform(glm::vec3 position, glm::vec3 eulerAngles);
+    Transform(Vector3 position, Vector3 eulerAngles);
 
     const glm::mat4 &getTransformMatrix();
 
   private:
-    glm::mat4 m_transform;
+    Matrix4x4 m_transform;
     bool m_isCached;
 
-    glm::vec3 m_position;
-    glm::vec3 m_rotation;
+    Vector3 m_position;
+    Vector3 m_rotation;
 
     void calculate();
   };
