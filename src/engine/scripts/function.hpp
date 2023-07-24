@@ -26,16 +26,17 @@ namespace px
   class ScriptFunction
   {
   public:
-    ScriptFunction(asIScriptFunction *function);
+    ScriptFunction(asIScriptFunction *function = nullptr);
+    ScriptFunction(const ScriptFunction &other);
     ScriptFunction(ScriptFunction &&other);
+
     ~ScriptFunction();
-
-
 
     /**
      * @brief Вызвать функцию AngelScript с указанными параметрами.
      * Вызывает функцию или метод AngelScript с указанными шаблонными параметрами.
      * Для передачи объекта-ссылки (не handle), нужно использовать @ref toRefArg.
+     * 
      * Пример:
      * @code
      * SomeObjValueType value = 34;
@@ -56,8 +57,12 @@ namespace px
 
     asIScriptFunction *getHandle();
 
+    ScriptFunction &operator=(const ScriptFunction &) = default;
+
   private:
     asIScriptFunction *m_function;
+
+    void check();
   };
 }
 

@@ -1,7 +1,9 @@
 #pragma once
 #include <string>
 #include <memory>
+
 #include <angelscript.h>
+
 #include "addons/scriptbuilder.h"
 #include "function.hpp"
 
@@ -11,6 +13,7 @@ namespace px
   class ScriptModule
   {
   public:
+    ScriptModule();
     ScriptModule(ScriptEngine &engine, std::string module_name);
 
     void loadScriptFromFile(const std::string &filename);
@@ -21,17 +24,16 @@ namespace px
     ScriptFunction getFunctionByName(const std::string &function_name);
     ScriptFunction getFunctionByDecl(const std::string &function_decl);
 
-
     asIScriptModule *getHandle();
-    ScriptEngine &getEngine();
+    ScriptEngine *getEngine();
 
   private:
     std::string m_name;
-    ScriptEngine &m_engine;
+    ScriptEngine *m_engine;
     CScriptBuilder m_builder;
 
     asIScriptModule *m_handle;
 
-
+    void check() const;
   };
 }

@@ -1,4 +1,6 @@
 #include "vertex_array.hpp"
+#include <stdexcept>
+
 #include <glad/glad.h>
 
 px::gl::VertexArray::VertexArray(const std::vector<float> vertices, const std::vector<VertexArrayAttribute> &attributes, DrawType drawType, PrimitiveType primitiveType)
@@ -31,6 +33,9 @@ px::gl::VertexArray::VertexArray(const std::vector<float> vertices, const std::v
 
     vertexSize += attribute.size;
   }
+
+  if (vertexSize == 0)
+    throw std::runtime_error("px::gl::VertexArray: Некорректные атрибуты.");
 
   m_vertexCount = vertices.size() / vertexSize; // получить количество вершит, так как каждая вершина состоит из аттрибутов
 
