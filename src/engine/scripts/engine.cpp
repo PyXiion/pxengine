@@ -7,6 +7,7 @@
 
 #include <yaml-cpp/yaml.h>
 #include <fmt/format.h>
+#include <easy/profiler.h>
 
 #include "addons/scriptstdstring.h"
 #include "binding.hpp"
@@ -31,6 +32,7 @@ px::ScriptModule px::ScriptEngine::getOrCreateModule(const std::string &module_n
 
 void px::ScriptEngine::bindAll()
 {
+  EASY_BLOCK("px::ScriptEngine::bindAll");
   ScriptDocumentationOptions options;
 
   options.projectName = "PyXiion's engine";
@@ -55,6 +57,7 @@ asIScriptEngine *px::ScriptEngine::getHandle()
 
 void px::ScriptEngine::initEngine()
 {
+  EASY_BLOCK("px::ScriptEngine::initEngine");
   m_script_engine = asCreateScriptEngine();
 
   int r = m_script_engine->SetMessageCallback(asFUNCTION(&messageCallback), this, asCALL_CDECL); assert(r >= 0);
