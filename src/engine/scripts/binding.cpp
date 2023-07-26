@@ -1,11 +1,13 @@
 #include "binding.hpp"
 #include <memory>
 #include <cassert>
+
 #include <angelscript.h>
+
 #include "docgen.hpp"
 #include "../engine.hpp"
 #include "../common/dynamic_enum.hpp"
-#include "../common/matrix4x4.hpp"
+#include "../math/matrix.hpp"
 
 #define CHECK assert(r >= 0);
 
@@ -22,6 +24,13 @@ template<class T>
 void TDestructor(void *memory)
 {
   static_cast<T*>(memory)->~T();
+}
+
+// Особые конструкторы
+template<>
+void TConstructor<px::Matrix4x4, float *>(void *memory, float *data)
+{
+  new(memory) px::Matrix4x4();
 }
 
 template<class T>
@@ -89,6 +98,16 @@ void px::scripts::priv::bindDynamicEnum(asIScriptEngine *engine, DocumentationGe
   r = engine->RegisterObjectMethod("DynamicEnum", "string get(int) const", asMETHODPR(DynamicEnum, get, (DynamicEnum::EnumValue) const, std::string), asCALL_THISCALL); CHECK
   DOC_METHOD("Получить строковой ID по целочисленному.")
 }
+
+float Matrix4x4_get_proxy(const px::Matrix4x4 &m, int j, int k)
+{
+  return m[j][k];
+}
+void Matrix4x4_set_proxy(px::Matrix4x4 &m, int j, int k, float v)
+{
+  m[j][k] = v;
+}
+
 void px::scripts::priv::bindMatrix4x4(asIScriptEngine *engine, DocumentationGenerator *docGen)
 {
   int r;
@@ -105,18 +124,32 @@ void px::scripts::priv::bindMatrix4x4(asIScriptEngine *engine, DocumentationGene
   // no need in destructor
   // r = engine->RegisterObjectBehaviour("Matrix4x4", asBEHAVE_DESTRUCT, "void f()", asFUNCTION(TDestructor<Matrix4x4>), asCALL_CDECL_OBJLAST); CHECK
 
-  r = engine->RegisterObjectMethod("Matrix4x4", "Matrix4x4 &opAssign(const Matrix4x4 &in)", asFUNCTION(TAssign<Matrix4x4>), asCALL_CDECL_OBJFIRST); CHECK
+  r = engine->RegisterObjectMethod("Matrix4x4", 
+                                   "Matrix4x4 &opAssign(const Matrix4x4 &in)", 
+                                   asMETHODPR(Matrix4x4, operator=, (Matrix4x4 const &), Matrix4x4 &), 
+                                   asCALL_THISCALL); CHECK
 
-  r = engine->RegisterObjectMethod("Matrix4x4", "Matrix4x4 opMul(const Matrix4x4 &in) const", asMETHODPR(Matrix4x4, operator*, (const Matrix4x4&) const, Matrix4x4), asCALL_THISCALL);
+  r = engine->RegisterObjectMethod("Matrix4x4", 
+                                   "Matrix4x4 opMul(const Matrix4x4 &in) const", 
+                                   asFUNCTIONPR(glm::operator*, (Matrix4x4 const &, Matrix4x4 const &), Matrix4x4), 
+                                   asCALL_CDECL_OBJFIRST);
   DOC_METHOD("Умножение матрицы на матрицу.")
 
-  r = engine->RegisterObjectMethod("Matrix4x4", "Vector3 opMul(const Vector3 &in) const", asMETHODPR(Matrix4x4, operator*, (const Vector3&) const, Vector3), asCALL_THISCALL);
-  DOC_METHOD("Умножение матрицы на вектор.")
+  // r = engine->RegisterObjectMethod("Matrix4x4", 
+  //                                  "Vector3 opMul(const Vector3 &in) const", 
+  //                                  asFUNCTIONPR(glm::operator*, (Matrix4x4 const &, const Vector3&), Matrix4x4), 
+  //                                  asCALL_THISCALL);
+  // DOC_METHOD("Умножение матрицы на вектор.")
 
-  r = engine->RegisterObjectMethod("Matrix4x4", "float get(int j, int k) const", asMETHOD(Matrix4x4, get), asCALL_THISCALL); CHECK
+  r = engine->RegisterObjectMethod("Matrix4x4", 
+                                   "float get(int j, int k) const", 
+                                   asFUNCTION(Matrix4x4_get_proxy),
+                                   asCALL_CDECL_OBJFIRST); CHECK
   DOC_METHOD("Получить элемент матрицы.")
-
-  r = engine->RegisterObjectMethod("Matrix4x4", "void set(int j, int k, float value)", asMETHOD(Matrix4x4, set), asCALL_THISCALL); CHECK;
+  r = engine->RegisterObjectMethod("Matrix4x4", 
+                                   "float set(int j, int k, float newValue)", 
+                                   asFUNCTION(Matrix4x4_set_proxy),
+                                   asCALL_CDECL_OBJFIRST); CHECK
   DOC_METHOD("Установить элемент матрицы.")
 }
 void px::scripts::priv::bindVector3(asIScriptEngine *engine, DocumentationGenerator *docGen)
@@ -125,52 +158,98 @@ void px::scripts::priv::bindVector3(asIScriptEngine *engine, DocumentationGenera
   r = engine->RegisterObjectType("Vector3", sizeof(Vector3), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_ALLFLOATS | asGetTypeTraits<Vector3>()); CHECK
   DOC_TYPE("3D вектор.")
 
-  r = engine->RegisterObjectBehaviour("Vector3", asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(TConstructor<Vector3>), asCALL_CDECL_OBJFIRST);
-  r = engine->RegisterObjectBehaviour("Vector3", asBEHAVE_CONSTRUCT, "void f(float x, float y, float z)", asFUNCTION((TConstructor<Vector3, float, float, float>)), asCALL_CDECL_OBJFIRST);
+  r = engine->RegisterObjectBehaviour("Vector3", asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(TConstructor<Vector3>), asCALL_CDECL_OBJFIRST); CHECK
+  r = engine->RegisterObjectBehaviour("Vector3", asBEHAVE_CONSTRUCT, "void f(float scalar)", asFUNCTION((TConstructor<Vector3, float>)), asCALL_CDECL_OBJFIRST); CHECK
+  r = engine->RegisterObjectBehaviour("Vector3", asBEHAVE_CONSTRUCT, "void f(float x, float y, float z)", asFUNCTION((TConstructor<Vector3, float, float, float>)), asCALL_CDECL_OBJFIRST); CHECK
 
-  r = engine->RegisterObjectMethod("Vector3", "float get_length() property", asMETHOD(Vector3, length), asCALL_THISCALL);
+  r = engine->RegisterObjectMethod("Vector3", 
+                                   "float get_length() const property", 
+                                   asFUNCTIONPR(glm::length, (Vector3 const &), float), 
+                                   asCALL_CDECL_OBJFIRST); CHECK
   DOC_METHOD("Длина вектора.")
 
-  r = engine->RegisterObjectMethod("Vector3", "float dot(const Vector3 &in)", asMETHOD(Vector3, dot), asCALL_THISCALL);
+  r = engine->RegisterObjectMethod("Vector3", 
+                                   "float dot(const Vector3 &in)", 
+                                   asFUNCTIONPR(glm::dot, (Vector3 const &, Vector3 const &), float), 
+                                   asCALL_CDECL_OBJFIRST); CHECK
   DOC_METHOD("Возвращает результат скалярного произведения с другим вектором.")
 
-  r = engine->RegisterObjectMethod("Vector3", "Vector3 cross(const Vector3 &in)", asMETHOD(Vector3, cross), asCALL_THISCALL);
-  DOC_METHOD("Возвращает результат не помню как по-русски")
+  r = engine->RegisterObjectMethod("Vector3", 
+                                   "Vector3 cross(const Vector3 &in)", 
+                                   asFUNCTIONPR(glm::cross, (Vector3 const &, Vector3 const &), Vector3), 
+                                   asCALL_CDECL_OBJFIRST); CHECK
+  DOC_METHOD("Возвращает результат не помню как по-русски") // TODO
 
-  r = engine->RegisterObjectMethod("Vector3", "Vector3 opEquals(const Vector3 &in) const", asMETHOD(Vector3, operator==), asCALL_THISCALL);
+  r = engine->RegisterObjectMethod("Vector3", 
+                                   "Vector3 opEquals(const Vector3 &in) const", 
+                                   asFUNCTIONPR(glm::operator==, (Vector3 const &, Vector3 const &), bool), 
+                                   asCALL_CDECL_OBJFIRST); CHECK
   DOC_METHOD("Сравнить два вектора.")
 
-  r = engine->RegisterObjectMethod("Vector3", "Vector3 opNeg() const", asMETHODPR(Vector3, operator-, () const, Vector3), asCALL_THISCALL);
+  r = engine->RegisterObjectMethod("Vector3", 
+                                   "Vector3 opNeg() const", 
+                                   asFUNCTIONPR(glm::operator-, (Vector3 const &), Vector3), 
+                                   asCALL_CDECL_OBJFIRST); CHECK
   DOC_METHOD("Поменять знаки в элементах вектора.")
-
-  r = engine->RegisterObjectMethod("Vector3", "Vector3 opSub(const Vector3 &in) const", asMETHODPR(Vector3, operator-, (const Vector3&) const, Vector3), asCALL_THISCALL);
+  
+  r = engine->RegisterObjectMethod("Vector3", 
+                                   "Vector3 opSub(const Vector3 &in) const", 
+                                   asFUNCTIONPR(glm::operator-, (Vector3 const &, Vector3 const &), Vector3), 
+                                   asCALL_CDECL_OBJFIRST); CHECK
   DOC_METHOD("Вычесть один вектор из другого.")
-
-  r = engine->RegisterObjectMethod("Vector3", "Vector3 opAdd(const Vector3 &in) const", asMETHODPR(Vector3, operator+, (const Vector3&) const, Vector3), asCALL_THISCALL);
+  
+  r = engine->RegisterObjectMethod("Vector3", 
+                                   "Vector3 opAdd(const Vector3 &in) const", 
+                                   asFUNCTIONPR(glm::operator+, (Vector3 const &, Vector3 const &), Vector3), 
+                                   asCALL_CDECL_OBJFIRST); CHECK
   DOC_METHOD("Сложить два вектора.")
 
-  r = engine->RegisterObjectMethod("Vector3", "Vector3 opMul(float) const", asMETHOD(Vector3, operator*), asCALL_THISCALL);
+  r = engine->RegisterObjectMethod("Vector3", 
+                                   "Vector3 opMul(float) const", 
+                                   asFUNCTIONPR(glm::operator*, (Vector3 const &, float), Vector3), 
+                                   asCALL_CDECL_OBJFIRST); CHECK
   DOC_METHOD("Умножить вектор на скаляр.")
 
-  r = engine->RegisterObjectMethod("Vector3", "Vector3 opMul_r(float) const", asMETHOD(Vector3, operator*), asCALL_THISCALL);
+  r = engine->RegisterObjectMethod("Vector3", 
+                                   "Vector3 opMul_r(float) const", 
+                                   asFUNCTIONPR(glm::operator*, (Vector3 const &, float), Vector3), 
+                                   asCALL_CDECL_OBJFIRST); CHECK
 
-  r = engine->RegisterObjectMethod("Vector3", "Vector3 opDiv(float) const", asMETHOD(Vector3, operator/), asCALL_THISCALL);
+  r = engine->RegisterObjectMethod("Vector3", 
+                                   "Vector3 opDiv(float) const", 
+                                   asFUNCTIONPR(glm::operator/, (Vector3 const &, float), Vector3), 
+                                   asCALL_CDECL_OBJFIRST); CHECK
   DOC_METHOD("Разделить вектор на скаляр.")
 
 
-  r = engine->RegisterObjectMethod("Vector3", "Vector3 &opAssign(const Vector3 &in)", asFUNCTION(TAssign<Vector3>), asCALL_CDECL_OBJFIRST);
+  r = engine->RegisterObjectMethod("Vector3", 
+                                   "Vector3 opAssign(const Vector3 &in)", 
+                                   asMETHODPR(Vector3, operator=, (Vector3 const &), Vector3 &), 
+                                   asCALL_THISCALL); CHECK
   DOC_METHOD("Копирует вектор.")
 
-  r = engine->RegisterObjectMethod("Vector3", "Vector3 &opAddAssign(const Vector3 &in)", asMETHOD(Vector3, operator+=), asCALL_THISCALL);
-  r = engine->RegisterObjectMethod("Vector3", "Vector3 &opSubAssign(const Vector3 &in)", asMETHOD(Vector3, operator-=), asCALL_THISCALL);
+  r = engine->RegisterObjectMethod("Vector3", 
+                                   "Vector3 opAddAssign(const Vector3 &in)", 
+                                   asMETHODPR(Vector3, operator+=, (Vector3 const &), Vector3 &), 
+                                   asCALL_THISCALL); CHECK
+  r = engine->RegisterObjectMethod("Vector3", 
+                                   "Vector3 opSubAssign(const Vector3 &in)", 
+                                   asMETHODPR(Vector3, operator-=, (Vector3 const &), Vector3 &), 
+                                   asCALL_THISCALL); CHECK
 
-  r = engine->RegisterObjectMethod("Vector3", "Vector3 &opMulAssign(float)", asMETHOD(Vector3, operator*=), asCALL_THISCALL);
-  r = engine->RegisterObjectMethod("Vector3", "Vector3 &opDivAssign(float)", asMETHOD(Vector3, operator/=), asCALL_THISCALL);
+  r = engine->RegisterObjectMethod("Vector3", 
+                                   "Vector3 opMulAssign(float)", 
+                                   asMETHODPR(Vector3, operator*=, (float), Vector3 &), 
+                                   asCALL_THISCALL); CHECK
+  r = engine->RegisterObjectMethod("Vector3", 
+                                   "Vector3 opDivAssign(float)", 
+                                   asMETHODPR(Vector3, operator/=, (float), Vector3 &), 
+                                   asCALL_THISCALL); CHECK
 
 
-  r = engine->RegisterObjectProperty("Vector3", "float x", asOFFSET(Vector3, x));
-  r = engine->RegisterObjectProperty("Vector3", "float y", asOFFSET(Vector3, y));
-  r = engine->RegisterObjectProperty("Vector3", "float z", asOFFSET(Vector3, z));
+  r = engine->RegisterObjectProperty("Vector3", "float x", asOFFSET(Vector3, x)); CHECK
+  r = engine->RegisterObjectProperty("Vector3", "float y", asOFFSET(Vector3, y)); CHECK
+  r = engine->RegisterObjectProperty("Vector3", "float z", asOFFSET(Vector3, z)); CHECK
 }
 
 
