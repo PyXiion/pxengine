@@ -10,13 +10,13 @@ file(GLOB_RECURSE PX_ENGINE_SOURCES CONFIGURE_DEPENDS
 
 add_library(px_engine ${PX_ENGINE_SOURCES})
 
-find_package(Angelscript REQUIRED)
-find_package(eventpp REQUIRED)
-find_package(yaml-cpp REQUIRED)
-find_package(fmt REQUIRED)
-find_package(easy_profiler REQUIRED)
-find_package(glfw3 3.3 REQUIRED)
-find_package(glm REQUIRED)
+find_package(Angelscript REQUIRED) # https://clck.ru/35ENso
+find_package(eventpp REQUIRED) # https://clck.ru/35ENxa
+find_package(yaml-cpp REQUIRED) # https://clck.ru/35EP9f
+find_package(fmt REQUIRED) # https://clck.ru/V5GiN
+find_package(easy_profiler REQUIRED) # https://clck.ru/35ENq8
+find_package(glfw3 3.3 REQUIRED) # https://clck.ru/35EPAi
+find_package(glm REQUIRED) # https://clck.ru/35ENvv
 
 target_link_libraries(px_engine easy_profiler)
 target_link_libraries(px_engine fmt)
