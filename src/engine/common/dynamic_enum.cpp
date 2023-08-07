@@ -1,4 +1,6 @@
 #include "dynamic_enum.hpp"
+#include <algorithm>
+#include <stdexcept>
 
 px::DynamicEnum::EnumValue px::DynamicEnum::add(const std::string& key)
 {
@@ -17,10 +19,20 @@ px::DynamicEnum::EnumValue px::DynamicEnum::claimValue()
 
 px::DynamicEnum::EnumValue px::DynamicEnum::get(const std::string& key) const
 {
-  return m_values.at(key);
+  auto it = m_values.find(key);
+  if (it == m_values.end())
+  {
+    throw std::out_of_range("Ключ перечисления не найден.");
+  }
+  return it->second;
 }
 
 std::string px::DynamicEnum::get(px::DynamicEnum::EnumValue val) const
 {
-  return m_keys.at(val);
+  auto it = m_keys.find(val);
+  if (it == m_keys.end())
+  {
+    throw std::out_of_range("Значение перечисления не найдено.");
+  }
+  return it->second;
 }
