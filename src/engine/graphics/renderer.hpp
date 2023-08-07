@@ -7,10 +7,11 @@
 
 namespace px
 {
+  /// @brief Абстрактный класс для рендера. Может использовать OpenGL и Vulkan.
   class Renderer
   {
   public:
-    virtual ~Renderer() {};
+    virtual ~Renderer() = default;
 
     virtual void setProjectionMatrix(glm::mat4 projection_matrix) = 0;
     virtual void setViewMatrix(glm::mat4 view_matrix) = 0;
@@ -22,7 +23,16 @@ namespace px
 
     virtual void useContext() = 0;
 
+    /// @brief Очищает экран.
+    /// @param color Цвет.
     virtual void clear(Vector3 color = Vector3(0.0f, 0.0f, 0.0f)) = 0;
+
+    /// @brief Переключение буфера.
     virtual void swapBuffers() = 0;
+
+    virtual void initImGui() = 0;
+    virtual void beginImGuiFrame() = 0;
+    virtual void endImGuiFrame() = 0;
+    virtual void renderImGui() = 0;
   };
 }

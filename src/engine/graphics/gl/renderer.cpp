@@ -1,10 +1,14 @@
 #include "renderer.hpp"
+
+#include <imgui/backend/imgui_impl_opengl3.h>
+#include <imgui/backend/imgui_impl_glfw.h>
 #include <glad/glad.h>
 #include <easy/profiler.h>
 
 #include "shader.hpp"
 #include "vertex_array.hpp"
 #include "../../common/utils.hpp"
+#include "../../general.hpp"
 
 px::gl::Renderer::Renderer(Window &window)
   : m_window(window)
@@ -67,4 +71,29 @@ void px::gl::Renderer::swapBuffers()
 {
   EASY_BLOCK("px::gl::Rendered::swapBuffers");
   glfwSwapBuffers(m_window_handle);
+}
+
+void px::gl::Renderer::initImGui()
+{
+  ImGui::CreateContext();
+  ImGui_ImplGlfw_InitForOpenGL(m_window_handle, true);
+  ImGui_ImplOpenGL3_Init(px::info::glslVersion.data());
+}
+
+void px::gl::Renderer::beginImGuiFrame()
+{
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplGlfw_NewFrame();
+  ImGui::NewFrame();
+}
+
+void px::gl::Renderer::endImGuiFrame()
+{
+  ImGui::EndFrame();
+}
+
+void px::gl::Renderer::renderImGui()
+{
+  ImGui::Render();
+  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
