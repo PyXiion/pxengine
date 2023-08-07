@@ -2,6 +2,8 @@
 #include <functional>
 
 #include <easy/profiler.h>
+#include <imgui/imgui.h>
+
 #include "graphics/gl/renderer.hpp"
 #include "common/frame_limiter.hpp"
 
@@ -61,6 +63,8 @@ void px::Engine::init()
     // ...
   }
 
+  m_renderer->initImGui();
+
   m_window->onFramebufferResize.append([this](int width, int height)
   {
     m_renderer->setViewportSize(0, 0, width, height);
@@ -73,6 +77,13 @@ void px::Engine::init()
 
   // Инициализация всего остального
   onInit(*this);
+
+  // test
+  onGuiDraw.append([]() {
+    ImGui::Begin("Test window");
+      ImGui::Text("Hello world");
+    ImGui::End();
+  });
 }
 
 void px::Engine::loop()
@@ -91,9 +102,15 @@ void px::Engine::loop()
 
 void px::Engine::draw()
 {
-
+  drawImGui();
 }
 
+void px::Engine::drawImGui()
+{
+  m_renderer->beginImGuiFrame();
+  onGuiDraw();
+  m_renderer->renderImGui();
+}
 
 void px::Engine::tickThread()
 {
@@ -111,6 +128,8 @@ void px::Engine::tickLoop()
 {
   EASY_BLOCK("Engine tick");
   float deltaTime = m_tickDeltaTime * m_speed; 
+
+  m_eventManager.process();
 
   onPreTick(deltaTime);
   onTick(deltaTime);
@@ -131,3 +150,7 @@ px::ScriptEngine &px::Engine::getScriptEngine()
   return *m_scriptEngine;
 }
 
+px::EventManager &px::Engine::getEventManager()
+{
+  return m_eventManager;
+}
