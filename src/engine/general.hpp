@@ -15,4 +15,6 @@ namespace px::info
   constexpr std::string_view engineBuildDateTime = __DATE__ " " __TIME__;
 
   constexpr std::string_view engineWebUrl = "https://engine.pyxiion.ru/";
+
+  constexpr std::string_view glslVersion = "#version 400";
 }
