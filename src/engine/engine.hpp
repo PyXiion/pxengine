@@ -6,8 +6,9 @@
 
 #include "events/event_manager.hpp"
 #include "graphics/renderer.hpp"
-#include "system/window.hpp"
 #include "scripts/engine.hpp"
+#include "system/window.hpp"
+#include "ui/debug/info_window.hpp"
 
 namespace px
 {
@@ -15,6 +16,7 @@ namespace px
 
   class Engine
   {
+  public:
     using UpdateCallback = eventpp::CallbackList<void (float)>;
 
   public:
@@ -62,6 +64,8 @@ namespace px
     std::unique_ptr<std::thread> m_tickLoopThread;
 
     EventManager m_eventManager;
+
+    DebugInfoWindow m_debugInfoWindow;
 
     int m_maxFps;
     int m_maxTps;

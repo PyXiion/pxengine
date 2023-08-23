@@ -14,6 +14,7 @@ px::Engine::Engine()
   , m_deltaTime(1.0f / m_maxFps)
   , m_tickDeltaTime(1.0f / m_maxTps)
   , m_tickThreadShouldStop(false)
+  , m_debugInfoWindow(*this)
 {
 }
 
@@ -77,13 +78,6 @@ void px::Engine::init()
 
   // Инициализация всего остального
   onInit(*this);
-
-  // test
-  onGuiDraw.append([]() {
-    ImGui::Begin("Test window");
-      ImGui::Text("Hello world");
-    ImGui::End();
-  });
 }
 
 void px::Engine::loop()
@@ -93,7 +87,9 @@ void px::Engine::loop()
   m_window->pollEvents();
   m_renderer->clear();
 
-  onUpdate(m_deltaTime * m_speed);
+  onPreUpdate(m_deltaTime);
+  onUpdate(m_deltaTime);
+  onPostUpdate(m_deltaTime);
 
   draw();
 
@@ -127,13 +123,12 @@ void px::Engine::tickThread()
 void px::Engine::tickLoop()
 {
   EASY_BLOCK("Engine tick");
-  float deltaTime = m_tickDeltaTime * m_speed; 
 
   m_eventManager.process();
 
-  onPreTick(deltaTime);
-  onTick(deltaTime);
-  onPostTick(deltaTime);
+  onPreTick(m_tickDeltaTime);
+  onTick(m_tickDeltaTime);
+  onPostTick(m_tickDeltaTime);
 }
 
 
