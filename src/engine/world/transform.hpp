@@ -9,6 +9,15 @@ namespace px
   public:
     Transform(Vector3 position, Vector3 eulerAngles);
 
+    void move(Vector3 offset);
+    void rotate(Vector3 angles);
+
+    void setPosition(Vector3 position);
+    void setRotation(Vector3 eulerAngles);
+
+    Vector3 getRotation() const;
+    Vector3 getPosition() const;
+
     const glm::mat4 &getTransformMatrix();
 
   private:
