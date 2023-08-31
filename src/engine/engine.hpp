@@ -4,6 +4,8 @@
 #include <thread>
 #include <atomic>
 
+#include <BS_thread_pool.hpp>
+
 #include "events/event_manager.hpp"
 #include "graphics/renderer.hpp"
 #include "scripts/engine.hpp"
@@ -33,6 +35,7 @@ namespace px
     Renderer &getRenderer();
     ScriptEngine &getScriptEngine();
     EventManager &getEventManager();
+    BS::thread_pool &getThreadPool();
 
     /// @brief Обратный вызов, который вызывается при во время инициализации игрового движка.
     eventpp::CallbackList<void (Engine &)> onInit;
@@ -63,8 +66,9 @@ namespace px
 
     std::unique_ptr<std::thread> m_tickLoopThread;
 
-    EventManager m_eventManager;
+    BS::thread_pool m_threadPool;
 
+    EventManager m_eventManager;
     DebugInfoWindow m_debugInfoWindow;
 
     int m_maxFps;

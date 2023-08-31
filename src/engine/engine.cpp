@@ -149,3 +149,8 @@ px::EventManager &px::Engine::getEventManager()
 {
   return m_eventManager;
 }
+
+BS::thread_pool &px::Engine::getThreadPool()
+{
+  return m_threadPool;
+}
