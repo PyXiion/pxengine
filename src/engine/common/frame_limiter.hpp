@@ -8,6 +8,7 @@ namespace px
   public:
     FrameLimiter(int maxFps = 60);
 
+    void setMaxFps(int maxFps);
     float sleep();
 
   private:

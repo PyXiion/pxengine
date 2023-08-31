@@ -18,7 +18,7 @@ namespace px
     int stride;
     intptr_t offset;
 
-    VertexArrayAttribute(int location, int size, VAAttributeType type, bool normalized, int stride, intptr_t offset)
+    constexpr VertexArrayAttribute(int location, int size, VAAttributeType type, bool normalized, int stride, intptr_t offset)
       : location(location)
       , size(size)
       , type(type)
@@ -26,7 +26,7 @@ namespace px
       , stride(stride)
       , offset(offset)
     {}
-    VertexArrayAttribute(int location, int size, int stride, intptr_t offset)
+    constexpr VertexArrayAttribute(int location, int size, int stride, intptr_t offset)
       : location(location)
       , size(size)
       , type(VAAttributeType_Float)

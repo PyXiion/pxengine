@@ -45,10 +45,12 @@ std::shared_ptr<px::Shader> px::gl::Renderer::createShader(const std::string &ve
   return std::make_shared<gl::Shader>(io::loadFileToString(vertexShaderPath), io::loadFileToString(fragmentShaderPath));
 }
 
-std::shared_ptr<px::VertexArray> px::gl::Renderer::createVertexArray(const std::vector<float> vertices,
-                                                                     const std::vector<px::VertexArrayAttribute> &attributes,
-                                                                     px::DrawType drawType,
-                                                                     px::PrimitiveType primitiveType)
+std::shared_ptr<px::VertexArray> 
+px::gl::Renderer::createVertexArray(
+  const std::vector<float> vertices,
+  const std::vector<px::VertexArrayAttribute> &attributes,
+  px::DrawType drawType,
+  px::PrimitiveType primitiveType)
 {
   return std::make_shared<gl::VertexArray>(vertices, attributes, drawType, primitiveType);
 }

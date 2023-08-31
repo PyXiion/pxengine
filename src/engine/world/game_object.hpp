@@ -1,8 +1,7 @@
 #pragma once
 #include <memory>
 #include <list>
-
-#include "../math/vector.hpp"
+#include <string>
 
 namespace px
 {
@@ -14,22 +13,27 @@ namespace px
 
   class GameObject
   {
+    friend class World;
     using GameObjectIter = std::list<GameObjectPtr>::const_iterator;
 
-  private:
-    friend class World;
+  public:
+    const std::string &getName() const;
+    World &getWorld();
 
+    void setName(const std::string &name);
+
+    void destroy();
+
+  protected:
     GameObject(World &world) : m_world(world) {}
     virtual ~GameObject() = default;
 
-  public:
-    void destroy();
-
-    World &getWorld();
-
   private:
+
+    std::string m_name;
+
     World &m_world;
-    GameObjectIter m_iter;
+    GameObjectIter m_self;
   };
 
 }

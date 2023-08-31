@@ -1,5 +1,6 @@
 #pragma once
 #include <engine/engine.hpp>
+#include <engine/events/event_fabric.hpp>
 
 namespace px
 {
@@ -8,17 +9,14 @@ namespace px
   public:
     Game(Engine &engine);
 
-
   private:
     Engine &m_engine;
+    EventManager &m_eventManager;
 
-    ScriptModule m_module;
-    ScriptFunction m_mainFunc;
+    void onInit(Engine &engine);
+    void onExit(Engine &engine);
 
-    void onEngineInit(Engine &engine);
-    void onEngineExit(Engine &engine);
-
-    void onEngineTick(float deltaTime);
-    void onEngineUpdate(float deltaTime);
+    void onTick(float deltaTime);
+    void onUpdate(float deltaTime);
   };
 }
