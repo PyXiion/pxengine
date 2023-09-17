@@ -40,3 +40,8 @@
   #define PX_IF_DEBUG(...)
   #define PX_IF_RELEASE(...) __VA_ARGS__
 #endif
+
+namespace px
+{
+  long long getUsedMemory();
+} // namespace px
