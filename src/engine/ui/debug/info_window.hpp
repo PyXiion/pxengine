@@ -1,10 +1,12 @@
 #pragma once
 #include <vector>
 #include <atomic>
+#include "../../world/game_object.hpp"
 
 namespace px
 {
   class Engine;
+  class World;
 
   class DebugInfoWindow
   {
@@ -12,7 +14,7 @@ namespace px
     DebugInfoWindow(Engine &engine);
 
   private:
-    const int kGraphPointCount = 40;
+    const int kGraphPointCount = 10;
 
     Engine &m_engine;
 
@@ -22,6 +24,8 @@ namespace px
 
     std::vector<float> m_frames;
     std::vector<float> m_ticks;
+
+    GameObject *m_worldSelectedObject;
 
     void onUpdate(float dt);
     void onTick(float dt);

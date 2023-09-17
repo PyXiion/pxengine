@@ -2,12 +2,16 @@
 #include <numeric>
 
 #include <imgui/imgui.h>
+#include <easy/profiler.h>
 
+#include "../../general.hpp"
+#include "../../system/general.hpp"
 #include "../../engine.hpp"
 
 px::DebugInfoWindow::DebugInfoWindow(px::Engine &engine)
   : m_engine(engine)
   , m_secondTimer(0.0f)
+  , m_worldSelectedObject(nullptr)
 {
   m_engine.onPostUpdate.append(std::bind(&DebugInfoWindow::onUpdate, this, std::placeholders::_1));
   m_engine.onPostTick.append(std::bind(&DebugInfoWindow::onTick, this, std::placeholders::_1));
@@ -30,6 +34,7 @@ void px::DebugInfoWindow::onTick(float dt)
 
 void px::DebugInfoWindow::onGuiDraw()
 {
+  EASY_BLOCK("px::DebugInfoWindow::onGuiDraw");
   bool graphUpdate = false;
   if (m_secondTimer > 1.0f)
   {
@@ -39,6 +44,18 @@ void px::DebugInfoWindow::onGuiDraw()
 
   ImGui::Begin("Debug Window");
   {
+    // Main information
+    ImGui::Text("Version: %s", px::info::engineVersion.c_str());
+    ImGui::Text("Build: %d", px::info::engineBuild);
+
+    ImGui::Separator();
+    
+    // Sys information
+    ImGui::Text("Mem used: %lldMB", px::getUsedMemory() / 1024);
+
+    ImGui::Separator();
+
+    // FPS and TPS
     float frameDeltaTime = m_frameDeltaTime;
     float tickDeltaTime = m_tickDeltaTime;
     
@@ -56,13 +73,56 @@ void px::DebugInfoWindow::onGuiDraw()
       ImGui::SetTooltip("Ms: %.4f", tickDeltaTime);
 
     drawGraph("TPS graph", m_ticks, tps, graphUpdate);
+
+    // World section
+    World *world = m_engine.getWorld();
+    ImGui::BeginDisabled(world == nullptr);
+    if (ImGui::CollapsingHeader("World objects") && world)
+    {
+      // 
+      if (ImGui::Button("Create new object"))
+      {
+        world->createGameObject();
+      }
+
+      // Game objects lists
+      bool isSelectedExists = false;
+      if (ImGui::BeginListBox("##worldobjects"))
+      {
+        auto &gameObjects = world->getAllGameObjects();
+        for (auto &obj : gameObjects)
+        {
+          const bool isSelected = obj.get() == m_worldSelectedObject;
+          if (ImGui::Selectable(obj->getName().c_str(), isSelected))
+            m_worldSelectedObject = obj.get();
+          
+          if (isSelected)
+          {
+            ImGui::SetItemDefaultFocus();
+            isSelectedExists = true;
+          }
+        }
+
+        ImGui::EndListBox();
+      }
+
+      // Selected game object info
+      if (isSelectedExists)
+      {
+        ImGui::Text("Selected object address: 0x%p", static_cast<void*>(m_worldSelectedObject));
+        ImGui::Text("Selected object name: %s", m_worldSelectedObject->getName().c_str());
+
+        if (ImGui::Button("Destroy"))
+          m_worldSelectedObject->destroy();
+      }
+    }
+    ImGui::EndDisabled();
   }
   ImGui::End();
 }
 
 void px::DebugInfoWindow::drawGraph(const char *label, std::vector<float> &graph, float currentValue, bool update)
 {
-  const float maxOffset = 5.0f;
   if (update)
   {
     if (graph.size() >= kGraphPointCount)
@@ -72,9 +132,11 @@ void px::DebugInfoWindow::drawGraph(const char *label, std::vector<float> &graph
     graph.push_back(currentValue);
   }
 
-  float average = std::reduce(graph.begin(), graph.end()) / static_cast<float>(graph.size());
+  float sum = std::reduce(graph.begin(), graph.end());
+  float max = *std::max_element(graph.begin(), graph.end());
+  float average = sum / static_cast<float>(graph.size());
   char overlay[32];
   sprintf(overlay, "Average: %.1f", average);
 
-  ImGui::PlotLines(label, graph.data(), graph.size(), 0, overlay, 0.0f, average + maxOffset, ImVec2(300, 100), 4);
+  ImGui::PlotLines(label, graph.data(), graph.size(), 0, overlay, 0.0f, max * 1.2f, ImVec2(300, 100), 4);
 }
