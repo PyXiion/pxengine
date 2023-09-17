@@ -6,12 +6,11 @@ set(CMAKE_CXX_STANDARD 20)
 
 include_directories(
   ext/glad/include
-  ext/args
-  ext/
+  ext/include
 )
 
 add_subdirectory(ext/glad)
-add_subdirectory(ext/imgui)
+add_subdirectory(ext/include/imgui)
 
 add_subdirectory(src/engine)
 add_subdirectory(src/game)
