@@ -10,6 +10,11 @@ px::EventType px::EventManager::registerNewEventType(const std::string &eventStr
   return m_enum.add(eventStrId);
 }
 
+px::EventType px::EventManager::getOrRegisterEventType(const std::string &eventStrId)
+{
+  return m_enum.getOrCreate(eventStrId);
+}
+
 px::EventType px::EventManager::getEventId(const std::string &eventStrId) const
 {
   return m_enum.get(eventStrId);

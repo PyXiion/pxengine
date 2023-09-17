@@ -6,8 +6,10 @@ px::DynamicEnum::EnumValue px::DynamicEnum::add(const std::string& key)
 {
   EnumValue val = claimValue();
 
-  m_values[key] = val;
-  m_keys[val] = key;
+  auto pair = std::make_pair(key, val);
+
+  m_keys.insert(std::make_pair(val, &pair.first));
+  m_values.insert(std::move(pair));
 
   return val;
 }
@@ -27,12 +29,32 @@ px::DynamicEnum::EnumValue px::DynamicEnum::get(const std::string& key) const
   return it->second;
 }
 
-std::string px::DynamicEnum::get(px::DynamicEnum::EnumValue val) const
+px::DynamicEnum::EnumValue px::DynamicEnum::getOrCreate(const std::string& key)
+{
+  auto it = m_values.find(key);
+  if (it == m_values.end())
+  {
+    return add(key);
+  }
+  return it->second;
+}
+
+const std::string& px::DynamicEnum::get(px::DynamicEnum::EnumValue val) const
 {
   auto it = m_keys.find(val);
   if (it == m_keys.end())
   {
     throw std::out_of_range("Значение перечисления не найдено.");
   }
-  return it->second;
+  return *it->second;
+}
+
+bool px::DynamicEnum::contains(const std::string &key) const
+{
+  return m_values.contains(key);
+}
+
+bool px::DynamicEnum::contains(EnumValue val) const
+{
+  return m_keys.contains(val);
 }

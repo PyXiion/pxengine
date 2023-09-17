@@ -18,6 +18,7 @@ namespace px
       static EventType getEvent(const EventPtr &event);
     };
 
+  public:
     using EventQueue = eventpp::EventQueue<EventType, EventCallbackSign, EventppPolicy>;
     using Handle = EventQueue::Handle;
 
@@ -34,6 +35,13 @@ namespace px
      * @return Внутренний числовой ID события. 
      */
     EventType registerNewEventType(const std::string &newEventStrId);
+
+    /**
+     * @brief Получить тип события по его строковому ID или создать новый.
+     * @param eventStrId Строковой ID события.
+     * @return Внутренний числовой ID события. 
+    */
+    EventType getOrRegisterEventType(const std::string &eventStrId);
     
     /**
      * @brief Возвращает внутренний числовой ID события по его строковому ID.
@@ -85,4 +93,6 @@ namespace px
     DynamicEnum m_enum;
 
   };
+
+  typedef EventManager::Handle EventListenerHandle;
 }

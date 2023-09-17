@@ -23,6 +23,10 @@ namespace px
      */
     void setEventType(EventType newEventType);
 
+    /// @brief Создать экземпляр класса события.
+    /// @param ...args Аргументы, передаваемые в конструктор класса события.
+    /// @return Указатель на экземпляр класса.
+    /// @throw std::runtime_error Если не установлен ID события.
     template<class ...TArgs>
     EventPtr make(TArgs ...args);
 
@@ -42,7 +46,7 @@ template<class ...TArgs>
 inline px::EventPtr px::EventFabric<TEvent>::make(TArgs ...args)
 {
   if (m_eventType == kUndefinedEventType)
-    throw std::runtime_error("Внутренний числовой ID события не назначен к фабрике событий.");
+    throw std::runtime_error("Внутренний числовой ID события не назначен к фабрике событий. Может вы забыли EventFabric::setEventType(eventType)?");
   EventPtr eventPtr = std::make_shared<TEvent>(args...);
   eventPtr->m_type = m_eventType;
 

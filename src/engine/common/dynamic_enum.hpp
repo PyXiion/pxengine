@@ -33,16 +33,26 @@ namespace px
     EnumValue get(const std::string &key) const;
 
     /**
+     * @brief Получает значение элемента или создает его по ключу.
+     * @param key Ключ элемента.
+     * @return Значение элемента.
+     */
+    EnumValue getOrCreate(const std::string &key);
+
+    /**
      * @brief Получает ключ элемента по его значению.
      * @param val Значение элемента.
      * @return Ключ элемента.
      * @throw std::out_of_range если элемент с данным значением отсутствует в перечислении.
      */
-    std::string get(EnumValue val) const;
+    const std::string& get(EnumValue val) const;
+
+    bool contains(const std::string &key) const;
+    bool contains(EnumValue val) const;
 
   private:
     std::unordered_map<std::string, EnumValue> m_values;
-    std::unordered_map<EnumValue, std::string> m_keys;
+    std::unordered_map<EnumValue, const std::string*> m_keys;
 
     /**
      * @brief Получить следующее свободное значение элемента. 
