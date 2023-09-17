@@ -11,6 +11,7 @@
 #include "scripts/engine.hpp"
 #include "system/window.hpp"
 #include "ui/debug/info_window.hpp"
+#include "world/world.hpp"
 
 namespace px
 {
@@ -36,6 +37,10 @@ namespace px
     ScriptEngine &getScriptEngine();
     EventManager &getEventManager();
     BS::thread_pool &getThreadPool();
+
+    World *getWorld();
+
+    px::World &createNewWorld();
 
     /// @brief Обратный вызов, который вызывается при во время инициализации игрового движка.
     eventpp::CallbackList<void (Engine &)> onInit;
@@ -63,6 +68,7 @@ namespace px
     std::unique_ptr<Window> m_window;
     std::unique_ptr<Renderer> m_renderer;
     std::unique_ptr<ScriptEngine> m_scriptEngine;
+    std::unique_ptr<World> m_world;
 
     std::unique_ptr<std::thread> m_tickLoopThread;
 

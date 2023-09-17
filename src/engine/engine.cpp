@@ -52,7 +52,7 @@ void px::Engine::init()
 {
   EASY_BLOCK("px::Engine::init", profiler::colors::Red);
 
-  m_window = std::make_unique<Window>("PXE", 800, 600);
+  m_window = std::make_unique<Window>("PXE", 1280, 720);
 
   // TODO выбор между OpenGL или Vulkan
   if (true)
@@ -153,4 +153,15 @@ px::EventManager &px::Engine::getEventManager()
 BS::thread_pool &px::Engine::getThreadPool()
 {
   return m_threadPool;
+}
+
+px::World *px::Engine::getWorld()
+{
+  return m_world.get();
+}
+
+px::World &px::Engine::createNewWorld()
+{
+  m_world = std::make_unique<World>(*this);
+  return *m_world;
 }
