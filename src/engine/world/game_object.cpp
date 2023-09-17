@@ -18,5 +18,6 @@ px::World &px::GameObject::getWorld()
 
 void px::GameObject::setName(const std::string &name)
 {
+  m_world.updateObjectName(*m_self, name); // вызывается перед m_name = name, так как оно получает оттуда прошлое имя
   m_name = name;
 }

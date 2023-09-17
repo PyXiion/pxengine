@@ -14,22 +14,23 @@ namespace px
   class GameObject
   {
     friend class World;
-    using GameObjectIter = std::list<GameObjectPtr>::const_iterator;
+    using GameObjectIter = std::list<GameObjectPtr>::iterator;
 
   public:
-    const std::string &getName() const;
+    GameObject(World &world) : m_world(world) {}
+    virtual ~GameObject() {};
+    
     World &getWorld();
 
+    /// @brief Установить имя (идентификатор) объекту.
+    /// @param name 
     void setName(const std::string &name);
+    const std::string &getName() const;
 
+    /// @brief Удалить объект из мира.
     void destroy();
 
-  protected:
-    GameObject(World &world) : m_world(world) {}
-    virtual ~GameObject() = default;
-
   private:
-
     std::string m_name;
 
     World &m_world;
