@@ -6,7 +6,7 @@ namespace px
   class FrameLimiter
   {
   public:
-    FrameLimiter(int maxFps = 60);
+    explicit FrameLimiter(int maxFps = 60);
 
     void setMaxFps(int maxFps);
     float sleep();

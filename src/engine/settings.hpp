@@ -3,11 +3,13 @@
 
 namespace px
 {
-  // Тут также указаны значение по-умолчанию
-  struct Settings
+  struct GraphicsSettings
   {
     int maxFps = 60;
+  };
 
-    std::string playerName = "Player";
+  struct Settings
+  {
+    GraphicsSettings graphicsSettings;
   };
 }

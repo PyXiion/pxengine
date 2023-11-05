@@ -12,9 +12,9 @@ namespace px
   public:
     virtual ~Event() = default;
 
-    EventType getType() const;
+    [[nodiscard]] EventType getType() const;
   private:
-    EventType m_type;
+    EventType m_type{};
   };
 
   typedef std::shared_ptr<Event> EventPtr;

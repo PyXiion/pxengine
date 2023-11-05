@@ -14,7 +14,7 @@ namespace px
     inline static const EventType kUndefinedEventType = INT_MIN;
 
   public:
-    EventFabric(EventType eventType = kUndefinedEventType) 
+    explicit EventFabric(EventType eventType = kUndefinedEventType)
       : m_eventType(eventType) {};
 
     /**

@@ -65,7 +65,7 @@ namespace px
      * @param callback Функция-прослушиватель.
      * @return Дескриптор прослушивателя.
      */
-    Handle appendListener(EventType type, EventCallback callback);
+    Handle appendListener(EventType type, const EventCallback& callback);
 
     /**
      * @brief Добавляет прослушиватель событий.
@@ -74,7 +74,7 @@ namespace px
      * @return Дескриптор прослушивателя.
      * @throw std::out_of_range если строковой ID не существует.
      */
-    Handle appendListener(const std::string &type, EventCallback callback);
+    Handle appendListener(const std::string &type, const EventCallback& callback);
 
     /**
      * @brief Добавляет событие в очередь.
@@ -92,6 +92,8 @@ namespace px
     EventQueue m_queue;
     DynamicEnum m_enum;
 
+    mutable std::mutex m_enumMutex;
+    mutable std::mutex m_queueMutex;
   };
 
   typedef EventManager::Handle EventListenerHandle;
