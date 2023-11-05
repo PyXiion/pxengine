@@ -1,6 +1,19 @@
 #include "window.hpp"
 #include <easy/profiler.h>
+#include <bx/bx.h>
+#include <bgfx/bgfx.h>
+#include <bgfx/platform.h>
 #include "../system/general.hpp"
+
+#if BX_PLATFORM_LINUX
+  #define GLFW_EXPOSE_NATIVE_X11
+#elif BX_PLATFORM_WINDOWS
+  #define GLFW_EXPOSE_NATIVE_WIN32
+#elif BX_PLATFORM_OSX
+  #define GLFW_EXPOSE_NATIVE_COCOA
+#endif
+#include <GLFW/glfw3native.h>
+
 
 px::Window::Window()
   : m_windowHandle(nullptr)
@@ -15,9 +28,7 @@ px::Window::Window(const std::string &window_name, int width, int height)
 
 px::Window::~Window()
 {
-  if (m_windowHandle)
-    glfwDestroyWindow(m_windowHandle);
-
+  close();
   glfwTerminate(); // TODO check is allowed to terminate
 }
 
@@ -25,51 +36,47 @@ px::Window::~Window()
 void px::Window::create(const std::string &window_name, int width, int height)
 {
   EASY_BLOCK("px::Window::create");
-  glfwInit();
-  // TODO make support for a choice between Vulkan and OpenGL
-  // so far, it's hardcoded
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  std::lock_guard lk(m_glfwMutex);
 
-  // For MacOS
-#ifdef PX_OS_MACOS
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
-#endif
+  if (!glfwInit())
+  {
+    throw std::runtime_error("Не удалось инициализировать GLFW :(");
+  }
 
+  glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
   m_windowHandle = glfwCreateWindow(width, height, window_name.c_str(), nullptr, nullptr);
 
   glfwSetWindowUserPointer(m_windowHandle, this);
 
   if (!m_windowHandle)
   {
-    // TODO throw error
+    throw std::runtime_error("Не удалось создать окно :(");
   }
 
   // callbacks
   // window resize
   glfwSetWindowSizeCallback(m_windowHandle, [](GLFWwindow *window, int width, int height) {
-    Window *self = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    self->onFramebufferResize(width, height);
+    auto *self = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    self->onResize(width, height);
   });
 
   // framebuffer resize
   glfwSetFramebufferSizeCallback(m_windowHandle, [](GLFWwindow *window, int width, int height) {
-    Window *self = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    self->onResize(width, height);
+    auto *self = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    self->onFramebufferResize(width, height);
   });
 
   // window close
   glfwSetWindowCloseCallback(m_windowHandle, [](GLFWwindow *window) {
-    Window *self = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    auto *self = static_cast<Window*>(glfwGetWindowUserPointer(window));
     self->onClose();
   });
 
   // window key pressed/released
   glfwSetKeyCallback(m_windowHandle, [](GLFWwindow *window, int key, int scancode, int action, int mods) {
-    Window *self = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    auto *self = static_cast<Window*>(glfwGetWindowUserPointer(window));
 
-    KeyCode keycode = static_cast<KeyCode>(key);
+    auto keycode = static_cast<KeyCode>(key);
 
     if (action == GLFW_PRESS)
       self->onKeyPressed(keycode);
@@ -79,13 +86,15 @@ void px::Window::create(const std::string &window_name, int width, int height)
 
   // cursor moved
   glfwSetCursorPosCallback(m_windowHandle, [](GLFWwindow *window, double x, double y) {
-    Window *self = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    auto *self = static_cast<Window*>(glfwGetWindowUserPointer(window));
     self->onMouseMoved(x, y);
   });
 }
 
 void px::Window::close()
 {
+  if (m_windowHandle)
+    glfwDestroyWindow(m_windowHandle);
 }
 
 bool px::Window::isShouldClose() const
@@ -104,9 +113,37 @@ void px::Window::pollEvents()
   glfwPollEvents();
 }
 
-
-
 GLFWwindow *px::Window::getHandle()
 {
   return m_windowHandle;
+}
+
+std::pair<int, int> px::Window::size() {
+  int width, height;
+  glfwGetWindowSize(getHandle(), &width, &height);
+  return {width, height};
+}
+
+void *px::Window::getDisplayHandle() {
+#if BX_PLATFORM_LINUX || BX_PLATFORM_BSD
+  return glfwGetX11Display();
+#else
+  return nullptr;
+#endif
+}
+
+void *px::Window::getNativeHandle() {
+#if BX_PLATFORM_LINUX || BX_PLATFORM_BSD
+  return reinterpret_cast<void*>(glfwGetX11Window(getHandle()));
+#elif BX_PLATFORM_OSX
+  return reinterpret_cast<void*>(glfwGetCocoaWindow(getHandle()));
+#elif BX_PLATFORM_WINDOWS
+  return reinterpret_cast<void*>(glfwGetWin32Window(getHandle()));
+#endif
+}
+
+float px::Window::getAspect() {
+  int width, height;
+  std::tie(width, height) = size();
+  return static_cast<float>(width) / static_cast<float>(height);
 }
