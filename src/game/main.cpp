@@ -9,7 +9,7 @@
 
 namespace fs = std::filesystem;
 
-const std::string argsDesc = "PXE - PyXiion's Engine v" PX_ENGINE_VERSION;
+const std::string argsDesc   = "PXE - PyXiion's Engine v" PX_ENGINE_VERSION;
 const std::string argsEpilog = "PyXiion (C) 2023";
 
 int main(int argc, char **argv)
