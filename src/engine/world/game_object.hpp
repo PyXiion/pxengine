@@ -17,15 +17,14 @@ namespace px
     using GameObjectIter = std::list<GameObjectPtr>::iterator;
 
   public:
-    GameObject(World &world) : m_world(world) {}
-    virtual ~GameObject() {};
+    virtual ~GameObject() = default;
     
     World &getWorld();
 
     /// @brief Установить имя (идентификатор) объекту.
     /// @param name 
     void setName(const std::string &name);
-    const std::string &getName() const;
+    [[nodiscard]] const std::string &getName() const;
 
     /// @brief Удалить объект из мира.
     void destroy();
@@ -33,7 +32,7 @@ namespace px
   private:
     std::string m_name;
 
-    World &m_world;
+    World *m_world;
     GameObjectIter m_self;
   };
 
