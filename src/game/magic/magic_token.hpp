@@ -1,8 +1,8 @@
 #pragma once
 
-namespace px::dw
+namespace px
 {
-  // Магический токен
+  /// @brief Магический токен
   class MagicToken
   {
   public:

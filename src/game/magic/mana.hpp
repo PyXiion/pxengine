@@ -1,15 +1,15 @@
 #pragma once
 
-namespace px::dw
+namespace px
 {
-  // Стихия магии
+  /// @brief Стихия магии
   enum ManaElement
   {
-    // Пустая стихия (или универсальная)
+    /// @brief Пустая стихия (или универсальная)
     ManaElement_None
   };
 
-  // Мана
+  /// @brief Мана
   struct Mana
   {
     constexpr Mana(ManaElement element, double potential, double power) 
@@ -17,12 +17,12 @@ namespace px::dw
       , potential(potential)
       , power(power) {}
 
-    // Стихия
+    /// @brief Стихия
     ManaElement element = ManaElement_None;
 
-    // Потенциал
-    double potential = 0.0;
-    // Сила
-    double power = 0.0;
+    /// @brief Потенциал
+    float potential = 0.0;
+    /// @brief Сила
+    float power = 0.0;
   };
 }

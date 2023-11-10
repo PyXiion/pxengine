@@ -1,9 +1,9 @@
 #pragma once
 #include <vector>
 
-namespace px::dw
+namespace px
 {
-  // Магическая матрица
+  /// @brief Магическая матрица
   struct MagicMatrix
   {
     
