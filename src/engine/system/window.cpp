@@ -73,28 +73,64 @@ void px::Window::create(const std::string &window_name, int width, int height)
   });
 
   // window key pressed/released
-  glfwSetKeyCallback(m_windowHandle, [](GLFWwindow *window, int key, int scancode, int action, int mods) {
+  glfwSetKeyCallback(m_windowHandle, [](GLFWwindow *window, int key, int scancode, int action, int _mods) {
     auto *self = static_cast<Window*>(glfwGetWindowUserPointer(window));
 
     auto keycode = static_cast<KeyCode>(key);
+    auto mods = static_cast<KeyModifiers::Enum>(_mods);
 
-    if (action == GLFW_PRESS)
-      self->onKeyPressed(keycode);
-    else if (action == GLFW_RELEASE)
-      self->onKeyReleased(keycode);
+    if (action == GLFW_PRESS) {
+      self->onKeyPressed(keycode, mods);
+      self->onKey(keycode, true, mods);
+    }
+    else if (action == GLFW_RELEASE) {
+      self->onKeyReleased(keycode, mods);
+      self->onKey(keycode, false, mods);
+    }
+
   });
 
   // cursor moved
   glfwSetCursorPosCallback(m_windowHandle, [](GLFWwindow *window, double x, double y) {
     auto *self = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    self->onMouseMoved(x, y);
+    self->m_lastMousePosition = {x, y};
+    self->onMouseMoved(float(x), float(y));
   });
+
+  // mouse click
+  glfwSetMouseButtonCallback(m_windowHandle, [](GLFWwindow *window, int button, int action, int mods) {
+    auto *self = static_cast<Window*>(glfwGetWindowUserPointer(window));
+
+    float x, y;
+    std::tie(x, y) = self->m_lastMousePosition;
+    self->onMouseClicked(x, y, getGlfwMouseButton(button), action == GLFW_PRESS);
+  });
+
+  // mouse scroll
+  glfwSetScrollCallback(m_windowHandle, [](GLFWwindow *window, double xoffset, double yoffset) {
+    auto *self = static_cast<Window*>(glfwGetWindowUserPointer(window));
+
+    self->onHorizontalScroll(float(xoffset));
+    self->onVerticalScroll(float(yoffset));
+    self->onScroll(float(xoffset), float(yoffset));
+  });
+
+  // character input
+  glfwSetCharCallback(m_windowHandle, [](GLFWwindow *window, unsigned int c) {
+    auto *self = static_cast<Window*>(glfwGetWindowUserPointer(window));
+
+    self->onInput(c);
+  });
+
+
 }
 
 void px::Window::close()
 {
-  if (m_windowHandle)
+  if (m_windowHandle) {
     glfwDestroyWindow(m_windowHandle);
+    m_windowHandle = nullptr;
+  }
 }
 
 bool px::Window::isShouldClose() const

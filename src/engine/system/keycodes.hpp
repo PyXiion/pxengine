@@ -1,7 +1,29 @@
 #pragma once
 
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+
 namespace px
 {
+  enum class MouseButton : int {
+    Left, Middle, Right,
+
+    Count
+  };
+
+  inline static constexpr MouseButton getGlfwMouseButton(int btn) {
+    switch (btn) {
+      case GLFW_MOUSE_BUTTON_LEFT:
+        return MouseButton::Left;
+      case GLFW_MOUSE_BUTTON_MIDDLE:
+        return MouseButton::Middle;
+      case GLFW_MOUSE_BUTTON_RIGHT:
+        return MouseButton::Right;
+      default:
+        return MouseButton::Count;
+    }
+  }
+
   enum KeyCode : int
   {
     KeyCode_Unknown = -1,
@@ -118,6 +140,24 @@ namespace px
     KeyCode_RightShift = 344,
     KeyCode_RightControl,
     KeyCode_RightAlt,
-    KeyCode_RightSuper
+    KeyCode_RightSuper,
+
+    KeyCode_Count
+  };
+
+  inline static constexpr KeyCode getGlfwKeyCode(int key) {
+    return static_cast<KeyCode>(key);
+  }
+
+  namespace KeyModifiers {
+    enum Enum {
+      None     = 0,
+      Shift    = 1 << 0,
+      Control  = 1 << 1,
+      Alt      = 1 << 2,
+      Super    = 1 << 3,
+      CapsLock = 1 << 4,
+      NumLock  = 1 << 5
+    };
   };
 }

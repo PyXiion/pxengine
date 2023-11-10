@@ -117,6 +117,14 @@ void px::DebugInfoWindow::onGuiDraw()
       }
     }
     ImGui::EndDisabled();
+
+    if (ImGui::CollapsingHeader("Controls"))
+    {
+      Controls &controls = m_engine.getControls();
+
+      ImGui::Text("Vertical: %f", controls.getAxis(ControlAxis::Vertical));
+      ImGui::Text("Horizontal: %f", controls.getAxis(ControlAxis::Horizontal));
+    }
   }
   ImGui::End();
 }

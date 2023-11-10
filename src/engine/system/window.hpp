@@ -10,11 +10,22 @@ namespace px {
   class Window {
   private:
     using OnResizeCallbackList = eventpp::CallbackList<void(int width, int height)>;
-    using OnKeyCallbackList = eventpp::CallbackList<void(KeyCode keycode)>;
+
+    using OnKeyCallbackList = eventpp::CallbackList<void(KeyCode keycode, bool down, KeyModifiers::Enum mods)>;
+    using OnKeyPressedCallbackList = eventpp::CallbackList<void(KeyCode keycode, KeyModifiers::Enum mods)>;
+    using OnKeyReleasedCallbackList = OnKeyPressedCallbackList;
+
+    using OnMouseMovedCallbackList = eventpp::CallbackList<void(float x, float y)>;
+    using OnMouseClickedCallbackList = eventpp::CallbackList<void(float x, float y, MouseButton button, bool down)>;
+
+    using OnScrollVerticalCallbackList = eventpp::CallbackList<void(float scroll)>;
+    using OnScrollHorizontalCallbackList = OnScrollVerticalCallbackList;
+    using OnScrollCallbackList = eventpp::CallbackList<void(float scrollX, float scrollY)>;
+
+    using OnCharacterInputCallbackList = eventpp::CallbackList<void(unsigned int character)>;
 
   public:
-    using OnResizeHandle = OnResizeCallbackList::Handle;
-    using OnKeyHandle = OnKeyCallbackList::Handle;
+    using OnKeyHandle = OnKeyPressedCallbackList::Handle;
 
 
   public:
@@ -43,14 +54,24 @@ namespace px {
     OnResizeCallbackList onResize;
     OnResizeCallbackList onFramebufferResize;
 
-    OnKeyCallbackList onKeyPressed;
-    OnKeyCallbackList onKeyReleased;
+    OnKeyCallbackList onKey;
+    OnKeyPressedCallbackList onKeyPressed;
+    OnKeyReleasedCallbackList onKeyReleased;
 
-    eventpp::CallbackList<void(double x, double y)> onMouseMoved;
+    OnMouseMovedCallbackList onMouseMoved;
+    OnMouseClickedCallbackList onMouseClicked;
+
+    OnScrollVerticalCallbackList onVerticalScroll;
+    OnScrollHorizontalCallbackList onHorizontalScroll;
+    OnScrollCallbackList onScroll;
+
+    OnCharacterInputCallbackList onInput;
 
   private:
-    GLFWwindow *m_windowHandle;
+    GLFWwindow *m_windowHandle{};
 
     std::mutex m_glfwMutex;
+
+    std::pair<float, float> m_lastMousePosition;
   };
 }

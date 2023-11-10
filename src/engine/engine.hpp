@@ -17,11 +17,14 @@
 #include "graphics/renderer.hpp"
 #include "graphics/camera.hpp"
 
+#define PX_IMGUI_USE_ENTRY
+#include "common/imgui/imgui.hpp"
+
 namespace px
 {
   const int ticksPerSecond = 30;
 
-  class Engine
+  class Engine : private EventListener
   {
   public:
     using UpdateCallback = eventpp::CallbackList<void (float)>;
@@ -79,19 +82,21 @@ namespace px
   private:
     static Engine *instance;
 
-    std::unique_ptr<Window> m_window;
     std::unique_ptr<World> m_world;
-    std::unique_ptr<ResourceManager> m_resourceManager;
     std::unique_ptr<Renderer> m_renderer;
+    std::unique_ptr<ResourceManager> m_resourceManager;
+    std::unique_ptr<Window> m_window;
+    std::unique_ptr<Controls> m_controls;
 
     std::unique_ptr<std::thread> m_tickLoopThread;
 
     CameraPtr m_camera;
 
     BS::thread_pool m_threadPool;
-    Controls m_controls;
 
     EventManager m_eventManager;
+
+    std::unique_ptr<ImGuiCtx> m_imgui;
     DebugInfoWindow m_debugInfoWindow;
 
     int m_maxFps;
@@ -99,7 +104,7 @@ namespace px
     FrameLimiter m_fpsLimiter{};
 
     const bgfx::ViewId kClearView = 0;
-    bool m_showBgfxStats;
+    bool m_showBgfxStats = false;
 
     float m_speed;
     float m_deltaTime;
@@ -109,7 +114,7 @@ namespace px
 
     void init();
     void loop();
-    void draw() const;
+    void draw();
 
     /// @brief Рисование интерфейса.
     /// @todo Рисовать в отдельном потоке с меньшим FPS (например, в тиках ?).

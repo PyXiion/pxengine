@@ -20,7 +20,6 @@ px::Engine::Engine()
   , m_tickDeltaTime(1.0f / float(m_maxTps))
   , m_tickThreadShouldStop(false)
   , m_debugInfoWindow(*this)
-  , m_controls(*this)
   , m_showBgfxStats(false)
 {
   instance = this;
@@ -58,13 +57,24 @@ void px::Engine::init()
 
   m_resourceManager = std::make_unique<ResourceManager>(*this, "./data");
   m_window = std::make_unique<Window>("PXE", 1280, 720);
-  m_window->onKeyPressed.append([this](KeyCode keycode) {
-    if (m_renderer) {
+
+  m_controls = std::make_unique<Controls>(*m_window);
+
+  listen(m_window->onKeyPressed, [this](auto keycode, auto mods) {
+    if (m_renderer && keycode == KeyCode_F1) {
       m_renderer->setDebugEnabled(!m_renderer->isDebugEnabled());
     }
   });
 
+  listen(onGuiDraw, [this] {
+    ImGui::Begin("Debug window!");
+      ImGui::Text("Hello world!");
+    ImGui::End();
+  });
+
   m_renderer = std::make_unique<Renderer>(*m_window);
+  m_imgui = std::make_unique<ImGuiCtx>(*m_window);
+  m_imgui->Create();
 
   m_tickLoopThread = std::make_unique<std::thread>([this] { tickThread(); });
 
@@ -83,80 +93,42 @@ void px::Engine::loop()
   onPostUpdate(m_deltaTime);
 
   if (m_camera) {
-    if (m_window->isKeyPressed(KeyCode_Up)) {
-      m_camera->move(m_camera->getForward());
-    } else if (m_window->isKeyPressed(KeyCode_Down)) {
-      m_camera->move(-m_camera->getForward());
-    } else if (m_window->isKeyPressed(KeyCode_Left)) {
-      m_camera->move(m_camera->getRight());
-    } else if (m_window->isKeyPressed(KeyCode_Right)) {
-      m_camera->move(-m_camera->getRight());
-    }
+    Vector3 offset;
+    offset += m_camera->getForward() * m_controls->getAxis(ControlAxis::Vertical);
+    offset += m_camera->getRight() * m_controls->getAxis(ControlAxis::Horizontal);
+    m_camera->move(offset * m_deltaTime);
   }
 
   draw();
 }
 
-void px::Engine::draw() const
+void px::Engine::draw()
 {
-  static std::unique_ptr<Cube> cube;
-  if (!cube)
-    cube = std::make_unique<Cube>();
+  if (!m_renderer)
+    return;
 
-//  const bx::Vec3 at = {0.0f, 0.0f, 0.0f};
-//  const bx::Vec3 eye = {0.0f, 0.0f, -35.0f};
-
-//  {
-//    int width, height;
-//    std::tie(width, height) = m_window->size();
-//
-//    float view[16];
-//    bx::mtxLookAt(view, eye, at);
-//
-//    float proj[16];
-//    bx::mtxProj(proj, 60.0f, float(width)/float(height), 0.1f, 100.0f, bgfx::getCaps()->homogeneousDepth);
-//    bgfx::setViewTransform(kClearView, view, proj);
-//
-//    bgfx::setViewRect(0, 0, 0, uint16_t(width), uint16_t(height) );
-//  }
-
+  EASY_BLOCK("px::Engine::draw");
   if (m_camera) {
     m_camera->apply();
   }
 
-  bgfx::touch(kClearView);
+  m_imgui->BeginFrame(m_renderer->getViewId());
+  onGuiDraw();
+  m_imgui->EndFrame();
 
-  bgfx::setDebug(m_showBgfxStats ? BGFX_DEBUG_STATS : BGFX_DEBUG_NONE);
-
-  for (uint32_t yy = 0; yy < 11; ++yy)
-  {
-    for (uint32_t xx = 0; xx < 11; ++xx)
-    {
-      for (uint32_t zz = 0; zz < 11; ++zz) {
-        float mtx[16];
-        bx::mtxRotateXY(mtx, 0, 0);
-        mtx[12] = -15.0f + float(xx) * 3.0f;
-        mtx[13] = -15.0f + float(yy) * 3.0f;
-        mtx[14] = -15.0f + float(zz) * 3.0f;
-
-        // Set model matrix for rendering.
-        bgfx::setTransform(mtx);
-
-        // Set vertex and index buffer.
-        cube->draw(0);
-      }
-    }
-  }
-
-  bgfx::frame();
+  m_renderer->beginFrame();
+  onDraw();
+  m_renderer->renderFrame();
 }
 
 void px::Engine::drawImGui()
 {
-  return;
-//  m_renderer->beginImGuiFrame();
-//  onGuiDraw();
-//  m_renderer->renderImGui();
+  ImGui::Begin("Hello");
+    ImGui::Text("HELLO WORLD\n\n\\n\n\\\n\n\n\n\n\n\n\n");
+
+    static char s[50]{};
+    ImGui::InputText("Input", s, 50);
+  ImGui::End();
 }
 
 void px::Engine::tickThread()
@@ -200,7 +172,7 @@ px::EventManager &px::Engine::getEventManager()
 
 px::Controls &px::Engine::getControls()
 {
-  return m_controls;
+  return *m_controls;
 }
 
 px::Renderer &px::Engine::getRenderer() {

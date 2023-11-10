@@ -11,7 +11,7 @@ namespace px
   class DebugInfoWindow
   {
   public:
-    DebugInfoWindow(Engine &engine);
+    explicit DebugInfoWindow(Engine &engine);
 
   private:
     const int kGraphPointCount = 10;
