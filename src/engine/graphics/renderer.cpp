@@ -5,6 +5,7 @@
 //
 
 #include <bgfx/platform.h>
+#include <easy/profiler.h>
 #include "renderer.hpp"
 
 static bgfx::ViewId viewsCount{};
@@ -12,6 +13,7 @@ static bgfx::ViewId viewsCount{};
 namespace px {
   Renderer::Renderer(Window &window, bgfx::RendererType::Enum type)
     : m_viewId(viewsCount++) {
+    EASY_BLOCK("Renderer::Renderer")
     // Call it before bgfx::init to signal to bgfx not to create a render thread.
     bgfx::renderFrame();
 
@@ -19,6 +21,7 @@ namespace px {
     bgfx::Init init;
     init.platformData.ndt = window.getDisplayHandle();
     init.platformData.nwh = window.getNativeHandle();
+    init.type = type;
 
     m_reset = BGFX_RESET_VSYNC;
 
@@ -54,13 +57,16 @@ namespace px {
   }
 
   void Renderer::beginFrame() {
+    EASY_BLOCK("Renderer::beginFrame")
     bgfx::touch(m_viewId);
 
-    bgfx::setDebug(m_debugText ? BGFX_DEBUG_TEXT : (BGFX_DEBUG_STATS | BGFX_DEBUG_PROFILER));
+    bgfx::setDebug(m_debugText ? BGFX_DEBUG_TEXT : (BGFX_DEBUG_STATS));
+    if (m_debugText)
+      debug();
   }
 
   void Renderer::renderFrame() {
-    (void) this;
+    EASY_BLOCK("Renderer::renderFrame")
     bgfx::frame();
   }
 
