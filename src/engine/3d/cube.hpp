@@ -36,7 +36,7 @@ namespace px {
     void createBuffers();
 
     bgfx::VertexBufferHandle m_vbh{};
-    bgfx::IndexBufferHandle m_ibh[5]{};
+    bgfx::IndexBufferHandle m_ibh{};
     bgfx::ProgramHandle m_program{};
   };
 
