@@ -3,6 +3,8 @@
 #include <list>
 #include <string>
 
+#define PX_OBJECT_NAME(name) constexpr inline static std::string_view defaultName = name;
+
 namespace px
 {
   class World;

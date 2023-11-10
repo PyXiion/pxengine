@@ -14,6 +14,8 @@
 namespace px {
   class Camera : public GameObject {
   public:
+    PX_OBJECT_NAME("Camera #{}")
+
     explicit Camera();
 
     void perspective(float fovy, float aspect, float near = 0.1f, float far = 100.0f);

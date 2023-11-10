@@ -41,6 +41,21 @@ namespace px
     void updateObjectName(GameObjectPtr &gameObject, const std::string &newName);
     void destroyObject(GameObjectIter &iterator);
   };
+
+  namespace priv {
+    template <class T>
+    concept HasDefaultName = requires {
+      { T::defaultName } -> std::convertible_to<std::string_view>;
+    };
+
+    template <class T>
+    inline constexpr std::string_view getObjectDefaultName() {
+      if constexpr (HasDefaultName<T>)
+        return T::defaultName;
+      else
+        return "Unnamed object #{}";
+    }
+  }
 }
 
 template<class T, class ...TArgs>
@@ -71,8 +86,10 @@ std::shared_ptr<T> px::World::createGameObject(TArgs... args)
     gameObject->m_self = m_gameObjects.begin();
   }
 
+  constexpr auto name = priv::getObjectDefaultName<T>();
+
   // Name it
-  gameObject->setName(fmt::format("Unnamed object {}", ++unnamedUid));
+  gameObject->setName(fmt::format(name, ++unnamedUid));
 
   return gameObject;
 }
