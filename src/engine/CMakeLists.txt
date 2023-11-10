@@ -5,6 +5,7 @@ file(GLOB_RECURSE PX_ENGINE_SOURCES CONFIGURE_DEPENDS
 )
 file(GLOB_RECURSE PX_ENGINE_SHADER_SOURCES CONFIGURE_DEPENDS
     "shaders/*.sc"
+    "common/imgui/*.sc"
 )
 set(PX_ENGINE_SOURCES
     ${PX_ENGINE_SOURCES}
@@ -31,7 +32,7 @@ target_link_libraries(px_engine easy_profiler)
 target_link_libraries(px_engine fmt)
 target_link_libraries(px_engine angelscript)
 target_link_libraries(px_engine yaml-cpp)
-target_link_libraries(px_engine glfw GL glad)
+target_link_libraries(px_engine glfw GL)
 target_link_libraries(px_engine glm::glm)
 target_link_libraries(px_engine imgui)
 target_link_libraries(px_engine eventpp::eventpp)
