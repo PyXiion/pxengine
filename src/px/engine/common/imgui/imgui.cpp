@@ -397,8 +397,6 @@ namespace px {
     }
 
     ImGui::NewFrame();
-
-//      ImGuizmo::BeginFrame();
   }
 
   bool ImGuiCtx::getMouseButtonState(MouseButton btn) {
