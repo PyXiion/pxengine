@@ -33,13 +33,17 @@ namespace px
     /// Loads a shader from a file.
     /// \param filename The name of the file without a pre-directory. It will be determined automatically depending on the current graphics API.
     /// \return A bgfx shader handle
-    bgfx::ShaderHandle loadShader(const std::string &filename, bool reload = false);
+    bgfx::ShaderHandle loadShaderFile(const std::string &filename, bool reload = false);
 
     /// Loads a shader program from files.
     /// \param vsName The file name of the vertex shader.
     /// \param fsName The file name of the fragment shader.
     /// \return A bgfx program handle
-    bgfx::ProgramHandle loadProgram(const std::string &vsName, const std::string &fsName, bool reload = false);
+    ShaderPtr loadShader(const std::string &vsName, const std::string &fsName, bool reload = false);
+
+    const Localization &loadLocalization(const std::string &localization, bool reload = false);
+
+    TexturePtr loadTexture(const std::string &texture, bool reload = false);
 
     RawType loadRawFile(const std::string &path, bool reload = false);
 

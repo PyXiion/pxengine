@@ -20,28 +20,28 @@ px::ResourceManager::ResourceManager(Engine &engine, std::string rootDir)
 px::ResourceManager::~ResourceManager() {
 }
 
-bgfx::ProgramHandle px::ResourceManager::loadProgram(const std::string &vsName, const std::string &fsName, bool reload) {
+px::ShaderPtr px::ResourceManager::loadShader(const std::string &vsName, const std::string &fsName, bool reload) {
   EASY_BLOCK("px::ResourceManager::loadShader")
   std::string key = vsName + "," + fsName;
 
   Resource &resource = (*this)[key];
-  if (not reload and std::holds_alternative<BgfxUniqueProgramHandle>(resource)) {
-    return static_cast<bgfx::ProgramHandle>(std::get<BgfxUniqueProgramHandle>(resource));
+  if (not reload and std::holds_alternative<ShaderPtr>(resource)) {
+    return std::get<ShaderPtr>(resource);
   }
 
-  bgfx::ShaderHandle vsh = loadShader(vsName, reload);
+  bgfx::ShaderHandle vsh = loadShaderFile(vsName, reload);
   bgfx::ShaderHandle fsh = BGFX_INVALID_HANDLE;
   if (!fsName.empty())
   {
-    fsh = loadShader(fsName, reload);
+    fsh = loadShaderFile(fsName, reload);
   }
 
-  auto program = bgfx::createProgram(vsh, fsh, false /* destroy shaders when program is destroyed */);
-  resource = BgfxUniqueProgramHandle(program);
-  return program;
+  auto shader = makeShader(vsh, fsh);
+  resource = shader;
+  return shader;
 }
 
-bgfx::ShaderHandle px::ResourceManager::loadShader(const std::string &filename, bool reload) {
+bgfx::ShaderHandle px::ResourceManager::loadShaderFile(const std::string &filename, bool reload) {
   EASY_BLOCK("px::ResourceManager::loadShaderFile")
   Resource &resource = (*this)[filename];
   if (not reload and std::holds_alternative<BgfxUniqueShaderHandle>(resource)) {
