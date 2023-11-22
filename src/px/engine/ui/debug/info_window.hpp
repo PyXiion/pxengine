@@ -8,8 +8,7 @@ namespace px
   class Engine;
   class World;
 
-  class DebugInfoWindow
-  {
+  class DebugInfoWindow : private EventListener {
   public:
     explicit DebugInfoWindow(Engine &engine);
 
