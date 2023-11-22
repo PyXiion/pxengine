@@ -33,6 +33,8 @@ namespace px
     /// @brief Удалить объект из мира.
     void destroy();
 
+    virtual void guiEditor();
+
     /// Create new component
     template <ComponentType T, typename ...TArgs>
     void addComponent(TArgs &&...args);
