@@ -19,6 +19,8 @@
 
 #define PX_IMGUI_USE_ENTRY
 #include "common/imgui/imgui.hpp"
+#include "px/engine/ui/settings_window.hpp"
+#include "settings.hpp"
 
 namespace px
 {
@@ -40,16 +42,19 @@ namespace px
     /// @brief Не реализовано
     void loadModule(const std::string &path);
 
+    void reloadSettings();
+
     Window &getWindow() const;
     ResourceManager &getResourceManager() const;
     EventManager &getEventManager();
     Controls &getControls();
     Renderer &getRenderer();
     BS::thread_pool &getThreadPool();
+    World *getWorld() const;
+    Settings &getSettings();
+    SettingsWindow &getSettingsWindow();
 
     static Engine &getInstance();
-
-    World *getWorld() const;
 
     px::World &createNewWorld();
 
@@ -98,6 +103,9 @@ namespace px
 
     std::unique_ptr<ImGuiCtx> m_imgui;
     DebugInfoWindow m_debugInfoWindow;
+
+    SettingsWindow m_settingsWindow;
+    Settings m_settings;
 
     int m_maxFps;
     int m_maxTps;

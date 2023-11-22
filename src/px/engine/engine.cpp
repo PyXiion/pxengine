@@ -24,6 +24,7 @@ px::Engine::Engine()
   , m_tickDeltaTime(1.0f / float(m_maxTps))
   , m_tickThreadShouldStop(false)
   , m_debugInfoWindow(*this)
+  , m_settingsWindow(*this)
   , m_showBgfxStats(false)
 {
   instance = this;
@@ -32,6 +33,7 @@ px::Engine::Engine()
   signal(SIGSEGV, &death_signal);
   signal(SIGTRAP, &death_signal);
 }
+
 
 px::Engine::~Engine()
 {
@@ -42,9 +44,11 @@ void px::Engine::run()
 {
   init();
 
+  m_fpsLimiter.reset();
   while (!m_window->isShouldClose())
   {
     loop();
+    m_deltaTime = m_fpsLimiter.sleep();
   }
   m_window->close();
 
@@ -58,6 +62,11 @@ void px::Engine::run()
 
 void px::Engine::loadModule(const std::string &path)
 {
+}
+
+void px::Engine::reloadSettings() {
+  // graphics
+  m_fpsLimiter.setMaxFps(m_settings.graphicsSettings.maxFps);
 }
 
 void px::Engine::init()
@@ -200,6 +209,14 @@ BS::thread_pool &px::Engine::getThreadPool()
 px::World *px::Engine::getWorld() const
 {
   return m_world.get();
+}
+
+px::Settings &px::Engine::getSettings() {
+  return m_settings;
+}
+
+px::SettingsWindow &px::Engine::getSettingsWindow() {
+  return m_settingsWindow;
 }
 
 px::World &px::Engine::createNewWorld()
