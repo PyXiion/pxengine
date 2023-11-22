@@ -15,11 +15,12 @@
 #include "../../events/event_listener.hpp"
 
 namespace px {
+  class Engine;
   class Window;
 
   class ImGuiCtx : private EventListener {
   public:
-    explicit ImGuiCtx(px::Window &window);
+    explicit ImGuiCtx(px::Engine &engine, px::Window &window);
 
     void Create();
     void Destroy();
@@ -28,6 +29,7 @@ namespace px {
     void EndFrame();
 
   private:
+    Engine &m_engine;
 
     bool m_wasDestroyed = false;
 
@@ -50,8 +52,10 @@ namespace px {
 
     ImGuiContext *m_imgui{};
     bgfx::VertexLayout m_layout;
-    BgfxUniqueProgramHandle m_program;
-    BgfxUniqueProgramHandle m_imageProgram;
+
+    ShaderPtr m_shader;
+    ShaderPtr m_imageShader;
+
     BgfxUniqueTextureHandle m_texture;
     BgfxUniqueUniformHandle s_tex;
     BgfxUniqueUniformHandle u_imageLodEnabled;

@@ -7,6 +7,7 @@
 #include "imgui.hpp"
 
 #include <imgui/imgui_internal.h>
+#include "../../engine.hpp"
 #include "../../resources/bgfx_handle.hpp"
 #include "../../system/keycodes.hpp"
 #include "../../engine.hpp"
@@ -22,7 +23,8 @@
 
 namespace px {
 
-  ImGuiCtx::ImGuiCtx(px::Window &window) {
+  ImGuiCtx::ImGuiCtx(px::Engine &engine, px::Window &window)
+    : m_engine(engine) {
     std::tie(m_windowWidth, m_windowHeight) = window.size();
 
     listen(window.onKey, [this](auto key, bool down, auto mods){
@@ -119,7 +121,7 @@ namespace px {
           ;
 
           bgfx::TextureHandle th = m_texture;
-          bgfx::ProgramHandle program = m_program;
+          bgfx::ProgramHandle program = m_shader->get();
 
           if (nullptr != cmd->TextureId)
           {
@@ -133,7 +135,7 @@ namespace px {
             {
               const float lodEnabled[4] = { float(texture.s.mip), 1.0f, 0.0f, 0.0f };
               bgfx::setUniform(u_imageLodEnabled, lodEnabled);
-              program = m_imageProgram;
+              program = m_imageShader->get();
             }
           }
           else
@@ -283,10 +285,10 @@ namespace px {
 
     bgfx::RendererType::Enum type = bgfx::getRendererType();
     auto &rm = px::Engine::getInstance().getResourceManager();
-    m_program = rm.loadProgram("core.shaders.vs_ocornut_imgui", "core.shaders.fs_ocornut_imgui");
+    m_shader = rm.loadShader("core.shaders.vs_ocornut_imgui", "core.shaders.fs_ocornut_imgui");
 
     u_imageLodEnabled = bgfx::createUniform("u_imageLodEnabled", bgfx::UniformType::Vec4);
-    m_imageProgram = rm.loadProgram("core.shaders.vs_imgui_image", "core.shaders.fs_imgui_image");
+    m_imageShader = rm.loadShader("core.shaders.vs_imgui_image", "core.shaders.fs_imgui_image");
 
     m_layout
       .begin()
