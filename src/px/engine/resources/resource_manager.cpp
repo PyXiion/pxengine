@@ -83,7 +83,36 @@ bgfx::ShaderHandle px::ResourceManager::loadShaderFile(const std::string &filena
   return handle;
 }
 
+px::TexturePtr px::ResourceManager::loadTexture(const std::string &texture, bool reload) {
   EASY_BLOCK("px::ResourceManager::loadTexture")
+  Resource &resource = (*this)[texture];
+  if (not reload and std::holds_alternative<TexturePtr>(resource)) {
+    return std::move(std::get<TexturePtr>(resource));
+  }
+
+  std::vector<std::string> texturePath = ResourceManager::parseResourcePath(texture);
+  fs::path path = m_rootDir;
+  for (const auto& i : texturePath)
+    path /= i;
+
+  // check extensions
+  auto extensions = {".png", ".jpg", ".jpeg", ".bmp", ".gif", ".tga", ".psd"};
+  bool found = false;
+  for (auto ext : extensions) {
+    path.replace_extension(ext);
+    if (not fs::exists(path))
+      continue;
+    found = true;
+  }
+  if (not found)
+    throw std::runtime_error("Texture not found.");
+
+  auto texturePtr = makeTexture();
+  texturePtr->loadFromFile(path);
+  resource = texturePtr;
+  return texturePtr;
+}
+
 px::ResourceManager::RawType px::ResourceManager::loadRawFile(const std::string &_path, bool reload) {
   EASY_BLOCK("px::ResourceManager::loadRawFile")
   fs::path path = absolutePath(_path);
@@ -94,13 +123,8 @@ px::ResourceManager::RawType px::ResourceManager::loadRawFile(const std::string 
     return RawType(handle.data(), handle.size());
   }
 
-  std::ifstream ifs(path, std::ios::in | std::ios::binary);
-  if (not ifs.is_open()) {
-    throw std::runtime_error("File does not exist.");
-  }
   px::MemoryStream ms;
-  ifs >> ms;
-  ifs.close();
+  ms.loadFromFile(path);
 
   RawType raw(ms.data(), ms.size());
   resource = std::move(ms);
@@ -108,7 +132,28 @@ px::ResourceManager::RawType px::ResourceManager::loadRawFile(const std::string 
   return raw;
 }
 
+const px::Localization &px::ResourceManager::loadLocalization(const std::string &localization, bool reload) {
   EASY_BLOCK("px::ResourceManager::loadLocalization")
+  Resource &resource = (*this)[localization];
+  if (not reload and std::holds_alternative<LocalizationPtr>(resource)) {
+    return *std::get<LocalizationPtr>(resource);
+  }
+
+  auto _path = parseResourcePath(localization);
+  fs::path path = m_rootDir;
+  for (const auto &i : _path)
+    path /= i;
+
+  auto loc = std::make_unique<Localization>();
+  auto *ptr = loc.get();
+  loc->setFolder(path);
+  // load default lang
+  loc->loadLanguage("ru");
+
+  resource = std::move(loc);
+  return *ptr;
+}
+
 std::string px::ResourceManager::absolutePath(const std::string &_path)
 {
   fs::path path = _path;

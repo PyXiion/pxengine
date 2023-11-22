@@ -1,9 +1,10 @@
 #include "info_window.hpp"
+#include <px/engine/common/imgui/imgui.hpp>
+
 #include <numeric>
-
 #include <imgui/imgui.h>
-#include <easy/profiler.h>
 
+#include <easy/profiler.h>
 #include "../../general.hpp"
 #include "../../system/general.hpp"
 #include "../../engine.hpp"
@@ -18,6 +19,8 @@ px::DebugInfoWindow::DebugInfoWindow(px::Engine &engine)
   m_engine.onGuiDraw.append(std::bind(&DebugInfoWindow::onGuiDraw, this));
   EASY_BLOCK("px::DebugInfoWindow::DebugInfoWindow")
   m_engine.onInit.append([this](auto &engine) {
+    m_localization = &engine.getResourceManager().loadLocalization("core.lang");
+  });
 
   m_frames.reserve(kGraphPointCount);
   m_ticks.reserve(kGraphPointCount);
@@ -44,16 +47,16 @@ void px::DebugInfoWindow::onGuiDraw()
     graphUpdate = true;
   }
 
-  ImGui::Begin("Debug Window");
-  {
+  const std::string title = m_localization->get("ui.debug-window.title") + "##debugwindow";
+  if (ImGui::Begin(title.c_str())) {
     // Main information
-    ImGui::Text("Version: %s", px::info::engineVersion.c_str());
-    ImGui::Text("Build: %d", px::info::engineBuild);
+    ImGui::TextFmt(m_localization->get("ui.debug-window.version"), PX_ENGINE_VERSION);
+    ImGui::TextFmt(m_localization->get("ui.debug-window.build"), PX_ENGINE_BUILD);
 
     ImGui::Separator();
     
     // Sys information
-    ImGui::Text("Mem used: %lldMB", px::getUsedMemory() / 1024);
+    ImGui::TextFmt(m_localization->get("ui.debug-window.mem-used"), px::getUsedMemory() / 1024);
 
     ImGui::Separator();
 
@@ -64,25 +67,25 @@ void px::DebugInfoWindow::onGuiDraw()
     float fps = 1.0f / frameDeltaTime;
     float tps = 1.0f / tickDeltaTime;
 
-    ImGui::Text("FPS: %.0f", fps);
+    ImGui::TextFmt(m_localization->get("ui.debug-window.graph.fps"), fps);
     if (ImGui::IsItemHovered())
-      ImGui::SetTooltip("Ms: %.4f", frameDeltaTime);
+      ImGui::SetTooltipFmt("Ms: {}", frameDeltaTime);
 
     drawGraph("FPS graph", m_frames, fps, graphUpdate);
     
-    ImGui::Text("TPS: %.0f", tps);
+    ImGui::TextFmt(m_localization->get("ui.debug-window.graph.tps"), tps);
     if (ImGui::IsItemHovered())
-      ImGui::SetTooltip("Ms: %.4f", tickDeltaTime);
+      ImGui::SetTooltipFmt("Ms: {}", tickDeltaTime);
 
     drawGraph("TPS graph", m_ticks, tps, graphUpdate);
 
-    // World section
+    #pragma region World
     World *world = m_engine.getWorld();
     ImGui::BeginDisabled(world == nullptr);
-    if (ImGui::CollapsingHeader("World objects") && world)
+    if (ImGui::CollapsingHeader(m_localization->getc("ui.debug-window.world-objects.title")) && world)
     {
       // 
-      if (ImGui::Button("Create new object"))
+      if (ImGui::Button(m_localization->getc("ui.debug-window.world-objects.create")))
       {
         world->createGameObject();
       }
@@ -111,27 +114,40 @@ void px::DebugInfoWindow::onGuiDraw()
       // Selected game object info
       if (isSelectedExists)
       {
-        ImGui::Text("Selected object address: 0x%p", static_cast<void*>(m_worldSelectedObject));
-        ImGui::Text("Selected object name: %s", m_worldSelectedObject->getName().c_str());
+        ImGui::TextFmt(m_localization->getc("ui.debug-window.world-objects.selected.address"),
+                       static_cast<void*>(m_worldSelectedObject));
+        ImGui::TextFmt(m_localization->getc("ui.debug-window.world-objects.selected.name"),
+                       m_worldSelectedObject->getName().c_str());
 
-        if (ImGui::Button("Destroy"))
+        if (ImGui::Button(m_localization->getc("ui.debug-window.world-objects.selected.destroy")))
           m_worldSelectedObject->destroy();
       }
     }
     ImGui::EndDisabled();
+    #pragma endregion
 
-    if (ImGui::CollapsingHeader("Controls"))
+    #pragma region Controls
+    if (ImGui::CollapsingHeader(m_localization->getc("ui.debug-window.controls")))
     {
       Controls &controls = m_engine.getControls();
 
       ImGui::Text("Vertical: %f", controls.getAxis(ControlAxis::Vertical));
       ImGui::Text("Horizontal: %f", controls.getAxis(ControlAxis::Horizontal));
     }
+    #pragma endregion
+
+    #pragma region Open things
+    if (ImGui::CollapsingHeader(m_localization->getc("ui.debug-window.open.title"))) {
+      if (ImGui::Button(m_localization->getc("ui.debug-window.open.settings"))) {
+        m_engine.getSettingsWindow().setOpened(true);
+      }
+    }
+    #pragma endregion
   }
   ImGui::End();
 }
 
-void px::DebugInfoWindow::drawGraph(const char *label, std::vector<float> &graph, float currentValue, bool update)
+void px::DebugInfoWindow::drawGraph(const char *label, std::vector<float> &graph, float currentValue, bool update) const
 {
   if (update)
   {
@@ -145,8 +161,8 @@ void px::DebugInfoWindow::drawGraph(const char *label, std::vector<float> &graph
   float sum = std::reduce(graph.begin(), graph.end());
   float max = *std::max_element(graph.begin(), graph.end());
   float average = sum / static_cast<float>(graph.size());
-  char overlay[32];
-  sprintf(overlay, "Average: %.1f", average);
+  char overlay[64] {};
+  fmt::format_to(overlay, fmt::runtime(m_localization->get("ui.debug-window.graph.average")), average);
 
   ImGui::PlotLines(label, graph.data(), graph.size(), 0, overlay, 0.0f, max * 1.2f, ImVec2(300, 100), 4);
 }

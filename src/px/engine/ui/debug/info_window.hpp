@@ -2,10 +2,12 @@
 #include <vector>
 #include <atomic>
 #include "../../world/game_object.hpp"
+#include "../../events/event_listener.hpp"
 
 namespace px
 {
   class Engine;
+  class Localization;
   class World;
 
   class DebugInfoWindow : private EventListener {
@@ -16,6 +18,7 @@ namespace px
     const int kGraphPointCount = 50;
 
     Engine &m_engine;
+    const Localization *m_localization;
 
     std::atomic<float> m_frameDeltaTime;
     std::atomic<float> m_tickDeltaTime;
@@ -31,6 +34,6 @@ namespace px
 
     void onGuiDraw();
 
-    void drawGraph(const char *label, std::vector<float> &graph, float currentValue, bool update);
+    void drawGraph(const char *label, std::vector<float> &graph, float currentValue, bool update) const;
   };
 } // namespace px

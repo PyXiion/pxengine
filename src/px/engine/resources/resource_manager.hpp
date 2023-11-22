@@ -3,11 +3,15 @@
 #include <unordered_map>
 #include <bgfx/bgfx.h>
 #include <vector>
+#include <memory>
 #include <variant>
 #include <px/hash_utils.hpp>
 #include <px/raw_memory.hpp>
 #include <px/memory_stream.hpp>
+#include "localization.hpp"
 #include "bgfx_handle.hpp"
+#include "../graphics/texture.hpp"
+#include "px/engine/graphics/shader.hpp"
 
 namespace px
 { 
@@ -18,11 +22,13 @@ namespace px
     struct None {};
     using RawType = px::RawConstMemory<char>;
     using RawTypeHandler = px::MemoryStream;
+    using LocalizationPtr = std::unique_ptr<Localization>;
+
     using Resource = std::variant<
         None,
         BgfxUniqueVertexBufferHandle, BgfxUniqueIndexBufferHandle,
-        BgfxUniqueShaderHandle, BgfxUniqueProgramHandle,
-        RawTypeHandler>;
+        BgfxUniqueShaderHandle, ShaderPtr,
+        RawTypeHandler, LocalizationPtr, TexturePtr>;
 
   public:
     ResourceManager(Engine &engine, std::string rootDir);
