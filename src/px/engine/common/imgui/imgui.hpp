@@ -10,6 +10,7 @@
 #include <queue>
 #include <bgfx/bgfx.h>
 #include <imgui/imgui.h>
+#include <fmt/format.h>
 #include "../../system/keycodes.hpp"
 #include "../../resources/bgfx_handle.hpp"
 #include "../../events/event_listener.hpp"
@@ -71,5 +72,18 @@ namespace px {
     bool getMouseButtonState(MouseButton btn);
   };
 } // px
+
+namespace ImGui {
+#define PX_IMGUI_OVERLOAD_FORMATTED(funcName) \
+  template <class... T> \
+  inline void funcName ## Fmt(const std::string &formatStr, T &&...args) { \
+    ImGui::funcName("%s", fmt::format(fmt::runtime(formatStr), args...).c_str()); \
+  }
+
+  PX_IMGUI_OVERLOAD_FORMATTED(Text)
+  PX_IMGUI_OVERLOAD_FORMATTED(SetTooltip)
+
+#undef PX_IMGUI_OVERLOAD_FORMATTED
+}
 
 #endif //ENGINE_IMGUI_HPP
