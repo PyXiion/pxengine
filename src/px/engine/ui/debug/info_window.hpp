@@ -14,7 +14,7 @@ namespace px
     explicit DebugInfoWindow(Engine &engine);
 
   private:
-    const int kGraphPointCount = 10;
+    const int kGraphPointCount = 50;
 
     Engine &m_engine;
 
