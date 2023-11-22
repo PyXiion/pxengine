@@ -21,6 +21,7 @@ px::ResourceManager::~ResourceManager() {
 }
 
 bgfx::ProgramHandle px::ResourceManager::loadProgram(const std::string &vsName, const std::string &fsName, bool reload) {
+  EASY_BLOCK("px::ResourceManager::loadShader")
   std::string key = vsName + "," + fsName;
 
   Resource &resource = (*this)[key];
@@ -41,6 +42,7 @@ bgfx::ProgramHandle px::ResourceManager::loadProgram(const std::string &vsName, 
 }
 
 bgfx::ShaderHandle px::ResourceManager::loadShader(const std::string &filename, bool reload) {
+  EASY_BLOCK("px::ResourceManager::loadShaderFile")
   Resource &resource = (*this)[filename];
   if (not reload and std::holds_alternative<BgfxUniqueShaderHandle>(resource)) {
     return static_cast<bgfx::ShaderHandle>(std::get<BgfxUniqueShaderHandle>(resource));
@@ -81,7 +83,9 @@ bgfx::ShaderHandle px::ResourceManager::loadShader(const std::string &filename, 
   return handle;
 }
 
+  EASY_BLOCK("px::ResourceManager::loadTexture")
 px::ResourceManager::RawType px::ResourceManager::loadRawFile(const std::string &_path, bool reload) {
+  EASY_BLOCK("px::ResourceManager::loadRawFile")
   fs::path path = absolutePath(_path);
 
   Resource &resource = (*this)[_path];
@@ -104,6 +108,7 @@ px::ResourceManager::RawType px::ResourceManager::loadRawFile(const std::string 
   return raw;
 }
 
+  EASY_BLOCK("px::ResourceManager::loadLocalization")
 std::string px::ResourceManager::absolutePath(const std::string &_path)
 {
   fs::path path = _path;

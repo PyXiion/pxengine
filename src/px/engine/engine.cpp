@@ -8,9 +8,13 @@
 #include <bx/bx.h>
 
 #include "common/frame_limiter.hpp"
-#include "3d/cube.hpp"
-#include <bx/bx.h>
-#include <bx/math.h>
+#include <csignal>
+
+void death_signal(int signum) {
+  profiler::dumpBlocksToFile("./profile");
+  signal(signum, SIG_DFL);
+  exit(3);
+}
 
 px::Engine::Engine()
   : m_maxFps(60)
@@ -23,10 +27,15 @@ px::Engine::Engine()
   , m_showBgfxStats(false)
 {
   instance = this;
+
+  EASY_PROFILER_ENABLE;
+  signal(SIGSEGV, &death_signal);
+  signal(SIGTRAP, &death_signal);
 }
 
 px::Engine::~Engine()
 {
+  profiler::dumpBlocksToFile("./profile");
 }
 
 void px::Engine::run()
@@ -79,18 +88,23 @@ void px::Engine::init()
   m_tickLoopThread = std::make_unique<std::thread>([this] { tickThread(); });
 
   // Инициализация всего остального
+  EASY_BLOCK("Init event", profiler::colors::LightBlue);
   onInit(*this);
 }
 
 void px::Engine::loop()
 {
-  EASY_BLOCK("px::Engine::loop");
+  EASY_BLOCK("px::Engine::loop")
 
+  EASY_BLOCK("Polling events")
   m_window->pollEvents();
+  EASY_END_BLOCK
 
+  EASY_BLOCK("Updating other things");
   onPreUpdate(m_deltaTime);
   onUpdate(m_deltaTime);
   onPostUpdate(m_deltaTime);
+  EASY_END_BLOCK
 
   if (m_camera) {
     Vector3 offset;
@@ -107,15 +121,18 @@ void px::Engine::draw()
   if (!m_renderer)
     return;
 
-  EASY_BLOCK("px::Engine::draw");
+  EASY_BLOCK("px::Engine::draw")
   if (m_camera) {
     m_camera->apply();
   }
 
+  EASY_BLOCK("ImGui")
   m_imgui->BeginFrame(m_renderer->getViewId());
   onGuiDraw();
   m_imgui->EndFrame();
+  EASY_END_BLOCK
 
+  EASY_BLOCK("Graphics");
   m_renderer->beginFrame();
   onDraw();
   m_renderer->renderFrame();
@@ -123,12 +140,7 @@ void px::Engine::draw()
 
 void px::Engine::drawImGui()
 {
-  ImGui::Begin("Hello");
-    ImGui::Text("HELLO WORLD\n\n\\n\n\\\n\n\n\n\n\n\n\n");
-
-    static char s[50]{};
-    ImGui::InputText("Input", s, 50);
-  ImGui::End();
+  EASY_BLOCK("px::Engine::drawImGui")
 }
 
 void px::Engine::tickThread()
@@ -143,9 +155,10 @@ void px::Engine::tickThread()
   }
 }
 
+
 void px::Engine::tickLoop()
 {
-  EASY_BLOCK("Engine tick");
+  EASY_BLOCK("px::Engine::tickLoop");
 
   m_eventManager.process();
 
@@ -191,6 +204,7 @@ px::World *px::Engine::getWorld() const
 
 px::World &px::Engine::createNewWorld()
 {
+  EASY_BLOCK("px::Engine::createNewWorld");
   m_world = std::make_unique<World>(*this);
   return *m_world;
 }
