@@ -14,6 +14,7 @@
 #include "../../system/keycodes.hpp"
 #include "../../resources/bgfx_handle.hpp"
 #include "../../events/event_listener.hpp"
+#include "../../graphics/shader.hpp"
 
 namespace px {
   class Engine;
