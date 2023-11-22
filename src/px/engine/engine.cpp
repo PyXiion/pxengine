@@ -76,6 +76,9 @@ void px::Engine::init()
 
   m_controls = std::make_unique<Controls>(*m_window);
 
+  m_renderer = std::make_unique<Renderer>(*m_window);
+  m_renderer->setDebugEnabled(false);
+
   listen(m_window->onKeyPressed, [this](auto keycode, auto mods) {
     if (m_renderer && keycode == KeyCode_F1) {
       m_renderer->setDebugEnabled(!m_renderer->isDebugEnabled());
@@ -166,7 +169,6 @@ void px::Engine::tickLoop()
   onTick(m_tickDeltaTime);
   onPostTick(m_tickDeltaTime);
 }
-
 
 px::Window &px::Engine::getWindow() const
 {
