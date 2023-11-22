@@ -1,11 +1,9 @@
 #include "engine.hpp"
-#include <functional>
 #include <utility>
 
 #include <easy/profiler.h>
 #include <bgfx/bgfx.h>
 #include <imgui/imgui.h>
-#include <bx/bx.h>
 
 #include "common/frame_limiter.hpp"
 #include <csignal>
