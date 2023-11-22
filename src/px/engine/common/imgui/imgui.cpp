@@ -194,7 +194,7 @@ namespace px {
     io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset;
 
     m_keyMap[KeyCode_Escape]       = ImGuiKey_Escape;
-//      m_keyMap[KeyCode_Return] = ImGuiKey_Return;
+    m_keyMap[KeyCode_Enter]        = ImGuiKey_Enter;
     m_keyMap[KeyCode_Tab]          = ImGuiKey_Tab;
     m_keyMap[KeyCode_Space]        = ImGuiKey_Space;
     m_keyMap[KeyCode_Backspace]    = ImGuiKey_Backspace;
