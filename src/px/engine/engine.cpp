@@ -69,7 +69,7 @@ void px::Engine::reloadSettings() {
 
 void px::Engine::init()
 {
-  EASY_BLOCK("px::Engine::init", profiler::colors::Red);
+  EASY_BLOCK("px::Engine::init", profiler::colors::Orange);
 
   m_resourceManager = std::make_unique<ResourceManager>(*this, "./data");
   m_window = std::make_unique<Window>("PXE", 1280, 720);
