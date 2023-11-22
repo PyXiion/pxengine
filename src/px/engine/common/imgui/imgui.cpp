@@ -301,12 +301,27 @@ namespace px {
 
     s_tex = bgfx::createUniform("s_tex", bgfx::UniformType::Sampler);
 
-    io.Fonts->AddFontDefault();
+    {
+      ImFontConfig config;
+      config.FontDataOwnedByAtlas = false;
+      config.MergeMode = false;
+
+      const ImWchar *ranges = io.Fonts->GetGlyphRangesCyrillic();
+
+      auto &resources = m_engine.getResourceManager();
+
+      auto regular = resources.loadRawFile("core/font/roboto/regular.ttf");
+      auto italic  = resources.loadRawFile("core/font/roboto/italic.ttf");
+      auto bold    = resources.loadRawFile("core/font/roboto/bold.ttf");
+
+      io.Fonts->AddFontFromMemoryTTF((void*)regular.data(), regular.size(), 16.0f, &config, ranges);
+      io.Fonts->AddFontFromMemoryTTF((void*)italic.data(),  italic.size(),  16.0f, &config, ranges);
+      io.Fonts->AddFontFromMemoryTTF((void*)bold.data(),    bold.size(),    16.0f, &config, ranges);
+    }
 
     uint8_t *data;
     int32_t width;
     int32_t height;
-
     io.Fonts->GetTexDataAsRGBA32(&data, &width, &height);
 
     m_texture = bgfx::createTexture2D(
