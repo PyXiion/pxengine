@@ -82,14 +82,7 @@ void px::Engine::init()
     }
   });
 
-  listen(onGuiDraw, [this] {
-    ImGui::Begin("Debug window!");
-      ImGui::Text("Hello world!");
-    ImGui::End();
-  });
-
-  m_renderer = std::make_unique<Renderer>(*m_window);
-  m_imgui = std::make_unique<ImGuiCtx>(*m_window);
+  m_imgui = std::make_unique<ImGuiCtx>(*this, *m_window);
   m_imgui->Create();
 
   m_tickLoopThread = std::make_unique<std::thread>([this] { tickThread(); });
