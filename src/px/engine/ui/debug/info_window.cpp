@@ -14,9 +14,6 @@ px::DebugInfoWindow::DebugInfoWindow(px::Engine &engine)
   , m_secondTimer(0.0f)
   , m_worldSelectedObject(nullptr)
 {
-  m_engine.onPostUpdate.append(std::bind(&DebugInfoWindow::onUpdate, this, std::placeholders::_1));
-  m_engine.onPostTick.append(std::bind(&DebugInfoWindow::onTick, this, std::placeholders::_1));
-  m_engine.onGuiDraw.append(std::bind(&DebugInfoWindow::onGuiDraw, this));
   EASY_BLOCK("px::DebugInfoWindow::DebugInfoWindow")
   m_engine.onInit.append([this](auto &engine) {
     m_localization = &engine.getResourceManager().loadLocalization("core.lang");
