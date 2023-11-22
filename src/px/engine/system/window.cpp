@@ -3,7 +3,7 @@
 #include <bx/bx.h>
 #include <bgfx/bgfx.h>
 #include <bgfx/platform.h>
-#include "../system/general.hpp"
+#include "general.hpp"
 
 #if BX_PLATFORM_LINUX
   #define GLFW_EXPOSE_NATIVE_X11
