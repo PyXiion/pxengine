@@ -6,6 +6,8 @@ if(NOT PX_SHADERC_BIN)
     set(PX_SHADERC_BIN "${PROJECT_SOURCE_DIR}/shaderc")
   elseif(EXISTS "${PROJECT_SOURCE_DIR}/tools/shaderc")
     set(PX_SHADERC_BIN "${PROJECT_SOURCE_DIR}/tools/shaderc")
+  else()
+    set(PX_SHADERC_BIN shaderc)
   endif()
 endif()
 
