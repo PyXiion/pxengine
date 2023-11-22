@@ -193,6 +193,7 @@ namespace px {
 
     io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset;
 
+    #pragma region Keymap
     m_keyMap[KeyCode_Escape]       = ImGuiKey_Escape;
     m_keyMap[KeyCode_Enter]        = ImGuiKey_Enter;
     m_keyMap[KeyCode_Tab]          = ImGuiKey_Tab;
@@ -278,6 +279,7 @@ namespace px {
     m_keyMap[KeyCode_X]         = ImGuiKey_X;
     m_keyMap[KeyCode_Y]         = ImGuiKey_Y;
     m_keyMap[KeyCode_Z]         = ImGuiKey_Z;
+#pragma endregion // Keymap
 
     io.ConfigFlags |= 0
         | ImGuiConfigFlags_NavEnableKeyboard
