@@ -87,7 +87,7 @@ namespace px
     std::construct_at(component, std::forward<TArgs>(args)...);
 
     // Push a shared ptr to vector and assign the iterator
-    m_components.push_back(std::shared_ptr<T>(component));
+    m_components.push_back(std::unique_ptr<T>(component));
     auto it = --m_components.end();
     component->m_handle = it;
   }
