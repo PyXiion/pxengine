@@ -1,34 +1,26 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(engine)
+project(px_engine)
 
 set(CMAKE_CXX_STANDARD 20)
 
-set(PX_GAME_DIR "${PROJECT_SOURCE_DIR}/game")
-set(PX_CORE_SHADERS_DIR "${PX_GAME_DIR}/data/core/shaders")
+set(PX_RESOURCES_DIR        "${PROJECT_SOURCE_DIR}/data")
+set(PX_ENGINE_RESOURCES_DIR "${PX_RESOURCES_DIR}/core")
+set(PX_ENGINE_SHADERS_DIR   "${PX_ENGINE_RESOURCES_DIR}/shaders")
 
 include_directories(
-  ext/glad/include
   ext/include
+  src
 )
 
-add_subdirectory(ext/glad)
-add_subdirectory(ext/include/imgui)
-add_subdirectory(
-    /home/pyxiion/CLionProjects/px
-    ./libpx
-)
-add_subdirectory(
-    /home/pyxiion/Projects/_EXT_/bgfx
-    ./libbin
-)
+add_subdirectory(bgfx.cmake)
 
-include_directories(/home/pyxiion/Projects/_EXT_/bgfx/bgfx/include)
-include_directories(/home/pyxiion/Projects/_EXT_/bgfx/bx/include)
+add_subdirectory(ext/imgui)
+include_directories(ext/imgui/include)
 
-add_subdirectory(src/engine)
-add_subdirectory(src/game)
+add_subdirectory(src)
+add_subdirectory(examples)
 
-install(TARGETS game
-  CONFIGURATIONS Debug
-  RUNTIME DESTINATION bin)
+#install(TARGETS game
+#  CONFIGURATIONS Debug
+#  RUNTIME DESTINATION bin)
