@@ -44,13 +44,30 @@ namespace px {
     ///     });                                         <br/>
     /// </code>
     /// \param callback Your CallbackList
-    /// \param fun
-    template<class TCallback>
-      requires px::is_base_of_template_v<eventpp::CallbackList, TCallback>
+    /// \param fun Your lambda or class member
+    template<class TCallback, class T>
+    void listen(TCallback &callback, T fun) {
+      typename TCallback::Handle handle;
+      using TCallbackFunction = typename TCallback::Callback;
 
-    void listen(TCallback &callback, TCallback::Callback &&fun) {
-      // Append the callback and get a listener
-      typename TCallback::Handle handle = callback.append(fun);
+      // checking types
+      typedef px::function_traits<TCallbackFunction> ExpectedFunc;
+      using ExpectedReturn = ExpectedFunc::return_type;
+      using ExpectedArgs = ExpectedFunc::arguments;
+      using FunctionTraits = px::overloaded_function_traits<T, ExpectedReturn, ExpectedArgs>;
+
+      // check if is a lambda or static function
+      if constexpr (std::is_convertible_v<T, TCallbackFunction &&>) {
+        handle = callback.append(fun);
+      } else if constexpr (FunctionTraits::is_member) { // is class member
+        using Object = typename FunctionTraits::instance_type;
+        static_assert(std::is_base_of_v<EventListener, Object>, "The class of the method does not inherit from EventListener.");
+
+        handle = callback.append([this, fun](auto &&...args) {
+          auto self = reinterpret_cast<Object *>(this);
+          (self->*fun)(std::forward<decltype(args)>(args)...);
+        });
+      }
 
       // Plan the destruction
       m_destructors.push_back([&callback, handle]{

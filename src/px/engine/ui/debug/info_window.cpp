@@ -19,9 +19,9 @@ px::DebugInfoWindow::DebugInfoWindow(px::Engine &engine)
     m_localization = &engine.getResourceManager().loadLocalization("core.lang");
   });
 
-  listen(m_engine.onPostUpdate, [this](float f) { onUpdate(f); });
-  listen(m_engine.onPostTick,   [this](float f) { onTick(f);   });
-  listen(m_engine.onGuiDraw,    [this]          { onGuiDraw(); });
+  listen(m_engine.onPostUpdate, &DebugInfoWindow::onUpdate);
+  listen(m_engine.onPostTick,   &DebugInfoWindow::onTick);
+  listen(m_engine.onGuiDraw,    &DebugInfoWindow::onGuiDraw);
 
   m_frames.reserve(kGraphPointCount);
   m_ticks.reserve(kGraphPointCount);
