@@ -1,6 +1,9 @@
 bin
 build
+cmake-build-release
+cmake-build-debug
 
 .vscode
+.idea
 
-*.prof
+src/px/game

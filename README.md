@@ -1,4 +1,4 @@
-# PyXiion's Engine and Game
+# PyXiion's Engine
 
 ## Used
  - [BGFX](https://github.com/bkaradzic/bgfx)
