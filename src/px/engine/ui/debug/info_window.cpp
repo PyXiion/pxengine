@@ -115,7 +115,7 @@ void px::DebugInfoWindow::onGuiDraw()
       if (isSelectedExists)
       {
         ImGui::TextFmt(m_localization->getc("ui.debug-window.world-objects.selected.address"),
-                       static_cast<void*>(m_worldSelectedObject));
+                       fmt::ptr(m_worldSelectedObject));
         ImGui::TextFmt(m_localization->getc("ui.debug-window.world-objects.selected.name"),
                        m_worldSelectedObject->getName().c_str());
 
