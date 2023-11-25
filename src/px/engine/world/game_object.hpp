@@ -38,7 +38,7 @@ namespace px
 
     /// Create new component
     template <ComponentType T, typename ...TArgs>
-    void addComponent(TArgs &&...args);
+    T *addComponent(TArgs &&...args);
 
     /// Get a component of a certain type
     /// \return Pointer to the component if successful, otherwise nullptr
@@ -76,7 +76,7 @@ namespace px
   };
 
   template<ComponentType T, typename... TArgs>
-  void GameObject::addComponent(TArgs &&... args) {
+  T *GameObject::addComponent(TArgs &&... args) {
     // Allocate
     std::allocator<T> allocator;
     auto component = allocator.allocate(1);
@@ -91,6 +91,8 @@ namespace px
     m_components.push_back(std::unique_ptr<T>(component));
     auto it = --m_components.end();
     component->m_handle = it;
+
+    return component;
   }
 
   template<ComponentType T>
