@@ -71,7 +71,7 @@ namespace px
   private:
     std::string m_name;
 
-    World *m_world; ///< must never be initialised
+    World *m_world;
     GameObjectIter m_self;
   };
 
