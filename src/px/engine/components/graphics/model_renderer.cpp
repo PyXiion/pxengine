@@ -13,6 +13,8 @@ namespace px {
 
   ModelRenderer::ModelRenderer() {
     subscribeEvents();
+
+    m_transform = getGameObject()->getComponent<px::Transform>();
   }
 
   void ModelRenderer::subscribeEvents() {
@@ -21,7 +23,7 @@ namespace px {
   }
 
   void ModelRenderer::draw() {
-    if (m_model and m_states.shaderPtr) {
+    if (m_model and m_states.shaderPtr and m_transform) {
       m_model->draw(m_states);
     }
   }
