@@ -1,6 +1,8 @@
 #include "transform.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 
+PX_COMPONENT_DEFINITION(px::Component, px::Transform)
+
 px::Transform::Transform(px::Vector3 position, px::Vector3 eulerAngles)
   : m_transform()
   , m_isCached(false)

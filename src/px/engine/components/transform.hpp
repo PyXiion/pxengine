@@ -9,6 +9,7 @@ namespace px
 {
   class Transform : public Component
   {
+    PX_COMPONENT_DECLARATION
   public:
     Transform(Vector3 position = {0, 0, 0}, Vector3 eulerAngles = {0, 0, 0});
 
