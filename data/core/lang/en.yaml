@@ -1,0 +1,28 @@
+ui:
+  debug-window:
+    title: "Debug Window"
+    version: "Engine version: {}"
+    build: "Build: {}"
+    mem-used: "Used {} MB of memory"
+    graph:
+      fps: "FPS: {:.1f}"
+      tps: "TPS: {:.1f}"
+      average: "Average: {:.2f}"
+    world-objects:
+      title: "World objects"
+      create: "Create"
+      selected:
+        name: "Name: {}"
+        address: "Address: {}"
+        destroy: "Destroy"
+    open:
+      title: "Open things"
+      settings: "Open settings"
+    controls: "Controls"
+  settings:
+    title: "Settings"
+    graphics:
+      title: "Graphics"
+      max-fps: "FPS Limit"
+    other:
+      title: "Misc"
