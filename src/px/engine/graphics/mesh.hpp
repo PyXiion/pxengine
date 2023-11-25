@@ -15,17 +15,23 @@ namespace px {
 
   class Mesh {
   public:
-    Mesh();
-    Mesh(const std::string &filename);
+    Mesh(std::vector<Vertex> vertices, std::vector<uint> indices, std::vector<TexturePtr> textures);
 
-    void loadFromFile(const std::string &filename);
+    void apply(uint8_t stream) const;
 
   private:
     std::vector<Vertex> m_vertices;
+    std::vector<uint> m_indices;
     std::vector<TexturePtr> m_textures;
 
     static bgfx::VertexLayout layout;
     static void initLayout();
+
+    BgfxUniqueVertexBufferHandle m_vb;
+    BgfxUniqueIndexBufferHandle m_ib;
+
+    BgfxUniqueVertexBufferHandle createVertexBuffer();
+    BgfxUniqueIndexBufferHandle  createIndexBuffer();
   };
 
 } // px
