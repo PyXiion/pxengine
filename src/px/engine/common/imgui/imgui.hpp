@@ -15,6 +15,7 @@
 #include "../../resources/bgfx_handle.hpp"
 #include "../../events/event_listener.hpp"
 #include "../../graphics/shader.hpp"
+#include "../../math/vector.hpp"
 
 namespace px {
   class Engine;
@@ -85,6 +86,8 @@ namespace ImGui {
   PX_IMGUI_OVERLOAD_FORMATTED(SetTooltip)
 
 #undef PX_IMGUI_OVERLOAD_FORMATTED
+
+  bool InputVector3(const char *label, px::Vector3 &v, const char *format = "%.3f", ImGuiInputTextFlags flags = 0);
 }
 
 #endif //ENGINE_IMGUI_HPP

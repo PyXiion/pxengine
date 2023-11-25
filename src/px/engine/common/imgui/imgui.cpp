@@ -403,3 +403,14 @@ namespace px {
     return m_mouseButtons[static_cast<std::size_t>(btn)];
   }
 } // px
+
+bool ImGui::InputVector3(const char *label, px::Vector3 &v, const char *format, ImGuiInputTextFlags flags) {
+  bool result;
+  float xyz[3] = {v.x, v.y, v.z};
+
+  if (ImGui::InputFloat3(label, xyz, format, flags)) {
+    v = {xyz[0], xyz[1], xyz[2]};
+    return true;
+  }
+  return false;
+}
