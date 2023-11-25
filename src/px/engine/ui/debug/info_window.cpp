@@ -54,30 +54,34 @@ void px::DebugInfoWindow::onGuiDraw()
     ImGui::TextFmt(m_localization->get("ui.debug-window.build"), PX_ENGINE_BUILD);
 
     ImGui::Separator();
-    
-    // Sys information
-    ImGui::TextFmt(m_localization->get("ui.debug-window.mem-used"), px::getUsedMemory() / 1024);
 
-    ImGui::Separator();
+    #pragma region Common
+    if (ImGui::CollapsingHeader("Common")) {
+      // Sys information
+      ImGui::TextFmt(m_localization->get("ui.debug-window.mem-used"), px::getUsedMemory() / 1024);
 
-    // FPS and TPS
-    float frameDeltaTime = m_frameDeltaTime;
-    float tickDeltaTime = m_tickDeltaTime;
-    
-    float fps = 1.0f / frameDeltaTime;
-    float tps = 1.0f / tickDeltaTime;
+      ImGui::Separator();
 
-    ImGui::TextFmt(m_localization->get("ui.debug-window.graph.fps"), fps);
-    if (ImGui::IsItemHovered())
-      ImGui::SetTooltipFmt("Ms: {}", frameDeltaTime);
+      // FPS and TPS
+      float frameDeltaTime = m_frameDeltaTime;
+      float tickDeltaTime = m_tickDeltaTime;
 
-    drawGraph("FPS graph", m_frames, fps, graphUpdate);
-    
-    ImGui::TextFmt(m_localization->get("ui.debug-window.graph.tps"), tps);
-    if (ImGui::IsItemHovered())
-      ImGui::SetTooltipFmt("Ms: {}", tickDeltaTime);
+      float fps = 1.0f / frameDeltaTime;
+      float tps = 1.0f / tickDeltaTime;
 
-    drawGraph("TPS graph", m_ticks, tps, graphUpdate);
+      ImGui::TextFmt(m_localization->get("ui.debug-window.graph.fps"), fps);
+      if (ImGui::IsItemHovered())
+        ImGui::SetTooltipFmt("Ms: {}", frameDeltaTime);
+
+      drawGraph("FPS graph", m_frames, fps, graphUpdate);
+
+      ImGui::TextFmt(m_localization->get("ui.debug-window.graph.tps"), tps);
+      if (ImGui::IsItemHovered())
+        ImGui::SetTooltipFmt("Ms: {}", tickDeltaTime);
+
+      drawGraph("TPS graph", m_ticks, tps, graphUpdate);
+    }
+    #pragma endregion
 
     #pragma region World
     World *world = m_engine.getWorld();
@@ -121,12 +125,14 @@ void px::DebugInfoWindow::onGuiDraw()
 
         m_worldSelectedObject->guiEditor();
 
-        ImGui::BeginChild("Components"); {
+        ImGui::BeginGroup(); {
           auto components = m_worldSelectedObject->getComponents<Component>();
-          for (auto component : components) {
-            component->guiEditor();
+          for (size_t i = 0; i < components.size(); i++) {
+            ImGui::PushID(i);
+            components[i]->guiEditor();
+            ImGui::PopID();
           }
-        } ImGui::EndChild();
+        } ImGui::EndGroup();
 
         if (ImGui::Button(m_localization->getc("ui.debug-window.world-objects.selected.destroy")))
           m_worldSelectedObject->destroy();
