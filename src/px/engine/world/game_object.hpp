@@ -99,7 +99,7 @@ namespace px
   T *GameObject::getComponent() {
     for (auto &component : m_components) {
       if (component->checkComponentType(T::componentTypeId)) {
-        return component;
+        return static_cast<T*>(component.get());
       }
     }
     return nullptr;
