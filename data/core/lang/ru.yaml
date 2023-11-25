@@ -13,9 +13,9 @@ ui:
     world-objects:
       title: "Объекты мира"
       create: "Создать"
-      address: "Адрес в памяти: {:x}"
       selected:
         name: "Имя объекта: {}"
+        address: "Адрес в памяти: {}"
         destroy: "Уничтожить"
 
     open:
