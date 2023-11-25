@@ -110,7 +110,7 @@ namespace px
     std::vector<T *> result;
     for (auto &component : m_components) {
       if (component->checkComponentType(T::componentTypeId)) {
-        result.push_back(component);
+        result.push_back(component.get());
       }
     }
     return result;
