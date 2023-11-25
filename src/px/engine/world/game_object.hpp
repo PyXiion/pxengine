@@ -21,6 +21,7 @@ namespace px
     using GameObjectIter = std::list<GameObjectPtr>::iterator;
 
   public:
+    GameObject();
     virtual ~GameObject() = default;
     
     World &getWorld();

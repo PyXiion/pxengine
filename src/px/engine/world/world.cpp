@@ -1,6 +1,8 @@
 #include "world.hpp"
 #include <fmt/format.h>
 
+thread_local px::World *px::World::current_world;
+
 px::World::World(px::Engine &engine)
   : m_engine(engine) {
 }

@@ -38,6 +38,9 @@ namespace px
 
     std::mutex m_gameObjectsMutex;
 
+    friend class px::GameObject;
+    static thread_local World *current_world;
+
     void updateObjectName(GameObjectPtr &gameObject, const std::string &newName);
     void destroyObject(GameObjectIter &iterator);
   };
@@ -69,7 +72,7 @@ std::shared_ptr<T> px::World::createGameObject(TArgs... args)
   auto gameObject = allocator.allocate(1);
 
   // Set the pointer to this world
-  gameObject->m_world = this;
+  current_world = this;
 
   // Call constructor
   std::construct_at(gameObject, std::forward<TArgs>(args)...);

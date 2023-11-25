@@ -1,6 +1,11 @@
 #include "game_object.hpp"
 #include "world.hpp"
 
+px::GameObject::GameObject()
+  : m_world(px::World::current_world) {
+
+}
+
 void px::GameObject::destroy()
 {
   m_world->destroyObject(m_self);
