@@ -113,7 +113,7 @@ void px::Engine::loop()
   EASY_END_BLOCK
 
   if (m_camera) {
-    Vector3 offset;
+    Vector3 offset{};
     offset += m_camera->getForward() * m_controls->getAxis(ControlAxis::Vertical);
     offset += m_camera->getRight() * m_controls->getAxis(ControlAxis::Horizontal);
     m_camera->move(offset * m_deltaTime);
