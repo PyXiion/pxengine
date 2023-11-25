@@ -121,7 +121,12 @@ void px::DebugInfoWindow::onGuiDraw()
 
         m_worldSelectedObject->guiEditor();
 
-        auto gameObjects = m_worldSelectedObject->getComponents<Component>();
+        ImGui::BeginChild("Components"); {
+          auto components = m_worldSelectedObject->getComponents<Component>();
+          for (auto component : components) {
+            component->guiEditor();
+          }
+        } ImGui::EndChild();
 
         if (ImGui::Button(m_localization->getc("ui.debug-window.world-objects.selected.destroy")))
           m_worldSelectedObject->destroy();

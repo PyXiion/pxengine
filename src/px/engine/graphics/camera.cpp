@@ -96,7 +96,7 @@ namespace px {
   }
 
   void Camera::guiEditor() {
-    ImGui::BeginChild("Camera", ImVec2(0, 300)); {
+    ImGui::BeginGroup(); {
       bool edited =
            ImGui::InputVector3("Position",  m_position)
         or ImGui::InputVector3("Direction", m_direction)
@@ -105,6 +105,6 @@ namespace px {
 
       if (edited)
         recalculate();
-    } ImGui::EndChild();
+    } ImGui::EndGroup();
   }
 } // px
