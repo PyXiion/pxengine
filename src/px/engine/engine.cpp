@@ -1,5 +1,6 @@
 #include "engine.hpp"
 #include <utility>
+#include <filesystem>
 
 #include <easy/profiler.h>
 #include <bgfx/bgfx.h>
@@ -26,6 +27,8 @@ px::Engine::Engine()
   , m_showBgfxStats(false)
 {
   instance = this;
+
+  printf("Рабочая директория %s\n", std::filesystem::current_path().c_str());
 
   EASY_PROFILER_ENABLE;
   signal(SIGSEGV, &death_signal);
