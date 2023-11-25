@@ -1,14 +1,16 @@
+// Copyright (c) 2023.
+
 #pragma once
-#include "../math/vector.hpp"
-#include "../math/matrix.hpp"
-#include "../components/component.hpp"
+#include "px/engine/math/vector.hpp"
+#include "px/engine/math/matrix.hpp"
+#include "component.hpp"
 
 namespace px
 {
   class Transform : public Component
   {
   public:
-    Transform(Vector3 position, Vector3 eulerAngles);
+    Transform(Vector3 position = {0, 0, 0}, Vector3 eulerAngles = {0, 0, 0});
 
     void move(Vector3 offset);
     void rotate(Vector3 angles);
