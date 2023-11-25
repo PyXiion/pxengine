@@ -119,6 +119,10 @@ void px::DebugInfoWindow::onGuiDraw()
         ImGui::TextFmt(m_localization->getc("ui.debug-window.world-objects.selected.name"),
                        m_worldSelectedObject->getName().c_str());
 
+        m_worldSelectedObject->guiEditor();
+
+        auto gameObjects = m_worldSelectedObject->getComponents<Component>();
+
         if (ImGui::Button(m_localization->getc("ui.debug-window.world-objects.selected.destroy")))
           m_worldSelectedObject->destroy();
       }

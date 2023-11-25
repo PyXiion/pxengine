@@ -38,6 +38,8 @@ namespace px {
 
     void apply();
 
+    void guiEditor() override;
+
   private:
     Renderer &m_renderer;
 

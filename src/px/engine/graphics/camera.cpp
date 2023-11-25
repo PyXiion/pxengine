@@ -94,4 +94,17 @@ namespace px {
       recalculate();
     return m_direction;
   }
+
+  void Camera::guiEditor() {
+    ImGui::BeginChild("Camera", ImVec2(0, 300)); {
+      bool edited =
+           ImGui::InputVector3("Position",  m_position)
+        or ImGui::InputVector3("Direction", m_direction)
+        or ImGui::InputVector3("Up",        m_up, "%.3f", ImGuiInputTextFlags_ReadOnly)
+        or ImGui::InputVector3("Right",     m_right, "%.3f", ImGuiInputTextFlags_ReadOnly);
+
+      if (edited)
+        recalculate();
+    } ImGui::EndChild();
+  }
 } // px
