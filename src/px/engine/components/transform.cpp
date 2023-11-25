@@ -1,4 +1,5 @@
 #include "transform.hpp"
+#include "px/engine/common/imgui/imgui.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 
 PX_COMPONENT_DEFINITION(px::Component, px::Transform)
@@ -60,4 +61,14 @@ void px::Transform::calculate()
   m_transform = glm::translate(m_transform, m_position);
 
   m_transform = glm::rotate(m_transform, 1.0f, m_rotation);
+}
+
+void px::Transform::guiEditor() {
+  ImGui::BeginGroup(); {
+    bool changed =
+        ImGui::InputVector3("Position", m_position)
+        or ImGui::InputVector3("Rotation", m_rotation);
+
+    m_isCached = m_isCached and not changed;
+  } ImGui::EndGroup();
 }

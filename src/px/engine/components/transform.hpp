@@ -24,6 +24,8 @@ namespace px
 
     const glm::mat4 &getTransformMatrix();
 
+    void guiEditor() override;
+
   private:
     Matrix4x4 m_transform;
     bool m_isCached;
