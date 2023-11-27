@@ -17,6 +17,7 @@ namespace px
 
   class GameObject
   {
+    friend class Component;
     friend class World;
     using GameObjectIter = std::list<GameObjectPtr>::iterator;
 
@@ -66,9 +67,9 @@ namespace px
     std::size_t removeComponents();
 
   private:
+    static thread_local GameObject *currentGameObject;
     px::Component::List m_components;
 
-  private:
     std::string m_name;
 
     World *m_world;
@@ -77,22 +78,19 @@ namespace px
 
   template<ComponentType T, typename... TArgs>
   T *GameObject::addComponent(TArgs &&... args) {
-    // Allocate
-    std::allocator<T> allocator;
-    auto component = allocator.allocate(1);
-
     // Set the pointer to this game object (this)
-    component->m_gameObject = this;
+    currentGameObject = this;
 
-    // Call constructor
-    std::construct_at(component, std::forward<TArgs>(args)...);
+    // Create component
+    auto component = std::make_unique<T>(std::forward<TArgs>(args)...);
+    auto ptr = component.get();
 
     // Push a shared ptr to vector and assign the iterator
-    m_components.push_back(std::unique_ptr<T>(component));
+    m_components.push_back(std::move(component));
     auto it = --m_components.end();
-    component->m_handle = it;
+    ptr->m_handle = it;
 
-    return component;
+    return ptr;
   }
 
   template<ComponentType T>

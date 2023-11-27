@@ -27,10 +27,10 @@ namespace px {
   class GameObject;
 
   class Component {
-  public:
     friend class GameObject;
+  public:
 
-    Component() = default;
+    Component();
 
     virtual ~Component() = default;
 
@@ -47,7 +47,7 @@ namespace px {
     using Handle = List::iterator;
 
     Handle m_handle;
-    GameObject *m_gameObject; ///< must never be initialised
+    GameObject *m_gameObject;
   };
 
   template <class T>

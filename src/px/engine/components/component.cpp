@@ -8,6 +8,10 @@
 
 const std::size_t px::Component::componentTypeId = std::hash<std::string>()("Component");
 
+px::Component::Component() {
+  m_gameObject = px::GameObject::currentGameObject;
+}
+
 bool px::Component::checkComponentType(std::size_t type) const {
   return componentTypeId == type;
 }

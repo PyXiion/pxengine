@@ -1,6 +1,8 @@
 #include "game_object.hpp"
 #include "world.hpp"
 
+thread_local px::GameObject *px::GameObject::currentGameObject;
+
 px::GameObject::GameObject()
   : m_world(px::World::current_world) {
 
