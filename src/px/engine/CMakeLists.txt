@@ -4,6 +4,9 @@ set(PX_ENGINE_SHADER_SOURCES
     shaders/fs_cubes.sc
     shaders/vs_cubes.sc
 
+    shaders/fs_mesh.sc
+    shaders/vs_mesh.sc
+
     common/imgui/fs_imgui_image.sc
     common/imgui/vs_imgui_image.sc
 
