@@ -7,6 +7,8 @@
 #include <imgui/imgui.h>
 
 #include "common/frame_limiter.hpp"
+#include "px/engine/events/common/mouse_event.hpp"
+#include "px/engine/events/common/key_event.hpp"
 #include <csignal>
 
 void death_signal(int signum) {
@@ -72,7 +74,9 @@ void px::Engine::reloadSettings() {
 
 void px::Engine::init()
 {
-  EASY_BLOCK("px::Engine::init", profiler::colors::Orange);
+  EASY_BLOCK("px::Engine::init", profiler::colors::Orange)
+
+  registerEventTypes();
 
   m_resourceManager = std::make_unique<ResourceManager>(*this, "./data");
   m_window = std::make_unique<Window>("PXE", 1280, 720);
@@ -96,6 +100,14 @@ void px::Engine::init()
   // Инициализация всего остального
   EASY_BLOCK("Init event", profiler::colors::LightBlue);
   onInit(*this);
+}
+
+void px::Engine::registerEventTypes() {
+  m_eventManager.registerEventClass<MouseEvent>();
+
+  m_eventManager.registerEventClass<KeyEvent>();
+  m_eventManager.registerEventClass<KeyReleasedEvent>();
+  m_eventManager.registerEventClass<KeyPressedEvent>();
 }
 
 void px::Engine::loop()
@@ -160,7 +172,6 @@ void px::Engine::tickThread()
     m_tickDeltaTime = tickLimiter.sleep();
   }
 }
-
 
 void px::Engine::tickLoop()
 {

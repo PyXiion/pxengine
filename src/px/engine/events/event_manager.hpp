@@ -28,6 +28,8 @@ namespace px
      */
     EventManager() = default;
     ~EventManager() = default;
+    template <EventBasedType T>
+    void registerEventClass();
 
     /**
      * @brief Регистрирует новый тип события и возвращает его внутренний числовой ID.
@@ -88,6 +90,8 @@ namespace px
      */
     bool process();
 
+    std::vector<std::pair<std::string, EventType>> getEventIds() const;
+
   private:
     EventQueue m_queue;
     DynamicEnum m_enum;
@@ -97,4 +101,15 @@ namespace px
   };
 
   typedef EventManager::Handle EventListenerHandle;
+}
+
+template<px::EventBasedType T>
+void px::EventManager::registerEventClass() {
+  static_assert(requires {
+    { T::eventId } -> std::convertible_to<std::string_view>;
+    { T::fabric } -> std::convertible_to<px::EventFabric<T>>;
+  }, "Невозможно зарегистрировать этот тип автоматически. Создайте статическое поле eventId типа std::string_view, а также воспользуйтесь макросом PX_EVENT_DECLARATION из event.hpp");
+
+  EventType type = getOrRegisterEventType(std::string{T::eventId.data(), T::eventId.size()});
+  T::fabric.setEventType(type);
 }

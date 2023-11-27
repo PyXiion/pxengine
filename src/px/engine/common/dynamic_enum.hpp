@@ -1,5 +1,6 @@
 #pragma once
 #include <unordered_map>
+#include <vector>
 #include <string>
 
 namespace px
@@ -49,6 +50,8 @@ namespace px
 
     bool contains(const std::string &key) const;
     bool contains(EnumValue val) const;
+
+    std::vector<std::pair<std::string, EnumValue>> getPairs() const;
 
   private:
     std::unordered_map<std::string, EnumValue> m_values;

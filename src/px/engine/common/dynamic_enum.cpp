@@ -58,3 +58,13 @@ bool px::DynamicEnum::contains(EnumValue val) const
 {
   return m_keys.contains(val);
 }
+
+std::vector<std::pair<std::string, px::DynamicEnum::EnumValue>> px::DynamicEnum::getPairs() const {
+  std::vector<std::pair<std::string, EnumValue>> pairs;
+
+  for (auto [k, v] : m_values) {
+    pairs.emplace_back(k, v);
+  }
+
+  return pairs;
+}

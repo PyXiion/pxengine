@@ -1,4 +1,6 @@
-#pragma once
+#ifndef PX_EVENT_FABRIC_HPP
+#define PX_EVENT_FABRIC_HPP
+
 #include "event.hpp"
 
 namespace px
@@ -14,8 +16,10 @@ namespace px
     inline static const EventType kUndefinedEventType = INT_MIN;
 
   public:
-    explicit EventFabric(EventType eventType = kUndefinedEventType)
-      : m_eventType(eventType) {};
+    EventFabric()
+      : m_eventType(kUndefinedEventType) {}
+    explicit EventFabric(EventType eventType)
+      : m_eventType(eventType) {}
 
     /**
      * @brief Установить внутренний числовой ID события для его последующего создания.
@@ -52,3 +56,5 @@ inline px::EventPtr px::EventFabric<TEvent>::make(TArgs ...args)
 
   return std::move(eventPtr);
 }
+
+#endif // PX_EVENT_FABRIC_HPP

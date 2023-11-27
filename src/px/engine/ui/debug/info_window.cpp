@@ -151,6 +151,33 @@ void px::DebugInfoWindow::onGuiDraw()
     }
     #pragma endregion
 
+    #pragma region Event IDs
+    if (ImGui::CollapsingHeader(m_localization->getc("ui.debug-window.events.title"))) {
+      EventManager &eventManager = m_engine.getEventManager();
+      auto pairs = eventManager.getEventIds();
+
+      ImGuiTableFlags flags = ImGuiTableFlags_RowBg;
+      if (ImGui::BeginTable("##eventstable", 2, flags)) {
+        ImGui::TableSetupColumn(m_localization->getc("ui.debug-window.events.string-id"));
+        ImGui::TableSetupColumn(m_localization->getc("ui.debug-window.events.num-id"));
+        ImGui::TableHeadersRow();
+
+        std::for_each(pairs.rbegin(), pairs.rend(), [](auto pair) {
+          auto [k, v] = pair;
+          ImGui::TableNextRow();
+
+          ImGui::TableSetColumnIndex(0);
+          ImGui::Text("%s", k.c_str());
+
+          ImGui::TableSetColumnIndex(1);
+          ImGui::Text("%d", v);
+        });
+
+        ImGui::EndTable();
+      }
+    }
+    #pragma endregion
+
     #pragma region Open things
     if (ImGui::CollapsingHeader(m_localization->getc("ui.debug-window.open.title"))) {
       if (ImGui::Button(m_localization->getc("ui.debug-window.open.settings"))) {
@@ -158,6 +185,8 @@ void px::DebugInfoWindow::onGuiDraw()
       }
     }
     #pragma endregion
+
+    ImGui::Separator();
   }
   ImGui::End();
 }

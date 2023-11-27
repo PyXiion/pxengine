@@ -52,3 +52,8 @@ bool px::EventManager::process()
   std::lock_guard lk(m_queueMutex);
   return m_queue.process();
 }
+
+std::vector<std::pair<std::string, px::EventType>> px::EventManager::getEventIds() const {
+  std::lock_guard lk(m_enumMutex);
+  return m_enum.getPairs();
+}

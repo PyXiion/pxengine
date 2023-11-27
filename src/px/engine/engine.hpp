@@ -121,6 +121,8 @@ namespace px
     std::atomic<bool> m_tickThreadShouldStop;
 
     void init();
+    void registerEventTypes();
+
     void loop();
     void draw();
 
