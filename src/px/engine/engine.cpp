@@ -40,6 +40,9 @@ px::Engine::Engine()
 
 px::Engine::~Engine()
 {
+  // Destruct the world and its objects before other things
+  m_world.reset();
+
   profiler::dumpBlocksToFile("./profile");
 }
 
