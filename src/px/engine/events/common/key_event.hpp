@@ -11,34 +11,20 @@
 #include "../event_fabric.hpp"
 
 namespace px {
-  // core.event.key
-  struct KeyEvent final : public Event {
-    PX_EVENT_DECLARATION(KeyEvent, "core.event.key")
-
-  public:
+  struct KeyEvent final : public BaseEvent<KeyEvent, "core.event.key"> {
     ~KeyEvent() override = default;
 
     KeyCode code{};
     bool released{};
   };
 
-  // core.event.key.up
-  struct KeyReleasedEvent final : public Event {
-    PX_EVENT_DECLARATION(KeyReleasedEvent, "core.event.key.up")
-
-  public:
+  struct KeyReleasedEvent final : public BaseEvent<KeyReleasedEvent, "core.event.key.up"> {
     ~KeyReleasedEvent() override = default;
-
     KeyCode code{};
   };
 
-  // core.event.key.down
-  struct KeyPressedEvent final : public Event {
+  struct KeyPressedEvent final : public BaseEvent<KeyPressedEvent, "core.event.key.down"> {
     ~KeyPressedEvent() override = default;
-    PX_EVENT_DECLARATION(KeyPressedEvent, "core.event.key.down")
-
-  public:
-
     KeyCode code{};
   };
 } // px

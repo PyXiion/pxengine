@@ -2,13 +2,6 @@
 #define PX_EVENT_HPP
 #include <memory>
 
-#define PX_EVENT_DECLARATION(classname, eventStrId)          \
-private:                                                  \
-  friend class ::px::EventManager;                        \
-  inline static ::px::EventFabric<classname> fabric;      \
-public:                                                   \
-  inline static constexpr std::string_view eventId = eventStrId;
-
 namespace px
 {
   typedef int EventType;
@@ -35,6 +28,19 @@ namespace px
 inline px::EventType px::Event::getType() const
 {
   return m_type;
+}
+
+#include <px/templates.hpp>
+#include "event_fabric.hpp"
+
+namespace px {
+  template<typename T, string_literal ID>
+  class BaseEvent : public Event {
+  public:
+    inline static EventFabric<T> fabric;
+
+    constexpr inline static std::string_view eventId = static_cast<std::string_view>(ID.value);
+  };
 }
 
 #endif // PX_EVENT_HPP
