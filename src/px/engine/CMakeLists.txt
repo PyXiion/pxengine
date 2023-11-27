@@ -52,7 +52,7 @@ set(PX_ENGINE_SOURCES
     utils/bgfx_utils.cpp utils/bgfx_utils.hpp
 
     world/game_object.cpp world/game_object.hpp
-    world/transform.cpp world/transform.hpp
+    components/transform.cpp components/transform.hpp
     world/world.cpp world/world.hpp
     resources/localization.cpp
     resources/localization.hpp
@@ -72,6 +72,16 @@ set(PX_ENGINE_SOURCES
     ui/settings_window.hpp
     graphics/model.cpp
     graphics/model.hpp
+    components/graphics/model_renderer.cpp
+    components/graphics/model_renderer.hpp
+    graphics/render_states.cpp
+    graphics/render_states.hpp
+    components/transform.cpp
+    components/transform.hpp
+    components/common/camera.cpp
+    components/common/camera.hpp
+    events/common/mouse_event.hpp
+    events/common/key_event.hpp
 )
 
 foreach(SHADER ${PX_ENGINE_SHADER_SOURCES})
