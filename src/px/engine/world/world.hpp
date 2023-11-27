@@ -67,29 +67,22 @@ std::shared_ptr<T> px::World::createGameObject(TArgs... args)
 {
   EASY_BLOCK(__PRETTY_FUNCTION__);
 
-  // Allocate
-  std::allocator<T> allocator;
-  auto gameObject = allocator.allocate(1);
-
   // Set the pointer to this world
   current_world = this;
 
-  // Call constructor
-  std::construct_at(gameObject, std::forward<TArgs>(args)...);
-
-  // Create a shared pointer.
-  auto ptr = std::shared_ptr<T>(gameObject);
+  // Create object
+  auto ptr = std::make_shared<T>(std::forward<TArgs>(args)...);
 
   // Append it to inner list
   {
     std::lock_guard lk(m_gameObjectsMutex);
     m_gameObjects.push_front(ptr);
-    gameObject->m_self = m_gameObjects.begin();
+    ptr->m_self = m_gameObjects.begin();
   }
 
   // Name it
   constexpr auto name = priv::getObjectDefaultName<T>();
-  gameObject->setName(fmt::format(name, ++unnamedUid));
+  ptr->setName(fmt::format(name, ++unnamedUid));
 
   return ptr;
 }
