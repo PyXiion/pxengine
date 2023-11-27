@@ -3,7 +3,9 @@ ui:
     title: "Debug Window"
     version: "Engine version: {}"
     build: "Build: {}"
-    mem-used: "Used {} MB of memory"
+    common:
+      title: "General"
+      mem-used: "Used {} MB of memory"
     graph:
       fps: "FPS: {:.1f}"
       tps: "TPS: {:.1f}"
@@ -15,10 +17,14 @@ ui:
         name: "Name: {}"
         address: "Address: {}"
         destroy: "Destroy"
+    controls: "Controls"
+    events:
+      title: "Table of registered events"
+      string-id: "String ID"
+      num-id: "Numeric ID"
     open:
       title: "Open things"
       settings: "Open settings"
-    controls: "Controls"
   settings:
     title: "Settings"
     graphics:
