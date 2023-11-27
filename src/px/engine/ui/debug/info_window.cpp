@@ -56,9 +56,9 @@ void px::DebugInfoWindow::onGuiDraw()
     ImGui::Separator();
 
     #pragma region Common
-    if (ImGui::CollapsingHeader("Common")) {
+    if (ImGui::CollapsingHeader(m_localization->getc("ui.debug-window.common.title"))) {
       // Sys information
-      ImGui::TextFmt(m_localization->get("ui.debug-window.mem-used"), px::getUsedMemory() / 1024);
+      ImGui::TextFmt(m_localization->get("ui.debug-window.common.mem-used"), px::getUsedMemory() / 1024);
 
       ImGui::Separator();
 
