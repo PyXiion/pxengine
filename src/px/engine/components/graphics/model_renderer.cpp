@@ -9,8 +9,6 @@
 #include "../../engine.hpp"
 
 namespace px {
-  PX_COMPONENT_DEFINITION(Component, ModelRenderer)
-
   ModelRenderer::ModelRenderer() {
     subscribeEvents();
 

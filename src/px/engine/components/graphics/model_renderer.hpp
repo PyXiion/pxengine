@@ -14,9 +14,7 @@
 
 namespace px {
 
-  class ModelRenderer : public Component, protected EventListener {
-    PX_COMPONENT_DECLARATION
-
+  class ModelRenderer : public BaseComponent<ModelRenderer, "core.model_renderer">, protected EventListener {
   public:
     ModelRenderer();
 

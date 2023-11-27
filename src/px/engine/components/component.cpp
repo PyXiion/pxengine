@@ -6,13 +6,13 @@
 #include "component.hpp"
 #include "../world/game_object.hpp"
 
-const std::size_t px::Component::componentTypeId = std::hash<std::string>()("Component");
+const std::uint32_t px::Component::componentTypeId = std::hash<std::string>()("Component");
 
 px::Component::Component() {
   m_gameObject = px::GameObject::currentGameObject;
 }
 
-bool px::Component::checkComponentType(std::size_t type) const {
+bool px::Component::checkComponentType(std::uint32_t type) const {
   return componentTypeId == type;
 }
 

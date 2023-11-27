@@ -11,17 +11,8 @@
 #include <list>
 #include <memory>
 #include <type_traits>
-
-#define PX_COMPONENT_DECLARATION                                \
-public:                                                         \
-  static const std::size_t componentTypeId;                 \
-  [[nodiscard]] virtual bool checkComponentType(std::size_t type) const override;
-
-#define PX_COMPONENT_DEFINITION(parent, child)                                \
-const std::size_t child::componentTypeId = std::hash<std::string>()(#child);  \
-bool child::checkComponentType(std::size_t type) const {                      \
-  return (componentTypeId == type) || parent::checkComponentType(type);       \
-}
+#include <px/templates.hpp>
+#include <px/utils/constexpr_hash.hpp>
 
 namespace px {
   class GameObject;
@@ -36,8 +27,8 @@ namespace px {
 
     virtual void guiEditor() {};
 
-    [[nodiscard]] virtual bool checkComponentType(std::size_t type) const;
-    static const std::size_t componentTypeId;
+    [[nodiscard]] virtual bool checkComponentType(std::uint32_t type) const;
+    static const std::uint32_t componentTypeId;
 
   protected:
     GameObject *getGameObject();
@@ -51,7 +42,19 @@ namespace px {
   };
 
   template <class T>
-  concept ComponentType = std::is_base_of_v<Component, T>;
+  concept ComponentType = std::is_base_of_v<Component, T> or std::is_same_v<Component, T>;
+
+  template<typename T, px::string_literal ID, ComponentType TParent = Component>
+  class BaseComponent : public TParent {
+  public:
+    virtual ~BaseComponent() = default;
+    inline static constexpr std::uint32_t componentTypeId = px::crc32(ID.value);
+    inline static constexpr std::string_view componentId = ID.value;
+
+    [[nodiscard]] inline bool checkComponentType(std::uint32_t type) const override {
+      return (componentTypeId == type) or TParent::checkComponentType(type);
+    }
+  };
 
 } // px
 
