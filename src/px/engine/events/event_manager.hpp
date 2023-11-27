@@ -108,7 +108,7 @@ void px::EventManager::registerEventClass() {
   static_assert(requires {
     { T::eventId } -> std::convertible_to<std::string_view>;
     { T::fabric } -> std::convertible_to<px::EventFabric<T>>;
-  }, "Невозможно зарегистрировать этот тип автоматически. Создайте статическое поле eventId типа std::string_view, а также воспользуйтесь макросом PX_EVENT_DECLARATION из event.hpp");
+  }, "Невозможно зарегистрировать этот тип автоматически. Он не имеет ID и встроенной фабрики. Наследуйте его от класса px::BaseEvent<тип, ID>");
 
   EventType type = getOrRegisterEventType(std::string{T::eventId.data(), T::eventId.size()});
   T::fabric.setEventType(type);
