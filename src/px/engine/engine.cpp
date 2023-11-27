@@ -66,10 +66,6 @@ void px::Engine::run()
   onExit(*this);
 }
 
-void px::Engine::loadModule(const std::string &path)
-{
-}
-
 void px::Engine::reloadSettings() {
   // graphics
   m_fpsLimiter.setMaxFps(m_settings.graphicsSettings.maxFps);

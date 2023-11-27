@@ -24,8 +24,6 @@
 
 namespace px
 {
-  const int ticksPerSecond = 30;
-
   class Engine : private EventListener
   {
   public:
@@ -38,9 +36,6 @@ namespace px
 
     /// @brief Запускает игровой движок.
     void run();
-    
-    /// @brief Не реализовано
-    void loadModule(const std::string &path);
 
     void reloadSettings();
 
@@ -110,9 +105,6 @@ namespace px
     int m_maxFps;
     int m_maxTps;
     FrameLimiter m_fpsLimiter{};
-
-    const bgfx::ViewId kClearView = 0;
-    bool m_showBgfxStats = false;
 
     float m_speed;
     float m_deltaTime;
