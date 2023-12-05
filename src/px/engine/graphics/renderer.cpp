@@ -44,12 +44,16 @@ namespace px {
     );
 
     // Window resize callback
-    listen(window.onFramebufferResize, [this](int width, int height) {
+    auto onFramebufferResize = [this](int width, int height) {
       bgfx::reset(width, height, m_reset);
       bgfx::setViewRect(0, 0, 0, width, height);
 
       m_framebufferSize = {width, height};
-    });
+    };
+    listen(window.onFramebufferResize, onFramebufferResize);
+
+    // And call it once
+    onFramebufferResize(width, height);
   }
 
   Renderer::~Renderer() {
