@@ -16,6 +16,10 @@ namespace px {
     std::hash<T> hasher;
     hash ^= hasher(v) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
   }
+  template<>
+  constexpr inline void combine_hash<std::size_t>(std::size_t &hash, const size_t &v) {
+    hash ^= v + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+  }
 
   struct pair_hash {
     template <class T1, class T2>
