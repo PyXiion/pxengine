@@ -12,11 +12,14 @@
 #include <px/templates.hpp>
 
 namespace px {
+  class EventManager;
 
   /// A class that allows you to simplify the management of callback handles.
   /// Inherit your class from it, or use it as a class member, or as just a variable.
   /// Destroys all handles in the destructor.
   class EventListener {
+    friend class EventManager;
+
   public:
     EventListener() = default;
     ~EventListener() {
@@ -51,10 +54,7 @@ namespace px {
       using TCallbackFunction = typename TCallback::Callback;
 
       // checking types
-      typedef px::function_traits<TCallbackFunction> ExpectedFunc;
-      using ExpectedReturn = ExpectedFunc::return_type;
-      using ExpectedArgs = ExpectedFunc::arguments;
-      using FunctionTraits = px::overloaded_function_traits<T, ExpectedReturn, ExpectedArgs>;
+      using FunctionTraits = px::function_traits<T>;
 
       // check if is a lambda or static function
       if constexpr (std::is_convertible_v<T, TCallbackFunction &&>) {
@@ -64,20 +64,26 @@ namespace px {
         static_assert(std::is_base_of_v<EventListener, Object>, "The class of the method does not inherit from EventListener.");
 
         handle = callback.append([this, fun](auto &&...args) {
-          auto self = reinterpret_cast<Object *>(this);
+          auto self = reinterpret_cast<Object *>(this); // everything is fine (maybe) =D (i'm not sure)
           (self->*fun)(std::forward<decltype(args)>(args)...);
         });
       }
 
       // Plan the destruction
-      m_destructors.push_back([&callback, handle]{
+      appendDestructor([&callback, handle]{
         callback.remove(handle);
       });
     }
 
   private:
     std::vector<std::function<void()>> m_destructors;
+
+    inline void appendDestructor(std::function<void()> &&f);
   };
+
+  void EventListener::appendDestructor(std::function<void()> &&f) {
+    m_destructors.push_back(f);
+  }
 
 } // px
 

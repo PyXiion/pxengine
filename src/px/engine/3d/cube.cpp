@@ -4,6 +4,7 @@
 
 #include <mutex>
 #include <easy/profiler.h>
+#include <glm/gtc/type_ptr.hpp>
 #include "cube.hpp"
 #include "../engine.hpp"
 
@@ -81,6 +82,9 @@ namespace px {
                      | BGFX_STATE_MSAA
     ;
 
+    static auto model = glm::mat4(1);
+
+    bgfx::setTransform(glm::value_ptr(model));
     bgfx::setVertexBuffer(0, m_vbh);
     bgfx::setIndexBuffer(m_ibh);
     bgfx::setState(state);

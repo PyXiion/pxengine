@@ -11,11 +11,6 @@
 #include "px/engine/events/common/key_event.hpp"
 #include <csignal>
 
-void death_signal(int signum) {
-  profiler::dumpBlocksToFile("./profile");
-  signal(signum, SIG_DFL);
-  exit(3);
-}
 
 px::Engine::Engine()
   : m_maxFps(60)
@@ -26,17 +21,13 @@ px::Engine::Engine()
   , m_tickThreadShouldStop(false)
   , m_debugInfoWindow(*this)
   , m_settingsWindow(*this)
-  , m_showBgfxStats(false)
 {
   instance = this;
 
   printf("Рабочая директория %s\n", std::filesystem::current_path().c_str());
 
-  EASY_PROFILER_ENABLE;
-  signal(SIGSEGV, &death_signal);
-  signal(SIGTRAP, &death_signal);
+  EASY_PROFILER_ENABLE
 }
-
 
 px::Engine::~Engine()
 {
@@ -144,7 +135,7 @@ void px::Engine::loop()
   if (m_camera) {
     Vector3 offset{};
     offset += m_camera->getForward() * m_controls->getAxis(ControlAxis::Vertical);
-    offset += m_camera->getRight() * m_controls->getAxis(ControlAxis::Horizontal);
+    offset += -m_camera->getRight() * m_controls->getAxis(ControlAxis::Horizontal);
     m_camera->move(offset * m_deltaTime);
   }
 
@@ -155,19 +146,15 @@ void px::Engine::draw()
 {
   if (!m_renderer)
     return;
-
   EASY_BLOCK("px::Engine::draw")
+
+  drawImGui();
+
+  EASY_BLOCK("Graphics");
+
   if (m_camera) {
     m_camera->apply();
   }
-
-  EASY_BLOCK("ImGui")
-  m_imgui->BeginFrame(m_renderer->getViewId());
-  onGuiDraw();
-  m_imgui->EndFrame();
-  EASY_END_BLOCK
-
-  EASY_BLOCK("Graphics");
   m_renderer->beginFrame();
   onDraw();
   m_renderer->renderFrame();
@@ -176,6 +163,11 @@ void px::Engine::draw()
 void px::Engine::drawImGui()
 {
   EASY_BLOCK("px::Engine::drawImGui")
+  m_imgui->BeginFrame(255);
+
+  onGuiDraw();
+
+  m_imgui->EndFrame();
 }
 
 void px::Engine::tickThread()
@@ -261,4 +253,8 @@ px::Engine &px::Engine::getInstance() {
     throw std::runtime_error("Engine instance is null.");
   }
   return *instance;
+}
+
+px::CameraPtr px::Engine::getCamera() const {
+  return m_camera;
 }

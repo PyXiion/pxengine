@@ -8,7 +8,7 @@
 #include <easy/profiler.h>
 #include "renderer.hpp"
 
-static bgfx::ViewId viewsCount{};
+static bgfx::ViewId viewsCount = 0;
 
 namespace px {
   Renderer::Renderer(Window &window, bgfx::RendererType::Enum type)

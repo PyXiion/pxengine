@@ -51,10 +51,10 @@ inline px::EventPtr px::EventFabric<TEvent>::make(TArgs ...args)
 {
   if (m_eventType == kUndefinedEventType)
     throw std::runtime_error("Внутренний числовой ID события не назначен к фабрике событий. Может вы забыли EventFabric::setEventType(eventType)?");
-  EventPtr eventPtr = std::make_shared<TEvent>(args...);
-  eventPtr->m_type = m_eventType;
+  auto event = std::make_unique<TEvent>(std::forward<TArgs>(args)...);
+  event->m_type = m_eventType;
 
-  return std::move(eventPtr);
+  return event;
 }
 
 #endif // PX_EVENT_FABRIC_HPP

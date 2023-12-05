@@ -19,10 +19,13 @@ namespace px
     EventType m_type{};
   };
 
-  typedef std::shared_ptr<Event> EventPtr;
+  using EventPtr = std::unique_ptr<Event>;
 
   template<typename T>
   concept EventBasedType = std::is_base_of_v<Event, T>;
+
+  template<EventBasedType T>
+  using CustomEventPtr = std::unique_ptr<T>;
 }
 
 inline px::EventType px::Event::getType() const

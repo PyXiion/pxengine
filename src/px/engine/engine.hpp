@@ -54,6 +54,7 @@ namespace px
     px::World &createNewWorld();
 
     void setCamera(CameraPtr camera);
+    CameraPtr getCamera() const;
 
     /// @brief Обратный вызов, который вызывается при во время инициализации игрового движка.
     eventpp::CallbackList<void (Engine &)> onInit;
@@ -113,7 +114,9 @@ namespace px
     std::atomic<bool> m_tickThreadShouldStop;
 
     void init();
+
     void registerEventTypes();
+    void proxyEvents();
 
     void loop();
     void draw();
