@@ -96,6 +96,8 @@ void px::Engine::init()
 
   m_tickLoopThread = std::make_unique<std::thread>([this] { tickThread(); });
 
+  proxyEvents();
+
   // Инициализация всего остального
   EASY_BLOCK("Init event", profiler::colors::LightBlue);
   onInit(*this);
@@ -107,6 +109,22 @@ void px::Engine::registerEventTypes() {
   m_eventManager.registerEventClass<KeyEvent>();
   m_eventManager.registerEventClass<KeyReleasedEvent>();
   m_eventManager.registerEventClass<KeyPressedEvent>();
+}
+
+void px::Engine::proxyEvents() {
+  if (m_window) {
+    m_window->onMouseMoved.append([this] (float x, float y) {
+      m_eventManager.emplaceEvent<MouseEvent>(x, y);
+    });
+    m_window->onKey.append([this] (KeyCode key, bool pressed, KeyModifiers::Enum mods) {
+      m_eventManager.emplaceEvent<KeyEvent>(key, pressed);
+
+      if (pressed)
+        m_eventManager.emplaceEvent<KeyPressedEvent>(key);
+      else
+        m_eventManager.emplaceEvent<KeyReleasedEvent>(key);
+    });
+  }
 }
 
 void px::Engine::loop()
