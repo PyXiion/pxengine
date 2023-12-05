@@ -83,7 +83,14 @@ namespace px {
   // https://stackoverflow.com/questions/9831501/how-can-i-have-multiple-parameter-packs-in-a-variadic-template
   // https://stackoverflow.com/questions/22291737/why-cant-decltype-work-with-overloaded-functions
 
-
+  // https://www.reddit.com/r/cpp_questions/comments/pumi9r/does_c20_not_support_string_literals_as_template/
+  template<auto N>
+  struct string_literal {
+    constexpr string_literal(const char (&str)[N]) {
+      std::copy_n(str, N, value);
+    }
+    char value[N]{};
+  };
 }
 
 #endif //ENGINE_TEMPLATES_HPP
