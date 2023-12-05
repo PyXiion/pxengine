@@ -28,6 +28,7 @@ namespace px {
     virtual void guiEditor() {};
 
     [[nodiscard]] virtual bool checkComponentType(std::uint32_t type) const;
+    [[nodiscard]] virtual const std::string_view &getComponentId() const;
     static const std::uint32_t componentTypeId;
 
   protected:
@@ -53,6 +54,9 @@ namespace px {
 
     [[nodiscard]] inline bool checkComponentType(std::uint32_t type) const override {
       return (componentTypeId == type) or TParent::checkComponentType(type);
+    }
+    [[nodiscard]] inline const std::string_view &getComponentId() const override {
+      return componentId;
     }
   };
 

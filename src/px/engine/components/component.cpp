@@ -19,3 +19,8 @@ bool px::Component::checkComponentType(std::uint32_t type) const {
 px::GameObject *px::Component::getGameObject() {
   return m_gameObject;
 }
+
+const std::string_view &px::Component::getComponentId() const {
+  static const std::string_view id = "component";
+  return id;
+}
