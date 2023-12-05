@@ -3,6 +3,7 @@
 #include "transform.hpp"
 #include "px/engine/common/imgui/imgui.hpp"
 #include <glm/gtc/matrix_transform.hpp>
+#include "../engine.hpp"
 
 px::Transform::Transform(px::Vector3 position, px::Vector3 eulerAngles)
   : m_transform()
@@ -64,11 +65,15 @@ void px::Transform::calculate()
 }
 
 void px::Transform::guiEditor() {
-  ImGui::BeginGroup(); {
-    bool changed =
-        ImGui::InputVector3("Position", m_position)
-        or ImGui::InputVector3("Rotation", m_rotation);
+  bool changed = false;
+  changed |= ImGui::InputVector3("Position", m_position);
+  changed |= ImGui::InputVector3("Rotation", m_rotation);
 
-    m_isCached = m_isCached and not changed;
-  } ImGui::EndGroup();
+  if (ImGui::SmallButton("Teleport to the camera")) {
+    auto camera = getGameObject()->getWorld().getEngine().getCamera();
+    setPosition(camera->getPosition());
+    changed = true;
+  }
+
+  m_isCached = m_isCached and not changed;
 }
