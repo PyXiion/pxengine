@@ -12,7 +12,8 @@
 
 namespace px {
   Camera::Camera()
-    : m_renderer(getWorld().getEngine().getRenderer()) {
+    : m_renderer(getWorld().getEngine().getRenderer())
+    , m_yaw(0), m_pitch(0) {
 
   }
 
@@ -64,14 +65,16 @@ namespace px {
       recalculate();
 
     bgfx::setViewTransform(m_renderer.getViewId(), glm::value_ptr(m_view), glm::value_ptr(m_proj));
-
-    auto size = m_renderer.getFramebufferSize();
-    bgfx::setViewRect(m_renderer.getViewId(), 0, 0, uint16_t(size.x), uint16_t(size.y) );
   }
 
   void Camera::recalculate() {
     Vector3 up = Vector3Up;
-    m_right = glm::normalize(glm::cross(up, m_direction));
+
+    m_direction.x = glm::cos(m_pitch) * glm::cos(m_yaw);
+    m_direction.y = glm::sin(m_pitch);
+    m_direction.z = glm::cos(m_pitch) * glm::sin(-m_yaw);
+
+    m_right = glm::normalize(glm::cross(up, -m_direction));
     m_up = glm::cross(m_direction, m_right);
     m_view = glm::lookAt(m_position, m_position + m_direction, m_up);
     m_changed = false;
@@ -99,12 +102,23 @@ namespace px {
     ImGui::BeginGroup(); {
       bool edited =
            ImGui::InputVector3("Position",  m_position)
-        or ImGui::InputVector3("Direction", m_direction)
-        or ImGui::InputVector3("Up",        m_up, "%.3f", ImGuiInputTextFlags_ReadOnly)
-        or ImGui::InputVector3("Right",     m_right, "%.3f", ImGuiInputTextFlags_ReadOnly);
+        or ImGui::InputFloat2("Rotation",  &m_yaw,       "%.1f")
+        or ImGui::InputVector3("Direction", m_direction, "%.1f", ImGuiInputTextFlags_ReadOnly)
+        or ImGui::InputVector3("Up",        m_up,        "%.1f", ImGuiInputTextFlags_ReadOnly)
+        or ImGui::InputVector3("Right",     m_right,     "%.1f", ImGuiInputTextFlags_ReadOnly);
 
       if (edited)
         recalculate();
     } ImGui::EndGroup();
+  }
+
+  void Camera::setRotation(float yaw, float pitch) {
+    m_yaw = glm::radians(yaw);
+    m_pitch = glm::radians(pitch);
+  }
+
+  void Camera::updateRotation(float deltaYaw, float deltaPitch) {
+    m_yaw += glm::radians(deltaYaw);
+    m_pitch += glm::radians(deltaPitch);
   }
 } // px
