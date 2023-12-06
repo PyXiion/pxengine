@@ -285,7 +285,6 @@ namespace px {
         | ImGuiConfigFlags_NavEnableKeyboard
         ;
 
-    bgfx::RendererType::Enum type = bgfx::getRendererType();
     auto &rm = px::Engine::getInstance().getResourceManager();
     m_shader = rm.loadShader("core.shaders.vs_ocornut_imgui", "core.shaders.fs_ocornut_imgui");
 

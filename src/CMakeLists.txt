@@ -15,6 +15,7 @@ set(PX_LIB_SOURCES
     px/visit_overloaded.hpp
 
     px/threading/task_queue.hpp
+    px/utils/constexpr_hash.hpp
 )
 
 add_library(px ${PX_LIB_SOURCES})

@@ -78,8 +78,6 @@ set(PX_ENGINE_SOURCES
     graphics/render_states.hpp
     components/transform.cpp
     components/transform.hpp
-    components/common/camera.cpp
-    components/common/camera.hpp
     events/common/mouse_event.hpp
     events/common/key_event.hpp
 )

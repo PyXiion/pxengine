@@ -78,7 +78,7 @@ namespace px {
 namespace ImGui {
 #define PX_IMGUI_OVERLOAD_FORMATTED(funcName) \
   template <class... T> \
-  inline void funcName ## Fmt(const std::string &formatStr, T &&...args) { \
+  inline static void funcName ## Fmt(const std::string &formatStr, T &&...args) { \
     ImGui::funcName("%s", fmt::format(fmt::runtime(formatStr), args...).c_str()); \
   }
 

@@ -7,6 +7,7 @@
 #ifndef ENGINE_TEMPLATES_HPP
 #define ENGINE_TEMPLATES_HPP
 #include <type_traits>
+#include <functional>
 #include <experimental/type_traits>
 
 namespace px {

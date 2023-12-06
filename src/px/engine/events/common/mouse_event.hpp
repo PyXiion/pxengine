@@ -11,11 +11,15 @@
 
   namespace px {
     struct MouseEvent final : public BaseEvent<MouseEvent, "core.event.mouse"> {
+      inline MouseEvent(float x, float y)
+        : x(x), y(y) {}
       ~MouseEvent() override = default;
 
       float x{};
       float y{};
     };
+
+    typedef CustomEventPtr<MouseEvent> MouseEventPtr;
   } // px
 
 #endif //PX_ENGINE_MOUSE_EVENT_HPP
