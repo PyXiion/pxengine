@@ -53,8 +53,6 @@ void px::Window::create(const std::string &window_name, int width, int height)
     throw std::runtime_error("Не удалось создать окно :(");
   }
 
-  glfwSwapInterval(0);
-
   // callbacks
   // window resize
   glfwSetWindowSizeCallback(m_windowHandle, [](GLFWwindow *window, int width, int height) {
