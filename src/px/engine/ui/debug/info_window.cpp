@@ -129,7 +129,9 @@ void px::DebugInfoWindow::onGuiDraw()
           auto components = m_worldSelectedObject->getComponents<Component>();
           for (size_t i = 0; i < components.size(); i++) {
             ImGui::PushID(i);
-            components[i]->guiEditor();
+              std::string componentTitle {component->getComponentId()};
+              ImGui::SeparatorText(componentTitle.c_str());
+              components[i]->guiEditor();
             ImGui::PopID();
           }
         } ImGui::EndGroup();

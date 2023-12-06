@@ -1,3 +1,7 @@
+component-names.core:
+  model_renderer: "Рендер модели"
+  transform: "Положение"
+
 ui:
   debug-window:
     title: "Окно дебага"
