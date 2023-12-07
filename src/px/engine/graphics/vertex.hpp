@@ -9,6 +9,8 @@
 #include "../math/vector.hpp"
 
 namespace px {
+  typedef std::uint16_t IndexType;
+
   struct Vertex {
     Vector3 position;
     Vector3 normal;

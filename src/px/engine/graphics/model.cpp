@@ -49,7 +49,7 @@ namespace px {
 
   Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
     std::vector<Vertex> vertices;
-    std::vector<uint> indices;
+    std::vector<IndexType> indices;
     std::vector<TexturePtr> textures;
 
     bool hasTexCoords = mesh->mTextureCoords[0];
