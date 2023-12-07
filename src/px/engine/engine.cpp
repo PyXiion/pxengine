@@ -3,13 +3,9 @@
 #include <filesystem>
 
 #include <easy/profiler.h>
-#include <bgfx/bgfx.h>
-#include <imgui/imgui.h>
-
 #include "common/frame_limiter.hpp"
 #include "px/engine/events/common/mouse_event.hpp"
 #include "px/engine/events/common/key_event.hpp"
-#include <csignal>
 
 
 px::Engine::Engine()
