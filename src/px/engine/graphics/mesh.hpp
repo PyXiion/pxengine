@@ -15,13 +15,13 @@ namespace px {
 
   class Mesh {
   public:
-    Mesh(std::vector<Vertex> vertices, std::vector<uint> indices, std::vector<TexturePtr> textures);
+    Mesh(std::vector<Vertex> vertices, std::vector<IndexType> indices, std::vector<TexturePtr> textures);
 
     void apply(uint8_t stream) const;
 
   private:
     std::vector<Vertex> m_vertices;
-    std::vector<uint> m_indices;
+    std::vector<IndexType> m_indices;
     std::vector<TexturePtr> m_textures;
 
     static bgfx::VertexLayout layout;
