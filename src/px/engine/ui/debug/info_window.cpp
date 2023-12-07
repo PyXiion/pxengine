@@ -127,7 +127,8 @@ void px::DebugInfoWindow::onGuiDraw()
 
         ImGui::BeginGroup(); {
           auto components = m_worldSelectedObject->getComponents<Component>();
-          for (size_t i = 0; i < components.size(); i++) {
+          for (int i = 0; i < components.size(); i++) {
+            auto &component = components[i];
             ImGui::PushID(i);
               std::string componentTitle {component->getComponentId()};
               ImGui::SeparatorText(componentTitle.c_str());
