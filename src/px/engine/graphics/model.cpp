@@ -16,14 +16,13 @@ namespace px {
       throw std::runtime_error("TODO: an adequate exception");
     }
     processNodes(scene->mRootNode, scene);
-
-
   }
 
   void Model::draw(const RenderStates &renderStates) const {
     for (auto &mesh : m_meshes) {
-      mesh.apply(0); // TODO
-      bgfx::submit(renderStates.viewId, renderStates.shaderPtr->get());
+      mesh.apply(0); // TODO use stream parameter
+      bgfx::submit(renderStates.viewId,
+                   renderStates.shaderPtr->get());
     }
   }
 
@@ -54,25 +53,20 @@ namespace px {
 
     bool hasTexCoords = mesh->mTextureCoords[0];
 
-    printf("Загружаю меш с %d вертексами\n", mesh->mNumVertices);
+    printf("Загружаю меш с %d вертексами и %d полигонами\n", mesh->mNumVertices, mesh->mNumFaces);
 
     for (uint i = 0; i < mesh->mNumVertices; i++) {
       Vertex vertex{};
 
       auto v = &mesh->mVertices[i];
-      vertex.position.x = v->x;
-      vertex.position.y = v->y;
-      vertex.position.z = v->z;
+      vertex.position = {v->x, v->y, v->z};
 
       auto n = &mesh->mNormals[i];
-      vertex.normal.x = n->x;
-      vertex.normal.y = n->y;
-      vertex.normal.z = n->z;
+      vertex.normal = {n->x, n->y, n->z};
 
       if (hasTexCoords) {
         auto t = &mesh->mTextureCoords[0][i];
-        vertex.texCoords.x = t->x;
-        vertex.texCoords.y = t->y;
+        vertex.texCoords = {t->x, t->y};
       } else {
         vertex.texCoords = {0, 0};
       }
