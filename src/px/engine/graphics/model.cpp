@@ -20,9 +20,7 @@ namespace px {
 
   void Model::draw(const RenderStates &renderStates) const {
     for (auto &mesh : m_meshes) {
-      mesh.apply(0); // TODO use stream parameter
-      bgfx::submit(renderStates.viewId,
-                   renderStates.shaderPtr->get());
+      mesh.submit(renderStates);
     }
   }
 
@@ -110,5 +108,9 @@ namespace px {
     }
 
     return textures;
+  }
+
+  const std::vector<Mesh> &Model::getMeshes() {
+    return m_meshes;
   }
 } // pc

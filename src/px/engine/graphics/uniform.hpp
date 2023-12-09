@@ -14,10 +14,16 @@ namespace px {
 
   class Uniform {
   public:
+    Uniform();
     Uniform(const std::string &name, bgfx::UniformType::Enum type);
+
+    void create(const std::string &name, bgfx::UniformType::Enum type);
 
     template<typename T>
     Uniform &operator=(const T &value);
+
+    operator bgfx::UniformHandle() const;
+    explicit operator bool() const;
 
   private:
     BgfxUniqueUniformHandle m_handle;

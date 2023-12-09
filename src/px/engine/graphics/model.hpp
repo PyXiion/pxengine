@@ -23,6 +23,8 @@ namespace px {
 
     void draw(const RenderStates &renderStates) const;
 
+    const std::vector<Mesh> &getMeshes();
+
   private:
     std::vector<Mesh> m_meshes;
 

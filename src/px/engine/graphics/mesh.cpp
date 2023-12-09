@@ -28,9 +28,13 @@ namespace px {
 
     m_vb = createVertexBuffer();
     m_ib = createIndexBuffer();
+
+    if (not s_texture) {
+      s_texture.create("s_texColor", bgfx::UniformType::Sampler);
+    }
   }
 
-  void Mesh::apply(uint8_t stream) const {
+  void Mesh::submit(const RenderStates &renderStates) const {
     uint64_t state =
           BGFX_STATE_WRITE_RGB
         | BGFX_STATE_WRITE_A
@@ -40,9 +44,15 @@ namespace px {
         | BGFX_STATE_MSAA
     ;
 
+
+    bgfx::setTexture(0, s_texture, m_textures[0]->getHandle());
+
     bgfx::setState(state);
-    bgfx::setVertexBuffer(stream, m_vb);
+    bgfx::setVertexBuffer(0, m_vb);
     bgfx::setIndexBuffer(m_ib);
+
+    bgfx::submit(renderStates.viewId,
+                 renderStates.shaderPtr->get());
   }
 
   BgfxUniqueVertexBufferHandle Mesh::createVertexBuffer() {
@@ -61,6 +71,10 @@ namespace px {
 
     printf("Allocated an index buffer %zu bytes (%zu indices)\n", size, m_indices.size());
     return handle;
+  }
+
+  std::vector<TexturePtr> Mesh::getTextures() const {
+    return m_textures;
   }
 
 } // px

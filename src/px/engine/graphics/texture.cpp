@@ -20,7 +20,7 @@ namespace px {
         bgfx::createTexture2D(
             size.x, size.y,
             false, 1,
-            bgfx::TextureFormat::RGBA8I,
+            bgfx::TextureFormat::RGBA8,
             BGFX_SAMPLER_U_CLAMP
             | BGFX_SAMPLER_V_CLAMP
             | BGFX_SAMPLER_MIN_POINT
