@@ -29,6 +29,7 @@ namespace px {
     void lookAt(Vector3 pos);
     void lookAt(float x, float y, float z);
 
+    void setRotation(Vector3 direction);
     void setRotation(float yaw, float pitch);
     void updateRotation(float deltaYaw, float deltaPitch);
 
@@ -58,6 +59,7 @@ namespace px {
     px::Matrix4x4 m_proj{};
 
     bool m_changed = true;
+    bool m_changedAngles = true;
 
     void recalculate();
   };

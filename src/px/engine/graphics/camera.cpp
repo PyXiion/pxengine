@@ -60,6 +60,27 @@ namespace px {
     move({offsetX, offsetY, offsetZ});
   }
 
+  void Camera::setRotation(float yaw, float pitch) {
+    m_yaw = yaw;
+    m_pitch = pitch;
+
+    m_changedAngles = true;
+  }
+
+  void Camera::setRotation(Vector3 direction) {
+    setRotation(
+        glm::degrees(glm::atan(m_direction.y, m_direction.x)), // yaw
+        glm::degrees(-std::asin(m_direction.z))                // pitch
+        );
+  }
+
+  void Camera::updateRotation(float deltaYaw, float deltaPitch) {
+    m_yaw += deltaYaw;
+    m_pitch += deltaPitch;
+
+    m_changedAngles = true;
+  }
+
   void Camera::apply() {
     if (m_changed)
       recalculate();
@@ -70,13 +91,21 @@ namespace px {
   void Camera::recalculate() {
     Vector3 up = Vector3Up;
 
-    m_direction.x = glm::cos(m_pitch) * glm::cos(m_yaw);
-    m_direction.y = glm::sin(m_pitch);
-    m_direction.z = glm::cos(m_pitch) * glm::sin(-m_yaw);
+    if (m_changedAngles) {
+      float pitch = glm::radians(-m_pitch);
+      float yaw = glm::radians(m_yaw);
 
-    m_right = glm::normalize(glm::cross(up, -m_direction));
+      m_direction.x = glm::cos(pitch) * glm::cos(-yaw);
+      m_direction.y = glm::sin(pitch);
+      m_direction.z = glm::cos(pitch) * glm::sin(yaw);
+
+      m_changedAngles = false;
+    }
+
+    m_right = glm::normalize(glm::cross(up, m_direction));
     m_up = glm::cross(m_direction, m_right);
     m_view = glm::lookAt(m_position, m_position + m_direction, m_up);
+
     m_changed = false;
   }
 
@@ -99,26 +128,20 @@ namespace px {
   }
 
   void Camera::guiEditor() {
-    ImGui::BeginGroup(); {
-      bool edited =
-           ImGui::InputVector3("Position",  m_position)
-        or ImGui::InputFloat2("Rotation",  &m_yaw,       "%.1f")
-        or ImGui::InputVector3("Direction", m_direction, "%.1f", ImGuiInputTextFlags_ReadOnly)
-        or ImGui::InputVector3("Up",        m_up,        "%.1f", ImGuiInputTextFlags_ReadOnly)
-        or ImGui::InputVector3("Right",     m_right,     "%.1f", ImGuiInputTextFlags_ReadOnly);
+    bool edited = false;
 
-      if (edited)
-        recalculate();
-    } ImGui::EndGroup();
-  }
+    edited |= ImGui::InputVector3("Position",  m_position,  "%.2f");
+    edited |= ImGui::InputFloat2("Rotation",  &m_yaw,       "%.1f");
 
-  void Camera::setRotation(float yaw, float pitch) {
-    m_yaw = glm::radians(yaw);
-    m_pitch = glm::radians(pitch);
-  }
+    // update direction
+    if (ImGui::InputVector3("Direction", m_direction, "%.1f")) {
+      setRotation(m_direction);
+    }
 
-  void Camera::updateRotation(float deltaYaw, float deltaPitch) {
-    m_yaw += glm::radians(deltaYaw);
-    m_pitch += glm::radians(deltaPitch);
+    edited |= ImGui::InputVector3("Up",        m_up,        "%.1f", ImGuiInputTextFlags_ReadOnly);
+    edited |= ImGui::InputVector3("Right",     m_right,     "%.1f", ImGuiInputTextFlags_ReadOnly);
+
+    if (edited)
+      recalculate();
   }
 } // px
