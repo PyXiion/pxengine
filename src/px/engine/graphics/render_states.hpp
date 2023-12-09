@@ -13,8 +13,18 @@
 namespace px {
 
   struct RenderStates {
+    inline static constexpr uint64_t defaultState =
+          BGFX_STATE_WRITE_RGB
+        | BGFX_STATE_WRITE_A
+        | BGFX_STATE_WRITE_Z
+        | BGFX_STATE_DEPTH_TEST_LESS
+        | BGFX_STATE_CULL_CW
+        | BGFX_STATE_MSAA;
+
     ShaderPtr shaderPtr;
     bgfx::ViewId viewId{};
+
+    uint64_t state = defaultState;
   };
 
 } // px
