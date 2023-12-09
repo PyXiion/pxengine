@@ -44,13 +44,18 @@ namespace px {
       return m_handle;
     }
 
+    explicit operator bool() const {
+      return bgfx::isValid(m_handle);
+    }
+
   private:
     T m_handle;
 
     inline void destroy() {
       EASY_BLOCK(__PRETTY_FUNCTION__)
-      if (bgfx::isValid(m_handle))
+      if (bgfx::isValid(m_handle)) {
         bgfx::destroy(m_handle);
+      }
     }
   };
 
