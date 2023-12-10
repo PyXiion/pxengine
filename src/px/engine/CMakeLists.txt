@@ -80,6 +80,8 @@ set(PX_ENGINE_SOURCES
     components/transform.hpp
     events/common/mouse_event.hpp
     events/common/key_event.hpp
+    graphics/uniform.cpp
+    graphics/uniform.hpp
 )
 
 foreach(SHADER ${PX_ENGINE_SHADER_SOURCES})
