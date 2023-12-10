@@ -9,6 +9,7 @@ px::Controls::Controls(px::Window &window)
 }
 
 float px::Controls::getAxis(px::ControlAxis::Enum axis) const {
+  std::shared_lock lk(m_axesMutex);
   return m_axes[axis];
 }
 
@@ -22,6 +23,7 @@ void px::Controls::processKey(px::KeyCode key, bool down) {
     }
   };
 
+  std::unique_lock lk(m_axesMutex);
   switch (key) {
     case KeyCode_W:
       setAxis(ControlAxis::Vertical, 1.0f);

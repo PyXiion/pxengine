@@ -25,7 +25,8 @@ namespace px {
     [[nodiscard]] float getAxis(ControlAxis::Enum axis) const;
 
   private:
-    std::array<float, ControlAxis::Count> m_axes{};
+    mutable std::shared_mutex m_axesMutex;
+    std::array<float, ControlAxis::Count> m_axes;
 
     void processKey(KeyCode key, bool down);
   };
