@@ -67,7 +67,7 @@ void px::Engine::init()
   m_resourceManager = std::make_unique<ResourceManager>(*this, "./data");
   m_window = std::make_unique<Window>("PXE", 1280, 720);
 
-  m_controls = std::make_unique<Controls>(*m_window);
+  m_controls = std::make_unique<Controls>(*this, *m_window);
 
   m_renderer = std::make_unique<Renderer>(*m_window);
   m_renderer->setDebugEnabled(false);

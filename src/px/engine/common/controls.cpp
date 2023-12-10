@@ -1,10 +1,18 @@
 #include "controls.hpp"
 #include "../engine.hpp"
 
-px::Controls::Controls(px::Window &window)
-{
+px::Controls::Controls(px::Engine &engine, px::Window &window)
+  : m_lastMousePos()
+  , m_axes()
+  , m_firstMouseMovement(true) {
   listen(window.onKey, [this](auto key, auto down, auto mods) {
     processKey(key, down);
+  });
+
+  engine.onUpdate.append([this, &window](float dt) {
+    double x,y;
+    glfwGetCursorPos(window.getHandle(), &x, &y);
+    processMouse(static_cast<float>(x), static_cast<float>(y));
   });
 }
 
@@ -46,4 +54,15 @@ void px::Controls::processKey(px::KeyCode key, bool down) {
     default:
       break;
   }
+}
+
+void px::Controls::processMouse(float x, float y) {
+  if (not m_firstMouseMovement) {
+    std::unique_lock lk(m_axesMutex);
+    m_axes[ControlAxis::MouseX] = x - m_lastMousePos.x;
+    m_axes[ControlAxis::MouseY] = y - m_lastMousePos.y;
+  }
+  m_lastMousePos = {x, y};
+
+  m_firstMouseMovement = false;
 }

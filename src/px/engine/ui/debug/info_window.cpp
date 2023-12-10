@@ -151,6 +151,9 @@ void px::DebugInfoWindow::onGuiDraw()
 
       ImGui::Text("Vertical: %f", controls.getAxis(ControlAxis::Vertical));
       ImGui::Text("Horizontal: %f", controls.getAxis(ControlAxis::Horizontal));
+
+      ImGui::Text("Mouse X: %f", controls.getAxis(ControlAxis::MouseX));
+      ImGui::Text("Mouse Y: %f", controls.getAxis(ControlAxis::MouseY));
     }
     #pragma endregion
 
