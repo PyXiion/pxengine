@@ -5,6 +5,8 @@ const char *code =
 R"(
 void main() {
   print("Hello world");
+
+  print2("Custom function declaration");
 }
 )";
 
@@ -15,7 +17,8 @@ void print(const std::string &str) {
 int main() {
   px::script::AngelScript as;
 
-  as.registerGlobalFunction("print", &print);
+  as.registerGlobalFunction("print", &print); // void print(const string &in)
+  as.registerGlobalFunctionWithDecl("void print2(const string &in)", &print);
 
   auto builder = as.createModuleBuilder();
   builder.startNewModule("main");

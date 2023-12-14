@@ -20,6 +20,9 @@ namespace px::script {
     template<class T, class ...U>
     inline void registerGlobalFunction(std::string_view name, T (*ptr)(U...));
 
+    template<class T, class ...U>
+    inline void registerGlobalFunctionWithDecl(const std::string &decl, T (*ptr)(U...));
+
     asIScriptEngine *getHandle();
     asIScriptContext *getContext();
 
@@ -42,6 +45,11 @@ namespace px::script {
     auto f = AsFunction<T (U...)>{std::forward<typename AsFunction<T (U...)>::FunctionPtr>(ptr)};
 
     registerGlobalFunction(f.getSignature(name), reinterpret_cast<void *>(ptr));
+  }
+
+  template<class T, class... U>
+  void AngelScript::registerGlobalFunctionWithDecl(const std::string &decl, T (*ptr)(U...)) {
+    registerGlobalFunction(decl, reinterpret_cast<void *>(ptr));
   }
 
 } // px::script
