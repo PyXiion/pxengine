@@ -94,7 +94,6 @@ add_library(px_engine
     ${PX_ENGINE_SHADER_SOURCES}
 )
 
-find_package(Angelscript REQUIRED)
 find_package(eventpp REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(fmt REQUIRED)
@@ -105,7 +104,6 @@ find_package(assimp REQUIRED)
 
 target_link_libraries(px_engine easy_profiler)
 target_link_libraries(px_engine fmt)
-target_link_libraries(px_engine angelscript)
 target_link_libraries(px_engine yaml-cpp)
 target_link_libraries(px_engine glfw GL)
 target_link_libraries(px_engine glm::glm)

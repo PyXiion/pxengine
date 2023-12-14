@@ -16,8 +16,26 @@ set(PX_LIB_SOURCES
 
     px/threading/task_queue.hpp
     px/utils/constexpr_hash.hpp
+    px/script/angel_script.hpp px/script/angel_script.cpp
+    px/script/common.hpp
+    px/script/template/as_function.hpp
+    px/script/template/names.hpp
+    px/script/function.hpp
+    px/script/addons/scriptbuilder/scriptbuilder.cpp
+    px/script/addons/scriptstdstring/scriptstdstring.cpp
+    px/script/addons/scriptstdstring/scriptstdstring_utils.cpp
+    px/script/addons/scriptarray/scriptarray.cpp
+    px/script/module.cpp
+    px/script/module.hpp
+    px/script/module_builder.cpp
+    px/script/module_builder.hpp
+    px/script/function.cpp
 )
 
 add_library(px ${PX_LIB_SOURCES})
+
+find_package(Angelscript REQUIRED)
+
+target_link_libraries(px angelscript)
 
 add_subdirectory(px/engine)
