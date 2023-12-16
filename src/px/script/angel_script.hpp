@@ -7,8 +7,9 @@
 #ifndef PX_ENGINE_ANGEL_SCRIPT_HPP
 #define PX_ENGINE_ANGEL_SCRIPT_HPP
 #include "common.hpp"
-#include "template/as_function.hpp"
+#include "template/signatures.hpp"
 #include "module_builder.hpp"
+#include "object_type_builder.hpp"
 
 namespace px::script {
 
@@ -18,10 +19,13 @@ namespace px::script {
     ~AngelScript();
 
     template<class T, class ...U>
-    inline void registerGlobalFunction(std::string_view name, T (*ptr)(U...));
+    inline void registerGlobalFunction(std::string_view &&name, T (*ptr)(U...));
 
     template<class T, class ...U>
     inline void registerGlobalFunctionWithDecl(const std::string &decl, T (*ptr)(U...));
+
+    template<class T>
+    inline AsTypeBuilder<T> registerObjectType(const std::string &&name);
 
     asIScriptEngine *getHandle();
     asIScriptContext *getContext();
@@ -40,16 +44,21 @@ namespace px::script {
     void registerGlobalFunction(const std::string &funSign, void *funPtr);
   };
 
-  template<class T, class... U>
-  void AngelScript::registerGlobalFunction(std::string_view name, T (*ptr)(U...)) {
-    auto f = AsFunction<T (U...)>{std::forward<typename AsFunction<T (U...)>::FunctionPtr>(ptr)};
+  template<class T, class ...U>
+  void AngelScript::registerGlobalFunction(std::string_view &&name, T (*ptr)(U...)) {
+    auto &&signature = getSignature<T (U...)>(std::forward<decltype(name)>(name));
 
-    registerGlobalFunction(f.getSignature(name), reinterpret_cast<void *>(ptr));
+    registerGlobalFunction(std::forward<decltype(signature)>(signature), reinterpret_cast<void *>(ptr));
   }
 
   template<class T, class... U>
   void AngelScript::registerGlobalFunctionWithDecl(const std::string &decl, T (*ptr)(U...)) {
     registerGlobalFunction(decl, reinterpret_cast<void *>(ptr));
+  }
+
+  template<class T>
+  AsTypeBuilder<T> AngelScript::registerObjectType(const std::string &&name) {
+    return AsTypeBuilder<T>(m_handle, std::forward<decltype(name)>(name));
   }
 
 } // px::script

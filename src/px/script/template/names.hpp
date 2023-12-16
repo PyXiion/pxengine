@@ -9,15 +9,30 @@
 #include <string>
 #include <string_view>
 #include <cstdint>
+#include <px/templates.hpp>
 
 namespace px::script {
   template<class T>
-  std::string getTypeBaseAsName();
+  std::string getTypeBaseAsName() {
+    static_assert(requires {
+      { T::angelScriptClassName } -> std::convertible_to<std::string_view>;
+    });
+
+    return std::string(T::angelScriptClassName);
+  }
+
+  template<px::string_literal NAME>
+  struct AsClassType {
+  private:
+    template<class>
+    friend std::string getTypeBaseAsName();
+    inline static constexpr std::string_view angelScriptClassName = NAME.value;
+  };
 
 #define PX_TYPE(cppType, asTypeName)                            \
   template<>                                                    \
-  inline std::string getTypeBaseAsName<cppType>() {  \
-    return asTypeName;                                                  \
+  inline std::string getTypeBaseAsName<cppType>() {             \
+    return asTypeName;                                          \
   }
 
   PX_TYPE(void,       "void")

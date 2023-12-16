@@ -8,7 +8,7 @@
 #define PX_ENGINE_MODULE_HPP
 #include "common.hpp"
 #include "function.hpp"
-#include "template/as_function.hpp"
+#include "template/signatures.hpp"
 
 namespace px::script {
 
@@ -19,7 +19,7 @@ namespace px::script {
 
     template<class TReturn, class ...TArgs>
     auto getFunction(const std::string &funcName) {
-      const std::string decl = AsFunction<TReturn (TArgs...)>::getSignature(funcName);
+      const std::string decl = getSignature<TReturn (TArgs...)>(funcName);
 
       asIScriptFunction *funcHandle = getFunctionByDecl(decl);
 

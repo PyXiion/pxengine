@@ -36,20 +36,26 @@ namespace px {
   struct function_traits<std::function<T>> : public function_traits<T> { };
 
   template <typename Return, typename ...Args>
-  struct function_traits<Return (*)(Args...)> : function_traits<Return (Args...)> { };
+  struct function_traits<Return (*)(Args...)> : public function_traits<Return (Args...)> { };
 
   template <typename Return, typename ...Args>
-  struct function_traits<Return (Args...) const> : function_traits<Return (Args...)> { };
+  struct function_traits<Return (Args...) const> : public function_traits<Return (Args...)> { };
 
   template <typename TClass, typename Return, typename ...Args>
-  struct function_traits<Return (TClass::*)(Args...)> : function_traits<Return (Args...)> {
+  struct function_traits<Return (TClass::*)(Args...)> : public function_traits<Return (Args...)> {
     typedef TClass instance_type;
 
     constexpr static bool is_member = true; // override
   };
+  template <typename TClass, typename Return, typename ...Args>
+  struct function_traits<Return (TClass::* const)(Args...)> : public function_traits<Return (TClass::*)(Args...)> {};
 
   template <typename TClass, typename Return, typename ...Args>
-  struct function_traits<Return (TClass::*)(Args...) const> : function_traits<Return (TClass::*)(Args...)> { };
+  struct function_traits<Return (TClass::*)(Args...) const> : public function_traits<Return (TClass::*)(Args...)> {
+    constexpr static bool is_const = true; // override
+  };
+  template <typename TClass, typename Return, typename ...Args>
+  struct function_traits<Return (TClass::* const)(Args...) const> : public function_traits<Return (TClass::*)(Args...) const> {};
 
   template <typename Return, typename ...Args>
   struct function_traits<Return (Args...)> {
@@ -61,21 +67,27 @@ namespace px {
     static constexpr size_t argument_count = sizeof...(Args);
 
     constexpr static bool is_member = false;
+    constexpr static bool is_const = false;
   };
 
   template<typename T>
   concept MemberFunction = function_traits<T>::is_member;
 
-  template<typename, typename...>
-  struct overloaded_function_traits;
+  template<class>
+  struct field_traits;
 
-  template<typename T, typename Return, typename ...Args>
-  struct overloaded_function_traits<T, Return, std::tuple<Args...>>
-    : public function_traits<decltype(static_cast<Return(*)(Args...)>(std::declval<T>()))> {};
+  template<class TClass, class T>
+  struct field_traits<T (TClass::*)> {
+    typedef TClass instance_type;
+    typedef T type;
 
-  template<MemberFunction T, typename Return, typename ...Args>
-  struct overloaded_function_traits<T, Return, std::tuple<Args...>>
-  : public function_traits<decltype(static_cast<Return(function_traits<T>::instance_type::*)(Args...)>(std::declval<T>()))> {};
+    inline constexpr static bool is_const = false;
+  };
+
+  template<class TClass, class T>
+  struct field_traits<T const (TClass::*)> : field_traits<T (TClass::*)> {
+    inline constexpr static bool is_const = true;
+  };
 
   // Lord, save the StackOverflow
   // Useful links:
@@ -87,11 +99,24 @@ namespace px {
   // https://www.reddit.com/r/cpp_questions/comments/pumi9r/does_c20_not_support_string_literals_as_template/
   template<auto N>
   struct string_literal {
+    constexpr string_literal() = default;
     constexpr string_literal(const char (&str)[N]) {
       std::copy_n(str, N, value);
     }
     char value[N]{};
   };
+
+  template<auto N, auto M>
+  auto operator+(const string_literal<N> &l, const string_literal<M> &r) {
+    string_literal<N + M> result;
+
+    // copy left
+    std::copy_n(l.value, 0 + N, result.value);
+    // copy right
+    std::copy_n(r.value, result.value + N, result.value);
+
+    return result;
+  }
 }
 
 #endif //ENGINE_TEMPLATES_HPP
