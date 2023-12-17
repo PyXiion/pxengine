@@ -29,4 +29,8 @@ namespace px::script {
   void priv::registerProperty(asIScriptEngine *engine, const std::string &name, const std::string &declaration, int offset) {
     engine->RegisterObjectProperty(name.c_str(), declaration.c_str(), offset);
   }
+
+  extern void priv::setCtxException(const char *msg) {
+    asGetActiveContext()->SetException(msg);
+  }
 } // px::script

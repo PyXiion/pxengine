@@ -13,11 +13,11 @@ namespace px::script {
     , m_module(module) {
   }
 
+  Module::~Module() {}
+
   asIScriptFunction *Module::getFunctionByDecl(const std::string &funcDecl) {
     return m_module->GetFunctionByDecl(funcDecl.c_str());
   }
-
-  Module::~Module() = default;
 
 
 } // px::script

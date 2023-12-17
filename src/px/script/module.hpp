@@ -24,7 +24,7 @@ namespace px::script {
       asIScriptFunction *funcHandle = getFunctionByDecl(decl);
 
       if (not funcHandle) {
-        throw std::runtime_error("Failed to get function by declaration.");
+        throw std::runtime_error(fmt::format("Failed to get function {} by declaration {}.", funcName, decl));
       }
 
       return Function<TReturn (TArgs...)>(priv::FunctionHandle(m_ctx, funcHandle));

@@ -24,7 +24,7 @@ namespace px::script {
 
       static inline decltype(auto) get() {
         std::array<std::string_view, N> arr {
-          getTypeAsName<T>()...
+          getTypeAsName<T, true>()...
         };
         return arr;
       }

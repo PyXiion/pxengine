@@ -27,7 +27,7 @@ namespace px::script {
                         std::is_same_v<T, double>;
 
   template<class T>
-  concept AsAddress = std::is_pointer_v<T>;
+  concept AsAddress = std::is_pointer_v<T> or std::is_reference_v<T>;
 
   template<class T>
   concept AsObject = not AsPrimitive<T> and not AsAddress<T>;

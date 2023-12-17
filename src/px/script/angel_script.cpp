@@ -17,6 +17,9 @@ namespace px::script {
   }
 
   AngelScript::~AngelScript() {
+    if (m_ctx)
+      m_ctx->Release();
+
     m_handle->ShutDownAndRelease();
   }
 
