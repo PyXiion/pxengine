@@ -25,7 +25,9 @@ namespace px::script {
     inline void registerGlobalFunctionWithDecl(const std::string &decl, T (*ptr)(U...));
 
     template<class T>
-    inline AsTypeBuilder<T> registerObjectType(const std::string &&name);
+    inline AsTypeBuilder<T> registerObjectType();
+    template<class T>
+    inline AsTypeBuilder<T> registerObjectType(std::string &&name);
 
     asIScriptEngine *getHandle();
     asIScriptContext *getContext();
@@ -57,7 +59,11 @@ namespace px::script {
   }
 
   template<class T>
-  AsTypeBuilder<T> AngelScript::registerObjectType(const std::string &&name) {
+  AsTypeBuilder<T> AngelScript::registerObjectType() {
+    return AsTypeBuilder<T>(m_handle);
+  }
+  template<class T>
+  AsTypeBuilder<T> AngelScript::registerObjectType(std::string &&name) {
     return AsTypeBuilder<T>(m_handle, std::forward<decltype(name)>(name));
   }
 

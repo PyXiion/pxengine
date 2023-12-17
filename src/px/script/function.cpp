@@ -10,18 +10,13 @@ namespace px::script {
   priv::FunctionHandle::FunctionHandle(asIScriptContext *context, asIScriptFunction *function)
     : m_ctx(context)
     , m_func(function) {
-    if (m_ctx)
-      m_ctx->AddRef();
-    if (m_func)
-      m_func->AddRef();
+    if (m_ctx) m_ctx->AddRef();
+    if (m_func) m_func->AddRef();
   }
 
   priv::FunctionHandle::~FunctionHandle() {
-    if (m_ctx)
-      m_ctx->Release();
-    if (m_func) {
-      m_func->Release();
-    }
+    if (m_func) m_func->Release();
+    if (m_ctx) m_ctx->Release();
   }
 
   priv::FunctionHandle::FunctionHandle(const priv::FunctionHandle &other)
@@ -32,8 +27,8 @@ namespace px::script {
     if (&other != this) {
       m_func = other.m_func;
       m_ctx = other.m_ctx;
-      m_ctx->AddRef();
-      m_func->AddRef();
+      if (m_ctx) m_ctx->AddRef();
+      if (m_func) m_func->AddRef();
     }
     return *this;
   }
@@ -131,10 +126,6 @@ namespace px::script {
 
   void *priv::FunctionHandle::getReturnObject() {
     return m_ctx->GetReturnObject();
-  }
-
-  int priv::FunctionHandle::release() {
-    return m_ctx->Release();
   }
 
 } // px::script

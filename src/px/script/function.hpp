@@ -33,6 +33,7 @@ namespace px::script {
       void setArg(int arg, double value);
 
       void setArgAddress(int arg, void *ptr);
+
       void setArgObject(int arg, void *ptr);
 
       int execute();
@@ -42,8 +43,6 @@ namespace px::script {
 
       void *getReturnAddress();
       void *getReturnObject();
-
-      int release();
 
     private:
       asIScriptContext  *m_ctx;
@@ -58,11 +57,13 @@ namespace px::script {
   private:
     using ThisType = Function<TReturn, TArgs...>;
 
+    static constexpr inline bool isReturning = not std::is_same_v<TReturn, void>;
+
   public:
     explicit Function(priv::FunctionHandle handle)
       : m_handle(std::move(handle)) {}
 
-    inline TReturn operator()(TArgs ...args) {
+    inline TReturn operator()(TArgs &&...args) {
       if constexpr (std::is_same_v<TReturn, void>) {
         call(std::forward<TArgs>(args)...);
       } else {
@@ -70,43 +71,54 @@ namespace px::script {
       }
     }
 
-    TReturn call(TArgs ...args) {
+    TReturn call(TArgs &&...args) {
       m_handle.prepare();
 
-      // pass args
-      int i = 0;
-      ([&]{
-        m_handle.setArg(i, args);
-        i += 1;
-      }(), ...);
+      setArgs(std::forward<TArgs>(args)...);
 
       int r = m_handle.execute();
       if (r < 0) {
         throw std::runtime_error("Failed AS function execution.");
       }
 
-      if constexpr (not std::is_same_v<TReturn, void>) {
+      if constexpr (isReturning)
+        return getReturn();
+    }
+
+  private:
+    priv::FunctionHandle m_handle;
+
+    void setArgs(TArgs &&...args) {
+      int i = 0;
+      ([&]{
+        if constexpr (AsPrimitive<TArgs>) {
+          m_handle.setArg(i, std::forward<TArgs>(args));
+        } else if constexpr (AsAddress<TArgs>) {
+          m_handle.setArgAddress(i, (void*)&args);
+        } else { // pass copy of the arg
+          m_handle.setArgObject(i, (void*)&args);
+        }
+        i += 1;
+      }(), ...);
+    };
+
+    TReturn getReturn() {
+      if constexpr (isReturning) {
         TReturn result;
 
         if constexpr (AsPrimitive<TReturn>) {
           // return primitive
           result = m_handle.getReturn<TReturn>();
         } else if constexpr (AsAddress<TReturn>) {
-          // TODO comments
+          // return a pointer or reference
           result = reinterpret_cast<TReturn>(m_handle.getReturnAddress());
         } else {
+          // return a copy, since the object will be deleted after releasing the context or another function call
           result = *reinterpret_cast<TReturn *>(m_handle.getReturnObject());
         }
-        m_handle.release();
         return std::move(result);
-      } else {
-        m_handle.release();
-        return;
       }
     }
-
-  private:
-    priv::FunctionHandle m_handle;
   };
 
 } // px::script

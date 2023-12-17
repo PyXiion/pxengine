@@ -113,15 +113,19 @@ namespace px::script {
 
     template<class T, class TReturn, class ...TArgs>
     struct MethodImpl<TReturn (T::*)(TArgs...)> : public PtrHolder<TReturn (T::*)(TArgs...)> {
+      using PtrHolder<TReturn (T::*)(TArgs...)>::ptr;
     };
 
     template<class T, class TReturn, class ...TArgs>
     struct MethodImpl<TReturn (T::*)(TArgs...) const> : public PtrHolder<TReturn (T::*)(TArgs...) const> {
+      using PtrHolder<TReturn (T::*)(TArgs...) const>::ptr;
     };
 
     template<class T>
     struct Method : public MethodImpl<T> {
       constexpr Method(T ptr) : MethodImpl<T>(ptr) {}
+
+      using MethodImpl<T>::ptr;
     };
 
     template<class T, class U>
@@ -154,6 +158,11 @@ namespace px::script {
 
     template<class T>
     struct Field : public FieldImpl<T> {
+      constexpr Field(T ptr) : FieldImpl<T>(ptr) {}
+    };
+
+    template<class T>
+    struct Field<FieldImpl<T>> : public FieldImpl<T> {
       constexpr Field(T ptr) : FieldImpl<T>(ptr) {}
     };
 
@@ -226,14 +235,19 @@ namespace px::script {
       new (memory) T(std::forward<TArgs>(args)...);
     }
 
-//    template<class T>
-//    void CopyConstructor(void *memory, TArgs ...args) {
-//      new (memory) T(std::forward<TArgs>(args)...);
-//    }
+    template<class T>
+    void CopyConstructor(void *memory, const T &other) {
+      new (memory) T(other);
+    }
 
     template<class T>
     void Destructor(void *memory) {
       reinterpret_cast<T *>(memory)->~T();
+    }
+
+    template<class T, class U = T>
+    T &assigment(const T& self, const U &other) {
+      return self = other;
     }
   }
 
@@ -253,7 +267,13 @@ namespace px::script {
     using ProxyFunction = Return (*)(Args...);
 
   public:
-    explicit AsTypeBuilder(asIScriptEngine *engine, const std::string &name)
+    explicit AsTypeBuilder(asIScriptEngine *engine)
+        : m_engine(std::forward<asIScriptEngine *>(engine))
+        , m_name(getTypeAsName<T>()) {
+      priv::registerClassType(m_engine, std::string(m_name), sizeof(T), static_cast<priv::ObjTypeFlags::Enum>(priv::ObjTypeFlags::Value | priv::getClassFlags<T>()));
+      registerBehaviour();
+    }
+    explicit AsTypeBuilder(asIScriptEngine *engine, std::string &&name)
       : m_engine(std::forward<asIScriptEngine *>(engine))
       , m_name(std::forward<decltype(name)>(name)) {
       priv::registerClassType(m_engine, std::string(m_name), sizeof(T), static_cast<priv::ObjTypeFlags::Enum>(priv::ObjTypeFlags::Value | priv::getClassFlags<T>()));
@@ -288,26 +308,180 @@ namespace px::script {
 
   private:
     asIScriptEngine *m_engine;
-    const std::string m_name;
+    std::string m_name;
 
     inline void registerBehaviour() {
       // default empty constructor
       if constexpr (Traits::hasConstructor) {
         priv::registerClassBehaviour(m_engine, m_name, priv::ObjBehaviour::Construct, "void f()", reinterpret_cast<void *>(&priv::Constructor<T>));
       }
-//      if constexpr (Traits::hasCopyConstructor) {
-//        priv::registerClassBehaviour(m_engine, m_name, priv::ObjBehaviour::Construct, "void f()", reinterpret_cast<void *>(&priv::Constructor<T>));
-//      }
+      // copy constructor
+      if constexpr (Traits::hasCopyConstructor) {
+        priv::registerClassBehaviour(m_engine, m_name, priv::ObjBehaviour::Construct, "void f()", reinterpret_cast<void *>(&priv::Constructor<T>));
+      }
+
+      // assigment operator
+      if constexpr (Traits::hasAssignmentOperator) {
+        priv::registerProxyMethod(m_engine, m_name, fmt::format("{0} &opAssign(const {0} &in)", m_name), reinterpret_cast<void *>(&priv::assigment<T>));
+      }
 
       // destructor
       priv::registerClassBehaviour(m_engine, m_name, priv::ObjBehaviour::Destruct, "void f()", reinterpret_cast<void *>(&priv::Destructor<T>));
     }
   };
 
-  // TODO for smart pointer
+  // SHARED PTR
+
+  namespace priv {
+    extern void setCtxException(const char *msg);
+
+    template<class T>
+    struct DefaultValue {
+      inline static T f() { return T(); }
+    };
+    template<class T>
+    struct DefaultValue<T&> {
+      inline static T &f() { return *static_cast<T *>(0); }
+    };
+
+    template<class TReturn, class ...TArgs>
+    struct SmartPtrCallerImpl;
+
+    template<class TClass, class TReturn, class ...TArgs>
+    struct SmartPtrCallerImpl<TReturn (TClass::*)(TArgs...)> {
+      template<TReturn (TClass::*fn)(TArgs...)>
+      static TReturn f(std::shared_ptr<TClass> &self, TArgs &&...args) {
+        if (!self) {
+          setCtxException("Attempting to call member function of a null pointer.");
+          return DefaultValue<TReturn>::f();
+        }
+        return (self.get())->*fn(std::forward<TArgs>(args)...);
+      }
+    };
+
+    template<class TClass, class TReturn, class ...TArgs>
+    struct SmartPtrCallerImpl<TReturn (TClass::*)(TArgs...) const> {
+      template<TReturn (TClass::*fn)(TArgs...) const>
+      static TReturn f(std::shared_ptr<TClass> &self, TArgs &&...args) {
+        if (not self) {
+          setCtxException("Attempting to call member function of a null pointer.");
+          return DefaultValue<TReturn>::f();
+        }
+        return (self.get())->*fn(std::forward<TArgs>(args)...);
+      }
+    };
+  }
+
   template<class T>
   struct AsTypeBuilder<std::shared_ptr<T>> {
+  private:
+    using ThisType = AsTypeBuilder<std::shared_ptr<T>>;
+    using Traits = priv::TypeTraits<T>;
+    using Self = std::shared_ptr<T>;
 
+    template<class Return, class ...Args>
+    using ProxyFunction = Return (*)(Args...);
+
+  public:
+    explicit AsTypeBuilder(asIScriptEngine *engine)
+        : m_engine(std::forward<asIScriptEngine *>(engine))
+        , m_name(getTypeAsName<Self>()) {
+      priv::registerClassType(m_engine, m_name, sizeof(T), static_cast<priv::ObjTypeFlags::Enum>(priv::ObjTypeFlags::Value | priv::getClassFlags<T>()));
+      registerBehaviour();
+    }
+    explicit AsTypeBuilder(asIScriptEngine *engine, std::string &&name)
+        : m_engine(std::forward<asIScriptEngine *>(engine))
+        , m_name(std::forward<decltype(name)>(name)) {
+      priv::registerClassType(m_engine, m_name, sizeof(T), static_cast<priv::ObjTypeFlags::Enum>(priv::ObjTypeFlags::Value | priv::getClassFlags<T>()));
+      registerBehaviour();
+    }
+
+    // Method
+    template<priv::Method Method>
+    ThisType &registerMethod(std::string &&name) {
+      typedef decltype(Method.ptr) TMethod;
+      const std::string declaration = getSignature<TMethod>(std::forward<decltype(name)>(name));
+
+      typedef priv::SmartPtrCallerImpl<TMethod> SmartCaller;
+      priv::registerProxyMethod(m_engine, m_name, declaration, reinterpret_cast<void *>(&SmartCaller::f));
+
+      return *this;
+    };
+
+    // Property
+
+    template<priv::Field Field>
+    ThisType &registerProperty(std::string_view name) {
+      typedef decltype(Field.ptr) TField;
+
+      // getter
+      typedef px::field_traits<TField> FieldTraits;
+      typedef typename FieldTraits::type Type;
+
+      using GetterPtr = Type (*)(const Self &);
+      using RefGetterPtr = Type& (*)(Self &);
+
+      using SetterPtr = void (*)(Self &, const Type &);
+
+      auto getDecl = fmt::format("{} get_{}() const property", getTypeAsName<Type>(), name);
+      GetterPtr getter = [](const Self &self) -> Type {
+        if (not self) {
+          priv::setCtxException("Attempting to access member of a null pointer");
+          return priv::DefaultValue<Type>::f();
+        }
+        return (self.get())->*(Field.ptr);
+      };
+
+      priv::registerProxyMethod(m_engine, m_name, getDecl, reinterpret_cast<void *>(getter));
+
+      if constexpr (not FieldTraits::is_const) {
+        auto getRefDecl = fmt::format("{}& get_{}() property", getTypeAsName<Type>(), name);
+        RefGetterPtr refGetter = [](std::shared_ptr<T> &self) -> Type& {
+          if (not self) {
+            priv::setCtxException("Attempting to access member of a null pointer");
+            return priv::DefaultValue<Type&>::f();
+          }
+          return (self.get())->*(Field.ptr);
+        };
+
+        auto setDecl = fmt::format("void set_{1}(const {0} &in) property", getTypeAsName<Type>(), name);
+        SetterPtr refSetter = [](std::shared_ptr<T> &self, const Type &other) -> void {
+          if (not self) {
+            priv::setCtxException("Attempting to access member of a null pointer");
+            return;
+          }
+          (self.get())->*(Field.ptr) = other;
+        };
+
+        priv::registerProxyMethod(m_engine, m_name, getRefDecl, reinterpret_cast<void *>(refGetter));
+        priv::registerProxyMethod(m_engine, m_name, setDecl, reinterpret_cast<void *>(refSetter));
+      }
+
+      return *this;
+    };
+
+  private:
+    asIScriptEngine *m_engine;
+    std::string m_name;
+
+    inline void registerBehaviour() {
+      // default empty constructor
+      if constexpr (Traits::hasConstructor) {
+        priv::registerClassBehaviour(m_engine, m_name, priv::ObjBehaviour::Construct, "void f()", reinterpret_cast<void *>(&priv::Constructor<T>));
+      }
+      // copy constructor
+      if constexpr (Traits::hasCopyConstructor) {
+        priv::registerClassBehaviour(m_engine, m_name, priv::ObjBehaviour::Construct, "void f()", reinterpret_cast<void *>(&priv::Constructor<T>));
+      }
+
+      // assigment operator
+      if constexpr (Traits::hasAssignmentOperator) {
+        priv::registerProxyMethod(m_engine, m_name, fmt::format("{0} &opAssign(const {0} &in)", m_name), reinterpret_cast<void *>(&priv::assigment<T>));
+      }
+
+      // destructor
+      priv::registerClassBehaviour(m_engine, m_name, priv::ObjBehaviour::Destruct, "void f()", reinterpret_cast<void *>(&priv::Destructor<T>));
+    }
   };
 } // px::script
 
