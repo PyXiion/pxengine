@@ -85,7 +85,7 @@ namespace px {
   };
 
   template<class TClass, class T>
-  struct field_traits<T const (TClass::*)> : field_traits<T (TClass::*)> {
+  struct field_traits<T const (TClass::*)> : public field_traits<T (TClass::*)> {
     inline constexpr static bool is_const = true;
   };
 

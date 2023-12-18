@@ -19,7 +19,6 @@ namespace px {
   public:
     Mesh(std::vector<Vertex> vertices, std::vector<IndexType> indices, std::vector<TexturePtr> textures);
 
-    void apply(uint8_t stream) const;
     void submit(const RenderStates &renderStates) const;
 
     std::vector<TexturePtr> getTextures() const;
