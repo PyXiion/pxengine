@@ -63,15 +63,11 @@ namespace px::script {
     explicit Function(priv::FunctionHandle handle)
       : m_handle(std::move(handle)) {}
 
-    inline TReturn operator()(TArgs &&...args) {
-      if constexpr (std::is_same_v<TReturn, void>) {
-        call(std::forward<TArgs>(args)...);
-      } else {
-        return call(std::forward<TArgs>(args)...);
-      }
+    inline TReturn operator()(TArgs ...args) {
+      return call(std::forward<TArgs>(args)...);
     }
 
-    TReturn call(TArgs &&...args) {
+    TReturn call(TArgs ...args) {
       m_handle.prepare();
 
       setArgs(std::forward<TArgs>(args)...);
@@ -88,7 +84,7 @@ namespace px::script {
   private:
     priv::FunctionHandle m_handle;
 
-    void setArgs(TArgs &&...args) {
+    void setArgs(TArgs ...args) {
       int i = 0;
       ([&]{
         if constexpr (AsPrimitive<TArgs>) {

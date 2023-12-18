@@ -168,10 +168,10 @@ namespace px::script {
 
     template<class T>
     struct TypeTraits {
-      constexpr static inline bool hasConstructor        = std::is_default_constructible_v<T> && not std::is_trivially_constructible_v<T>;
-      constexpr static inline bool hasDestructor         = std::is_destructible_v<T>          && not std::is_trivially_destructible_v<T>;
-      constexpr static inline bool hasAssignmentOperator = std::is_copy_assignable_v<T>       && not std::is_trivially_copy_assignable_v<T>;
-      constexpr static inline bool hasCopyConstructor    = std::is_copy_constructible_v<T>    && not std::is_trivially_copy_constructible_v<T>;
+      constexpr static inline bool hasDefaultConstructor = std::is_default_constructible_v<T> && not std::is_trivially_constructible_v<T>;
+      constexpr static inline bool hasDestructor         = std::is_destructible_v<T>;
+      constexpr static inline bool hasAssignmentOperator = std::is_copy_assignable_v<T>;
+      constexpr static inline bool hasCopyConstructor    = std::is_copy_constructible_v<T>;
 
       constexpr static inline bool isFloat     = std::is_floating_point_v<T>;
       constexpr static inline bool isPrimitive = std::is_integral_v<T> or std::is_pointer_v<T> or std::is_enum_v<T>;
@@ -198,7 +198,7 @@ namespace px::script {
 
       else if constexpr (Traits::isClass) {
         int flags = ObjTypeFlags::Class;
-        if constexpr (Traits::hasConstructor)
+        if constexpr (Traits::hasDefaultConstructor)
           flags |= ObjTypeFlags::ClassConstructor;
         if constexpr (Traits::hasDestructor)
           flags |= ObjTypeFlags::ClassDestructor;
@@ -312,7 +312,7 @@ namespace px::script {
 
     inline void registerBehaviour() {
       // default empty constructor
-      if constexpr (Traits::hasConstructor) {
+      if constexpr (Traits::hasDefaultConstructor) {
         priv::registerClassBehaviour(m_engine, m_name, priv::ObjBehaviour::Construct, "void f()", reinterpret_cast<void *>(&priv::Constructor<T>));
       }
       // copy constructor
@@ -427,6 +427,7 @@ namespace px::script {
       GetterPtr getter = [](const Self &self) -> Type {
         if (not self) {
           priv::setCtxException("Attempting to access member of a null pointer");
+          fmt::print("Attempting to access member of a null pointer (getter, ptr: {})\n", fmt::ptr(self.get()));
           return priv::DefaultValue<Type>::f();
         }
         return (self.get())->*(Field.ptr);
@@ -434,20 +435,23 @@ namespace px::script {
 
       priv::registerProxyMethod(m_engine, m_name, getDecl, reinterpret_cast<void *>(getter));
 
+
       if constexpr (not FieldTraits::is_const) {
         auto getRefDecl = fmt::format("{}& get_{}() property", getTypeAsName<Type>(), name);
-        RefGetterPtr refGetter = [](std::shared_ptr<T> &self) -> Type& {
+        RefGetterPtr refGetter = [](Self &self) -> Type& {
           if (not self) {
             priv::setCtxException("Attempting to access member of a null pointer");
+            fmt::print("Attempting to access member of a null pointer (refGetter, ptr: {})\n", fmt::ptr(self.get()));
             return priv::DefaultValue<Type&>::f();
           }
           return (self.get())->*(Field.ptr);
         };
 
         auto setDecl = fmt::format("void set_{1}(const {0} &in) property", getTypeAsName<Type>(), name);
-        SetterPtr refSetter = [](std::shared_ptr<T> &self, const Type &other) -> void {
+        SetterPtr refSetter = [](Self &self, const Type &other) -> void {
           if (not self) {
             priv::setCtxException("Attempting to access member of a null pointer");
+            fmt::print("Attempting to access member of a null pointer (refSetter, ptr: {})\n", fmt::ptr(self.get()));
             return;
           }
           (self.get())->*(Field.ptr) = other;
@@ -466,12 +470,12 @@ namespace px::script {
 
     inline void registerBehaviour() {
       // default empty constructor
-      if constexpr (Traits::hasConstructor) {
+      if constexpr (Traits::hasDefaultConstructor) {
         priv::registerClassBehaviour(m_engine, m_name, priv::ObjBehaviour::Construct, "void f()", reinterpret_cast<void *>(&priv::Constructor<T>));
       }
       // copy constructor
       if constexpr (Traits::hasCopyConstructor) {
-        priv::registerClassBehaviour(m_engine, m_name, priv::ObjBehaviour::Construct, "void f()", reinterpret_cast<void *>(&priv::Constructor<T>));
+        priv::registerClassBehaviour(m_engine, m_name, priv::ObjBehaviour::Construct, fmt::format("void f(const {} &in)", m_name), reinterpret_cast<void *>(&priv::CopyConstructor<T>));
       }
 
       // assigment operator
