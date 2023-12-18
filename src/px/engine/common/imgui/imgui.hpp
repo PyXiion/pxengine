@@ -88,6 +88,38 @@ namespace ImGui {
 #undef PX_IMGUI_OVERLOAD_FORMATTED
 
   bool InputVector3(const char *label, px::Vector3 &v, const char *format = "%.3f", ImGuiInputTextFlags flags = 0);
+
+  inline ImTextureID toId(bgfx::TextureHandle handle, uint8_t flags, uint8_t mip) {
+    union { struct { bgfx::TextureHandle handle; uint8_t flags; uint8_t mip; } s; ImTextureID id; } tex{};
+    tex.s.handle = handle;
+    tex.s.flags  = flags;
+    tex.s.mip    = mip;
+    return tex.id;
+  }
+
+  // Helper function for passing bgfx::TextureHandle to ImGui::Image.
+  inline void Image(bgfx::TextureHandle _handle
+      , uint8_t _flags
+      , uint8_t _mip
+      , const ImVec2& _size
+      , const ImVec2& _uv0       = ImVec2(0.0f, 0.0f)
+      , const ImVec2& _uv1       = ImVec2(1.0f, 1.0f)
+      , const ImVec4& _tintCol   = ImVec4(1.0f, 1.0f, 1.0f, 1.0f)
+      , const ImVec4& _borderCol = ImVec4(0.0f, 0.0f, 0.0f, 0.0f)
+  ) {
+    Image(toId(_handle, _flags, _mip), _size, _uv0, _uv1, _tintCol, _borderCol);
+  }
+
+  // Helper function for passing bgfx::TextureHandle to ImGui::Image.
+  inline void Image(bgfx::TextureHandle _handle
+      , const ImVec2& _size
+      , const ImVec2& _uv0       = ImVec2(0.0f, 0.0f)
+      , const ImVec2& _uv1       = ImVec2(1.0f, 1.0f)
+      , const ImVec4& _tintCol   = ImVec4(1.0f, 1.0f, 1.0f, 1.0f)
+      , const ImVec4& _borderCol = ImVec4(0.0f, 0.0f, 0.0f, 0.0f)
+  ) {
+    Image(_handle, 0x01 /* IMGUI_FLAGS_ALPHA_BLEND */, 0, _size, _uv0, _uv1, _tintCol, _borderCol);
+  }
 }
 
 #endif //ENGINE_IMGUI_HPP
