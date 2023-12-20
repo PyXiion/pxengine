@@ -12,3 +12,4 @@
  - [yaml-cpp](https://github.com/jbeder/yaml-cpp)
  - [fmt](https://github.com/fmtlib/fmt)
  - [GLFW](https://github.com/glfw/glfw)
+ - [Easylogging++](https://github.com/abumq/easyloggingpp)
