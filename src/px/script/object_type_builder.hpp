@@ -105,7 +105,6 @@ namespace px::script {
 
       template<class U>
       using ProxyPointerType = TReturn (*)(U, TArgs...);
-      typedef T& ThisType;
     };
 
     template<class T, class TReturn, class ...TArgs>
@@ -114,14 +113,11 @@ namespace px::script {
 
       template<class U>
       using ProxyPointerType = TReturn (*)(U, TArgs...);
-      typedef const T& ThisType;
     };
 
     template<class T>
     struct Method : public MethodImpl<T> {
       constexpr Method(T ptr) : MethodImpl<T>(ptr) {}
-      constexpr Method(const Method &other)
-        : MethodImpl<T>(other.ptr){}
 
       using MethodImpl<T>::ptr;
       using typename MethodImpl<T>::ProxyPointerType;
@@ -141,7 +137,7 @@ namespace px::script {
       using PtrType = U (T::*);
       using PtrHolder<PtrType>::ptr;
 
-      int getOffset() const {
+      [[nodiscard]] int getOffset() const {
         return getPropertyOffset<T, PtrType>(ptr);
       };
     };
@@ -151,7 +147,7 @@ namespace px::script {
       using PtrType = const U (T::*);
       using PtrHolder<PtrType>::ptr;
 
-      int getOffset() const {
+      [[nodiscard]] int getOffset() const {
         return getPropertyOffset<T, PtrType>(ptr);
       };
     };
