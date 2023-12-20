@@ -18,6 +18,10 @@ add_subdirectory(bgfx.cmake)
 add_subdirectory(ext/imgui)
 include_directories(ext/imgui/include)
 
+set(build_static_lib ON)
+add_subdirectory(easyloggingpp)
+include_directories(easyloggingpp/src/)
+
 add_subdirectory(src)
 add_subdirectory(examples)
 

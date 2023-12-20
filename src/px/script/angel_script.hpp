@@ -10,6 +10,7 @@
 #include "template/signatures.hpp"
 #include "module_builder.hpp"
 #include "object_type_builder.hpp"
+#include "easylogging++.h"
 
 namespace px::script {
 
@@ -48,9 +49,11 @@ namespace px::script {
 
   template<class T, class ...U>
   void AngelScript::registerGlobalFunction(std::string_view &&name, T (*ptr)(U...)) {
-    auto &&signature = getSignature<T (U...)>(std::forward<decltype(name)>(name));
+    auto signature = getSignature<T (U...)>(std::forward<decltype(name)>(name));
 
-    registerGlobalFunction(std::forward<decltype(signature)>(signature), reinterpret_cast<void *>(ptr));
+    registerGlobalFunction(signature, reinterpret_cast<void *>(ptr));
+    CLOG(INFO, "AngelScript") << "Registered an AngelScript global function with a signature \"" << signature <<
+                              "\" and function pointer at " << reinterpret_cast<void*>(ptr);
   }
 
   template<class T, class... U>

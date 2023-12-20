@@ -9,8 +9,8 @@
 
 namespace px::script {
   Module::Module(asIScriptContext *ctx, asIScriptModule *module)
-    : m_ctx(ctx)
-    , m_module(module) {
+      : m_ctx(ctx)
+      , m_module(module) {
   }
 
   Module::~Module() {}

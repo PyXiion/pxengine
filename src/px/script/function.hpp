@@ -9,6 +9,7 @@
 #include "common.hpp"
 #include <stdexcept>
 #include <utility>
+#include "easylogging++.h"
 
 namespace px::script {
   namespace priv {
@@ -44,6 +45,8 @@ namespace px::script {
       void *getReturnAddress();
       void *getReturnObject();
 
+      const char *getDeclaration();
+
     private:
       asIScriptContext  *m_ctx;
       asIScriptFunction *m_func;
@@ -61,24 +64,25 @@ namespace px::script {
 
   public:
     explicit Function(priv::FunctionHandle handle)
-      : m_handle(std::move(handle)) {}
+        : m_handle(std::move(handle)) {}
 
     inline TReturn operator()(TArgs ...args) {
       return call(std::forward<TArgs>(args)...);
     }
 
     TReturn call(TArgs ...args) {
+      CVLOG(1, "AngelScript") << "Calling the function \"" << m_handle.getDeclaration() << "\"";
       m_handle.prepare();
 
       setArgs(std::forward<TArgs>(args)...);
 
       int r = m_handle.execute();
       if (r < 0) {
+        CLOG(ERROR, "AngelScript") << "Failed to call function.";
         throw std::runtime_error("Failed AS function execution.");
       }
 
-      if constexpr (isReturning)
-        return getReturn();
+      return getReturn();
     }
 
   private:

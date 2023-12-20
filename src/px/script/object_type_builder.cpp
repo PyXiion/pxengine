@@ -9,12 +9,12 @@
 
 namespace px::script {
   void priv::registerClassType(asIScriptEngine *engine, const std::string &name, int size,
-                                  script::priv::ObjTypeFlags::Enum flags) {
+                               script::priv::ObjTypeFlags::Enum flags) {
     engine->RegisterObjectType(name.c_str(), size, flags);
   }
 
   void priv::registerClassBehaviour(asIScriptEngine *engine, const std::string &name,
-                                  priv::ObjBehaviour::Enum behaviour, const std::string &declaration, void *funcPtr) {
+                                    priv::ObjBehaviour::Enum behaviour, const std::string &declaration, void *funcPtr) {
     engine->RegisterObjectBehaviour(name.c_str(), static_cast<asEBehaviours>(behaviour), declaration.c_str(), asFUNCTION(funcPtr), asCALL_CDECL_OBJFIRST);
   }
 

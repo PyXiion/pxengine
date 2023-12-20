@@ -18,7 +18,7 @@ set(PX_LIB_SOURCES
     px/utils/constexpr_hash.hpp
     px/script/angel_script.hpp px/script/angel_script.cpp
     px/script/common.hpp
-    px/script/template/as_function.hpp
+    px/script/template/signatures.hpp
     px/script/template/names.hpp
     px/script/function.hpp
     px/script/addons/scriptbuilder/scriptbuilder.cpp
@@ -30,12 +30,16 @@ set(PX_LIB_SOURCES
     px/script/module_builder.cpp
     px/script/module_builder.hpp
     px/script/function.cpp
+    px/script/object_type_builder.cpp
+    px/script/object_type_builder.hpp
+    px/utils/static_warning.hpp
+    px/px.cpp
 )
 
 add_library(px ${PX_LIB_SOURCES})
 
 find_package(Angelscript REQUIRED)
 
-target_link_libraries(px angelscript)
+target_link_libraries(px angelscript easyloggingpp)
 
 add_subdirectory(px/engine)

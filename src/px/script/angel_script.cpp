@@ -6,12 +6,28 @@
 
 #include "angel_script.hpp"
 #include <angelscript.h>
+#include <mutex>
 #include "addons/scriptarray/scriptarray.h"
 #include "addons/scriptstdstring/scriptstdstring.h"
 
 namespace px::script {
+
+  static std::once_flag createLoggerFlag;
+  static void createLogger() {
+    auto logger = el::Loggers::getLogger("AngelScript");
+
+    auto conf = *logger->configurations();
+    conf.set(el::Level::Global,
+              el::ConfigurationType::Format,
+              "%user [%datetime] [%level] \t%logger : %msg");
+    logger->configure(conf);
+  }
+
   AngelScript::AngelScript() {
+    std::call_once(createLoggerFlag, createLogger);
+
     m_handle = asCreateScriptEngine();
+    CLOG(INFO, "AngelScript") << "Created the AngelScript engine";
 
     init();
   }
@@ -21,6 +37,7 @@ namespace px::script {
       m_ctx->Release();
 
     m_handle->ShutDownAndRelease();
+    CLOG(INFO, "AngelScript") << "Destroyed the AngelScript";
   }
 
   void AngelScript::init() {
@@ -30,8 +47,10 @@ namespace px::script {
 
     RegisterStdString(m_handle);
     RegisterStdStringUtils(m_handle);
+    CLOG(INFO, "AngelScript") << "Registered AngelScript addons array, string, string utils";
 
     m_ctx = m_handle->CreateContext();
+    CLOG(INFO, "AngelScript") << "Created the AngelScript context.";
   }
 
   void AngelScript::registerGlobalFunction(const std::string &funSign, void *funPtr) {
@@ -56,8 +75,19 @@ namespace px::script {
 
   void AngelScript::messageCallback(const asSMessageInfo *msg, void *param) {
     auto self = reinterpret_cast<AngelScript*>(param);
-    const char *msgTypes[] = {"ERROR", "WARNING", "INFO"};
 
-    fmt::print("{} ({}, {}) : {} : {}\n", msg->section, msg->row, msg->col, msgTypes[(int)msg->type], msg->message);
+    auto message = fmt::format("{} ({}, {}) : {}", msg->section, msg->row, msg->col, msg->message);
+
+    switch (msg->type) {
+      default:
+      case asMSGTYPE_INFORMATION:
+        CLOG(INFO, "AngelScript") << message;
+        break;
+      case asMSGTYPE_WARNING:
+        CLOG(WARNING, "AngelScript") << message;
+        break;
+      case asMSGTYPE_ERROR:
+        CLOG(ERROR, "AngelScript") << message;
+    }
   }
 } // px::script

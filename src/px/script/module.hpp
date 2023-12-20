@@ -23,11 +23,13 @@ namespace px::script {
 
       asIScriptFunction *funcHandle = getFunctionByDecl(decl);
 
+
       if (not funcHandle) {
+        CLOG(ERROR, "AngelScript") << "Failed to get a function by declaration " << decl;
         throw std::runtime_error(fmt::format("Failed to get function {} by declaration {}.", funcName, decl));
       }
-
-      return Function<TReturn (TArgs...)>(priv::FunctionHandle(m_ctx, funcHandle));
+      CVLOG(1, "AngelScript") << "Requested AngelScript function by declaration " << decl;
+      return Function<TReturn (typename priv::GetTypeAsNameImpl<TArgs>::Type...)>(priv::FunctionHandle(m_ctx, funcHandle));
     }
 
   private:
