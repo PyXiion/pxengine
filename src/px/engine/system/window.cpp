@@ -3,6 +3,7 @@
 #include <bx/bx.h>
 #include <bgfx/bgfx.h>
 #include <bgfx/platform.h>
+#include <easylogging++.h>
 #include "general.hpp"
 
 #if BX_PLATFORM_LINUX
@@ -40,6 +41,7 @@ void px::Window::create(const std::string &window_name, int width, int height)
 
   if (!glfwInit())
   {
+    CLOG(ERROR, "PXEngine") << "Failed to initialise the GLFW";
     throw std::runtime_error("Не удалось инициализировать GLFW :(");
   }
 
@@ -50,8 +52,11 @@ void px::Window::create(const std::string &window_name, int width, int height)
 
   if (!m_windowHandle)
   {
+    CLOG(ERROR, "PXEngine") << "Failed to create a window";
     throw std::runtime_error("Не удалось создать окно :(");
   }
+
+  CLOG(INFO, "PXEngine") << "The window has been created successfully";
 
   // callbacks
   // window resize
@@ -122,7 +127,7 @@ void px::Window::create(const std::string &window_name, int width, int height)
     self->onInput(c);
   });
 
-
+  CLOG(INFO, "PXEngine") << "The window event callback have been set up.";
 }
 
 void px::Window::close()
@@ -130,6 +135,7 @@ void px::Window::close()
   if (m_windowHandle) {
     glfwDestroyWindow(m_windowHandle);
     m_windowHandle = nullptr;
+    CLOG(INFO, "PXEngine") << "The window is closed";
   }
 }
 

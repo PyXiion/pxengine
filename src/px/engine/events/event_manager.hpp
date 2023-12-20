@@ -1,6 +1,7 @@
 #pragma once
 #include <experimental/memory>
 #include <eventpp/eventqueue.h>
+#include "easylogging++.h"
 #include "../common/dynamic_enum.hpp"
 #include "event.hpp"
 #include "event_fabric.hpp"
@@ -136,6 +137,7 @@ void px::EventManager::registerEventClass() {
 
   EventType type = getOrRegisterEventType(std::string{T::eventId.data(), T::eventId.size()});
   T::fabric.setEventType(type);
+  CLOG(INFO, "PXEngine") << "New event \"" << T::eventId << "\" is registered with ID " << type;
 }
 
 template<px::EventBasedType T>

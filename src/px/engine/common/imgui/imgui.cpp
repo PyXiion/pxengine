@@ -8,13 +8,10 @@
 
 #include <imgui/imgui_internal.h>
 #include "../../engine.hpp"
-#include "../../resources/bgfx_handle.hpp"
-#include "../../system/keycodes.hpp"
-#include "../../engine.hpp"
 #include "../../utils/bgfx_utils.hpp"
-#include "../../system/window.hpp"
 #include <bx/timer.h>
 #include <bx/math.h>
+#include <easylogging++.h>
 
 #define IMGUI_FLAGS_ALPHA_BLEND UINT8_C(0x01)
 #define IMGUI_MBUT_LEFT   0x01
@@ -49,6 +46,7 @@ namespace px {
     listen(window.onInput, [this](auto c){
       m_input.push(c);
     });
+    CLOG(INFO, "PXEngine") << "Initialised the ImGui context";
   }
 
   void ImGuiCtx::Render(ImDrawData* _drawData) {
@@ -176,6 +174,7 @@ namespace px {
   }
 
   void ImGuiCtx::Create() {
+    CLOG(INFO, "PXEngine") << "Creating the ImGui context";
     IMGUI_CHECKVERSION();
 
     m_viewId = 255;
@@ -291,6 +290,7 @@ namespace px {
     u_imageLodEnabled = bgfx::createUniform("u_imageLodEnabled", bgfx::UniformType::Vec4);
     m_imageShader = rm.loadShader("core.shaders.vs_imgui_image", "core.shaders.fs_imgui_image");
 
+
     m_layout
       .begin()
       .add(bgfx::Attrib::Position,  2, bgfx::AttribType::Float)
@@ -317,6 +317,7 @@ namespace px {
       io.Fonts->AddFontFromMemoryTTF((void*)italic.data(),  italic.size(),  16.0f, &config, ranges);
       io.Fonts->AddFontFromMemoryTTF((void*)bold.data(),    bold.size(),    16.0f, &config, ranges);
     }
+    CLOG(INFO, "PXEngine") << "Loaded ImGui resources";
 
     uint8_t *data;
     int32_t width;
@@ -333,6 +334,7 @@ namespace px {
         , bgfx::copy(data, width*height*4)
         );
 
+    CLOG(INFO, "PXEngine") << "The ImGui context is ready";
 //      ImGui::InitDockContext();
   }
 
@@ -355,6 +357,8 @@ namespace px {
 
     style.FrameRounding = 4.0f;
     style.WindowBorderSize = 0.0f;
+
+    CLOG(INFO, "PXEngine") << "Set up the " << (dark ? "dark" : "light") << " theme";
   }
 
   void ImGuiCtx::BeginFrame(bgfx::ViewId viewId) {

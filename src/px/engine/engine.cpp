@@ -3,10 +3,21 @@
 #include <filesystem>
 
 #include <easy/profiler.h>
+#include "easylogging++.h"
 #include "common/frame_limiter.hpp"
 #include "px/engine/events/common/mouse_event.hpp"
 #include "px/engine/events/common/key_event.hpp"
 
+static std::once_flag createLoggerFlag;
+static void createLogger() {
+  auto logger = el::Loggers::getLogger("PXEngine");
+
+  auto conf = *logger->configurations();
+  conf.set(el::Level::Global,
+           el::ConfigurationType::Format,
+           "%user [%datetime] [%level] \t%logger : %msg");
+  logger->configure(conf);
+}
 
 px::Engine::Engine()
   : m_maxFps(60)
@@ -18,9 +29,10 @@ px::Engine::Engine()
   , m_debugInfoWindow(*this)
   , m_settingsWindow(*this)
 {
+  std::call_once(createLoggerFlag, createLogger);
   instance = this;
-
-  printf("Рабочая директория %s\n", std::filesystem::current_path().c_str());
+  CLOG(INFO, "PXEngine") << "Created an engine instance";
+  CLOG(INFO, "PXEngine") << "The orking directory is " << std::filesystem::current_path();
 
   EASY_PROFILER_ENABLE
 }
@@ -31,17 +43,19 @@ px::Engine::~Engine()
   m_world.reset();
 
   profiler::dumpBlocksToFile("./profile");
+  CLOG(INFO, "PXEngine") << "The profile is dumped";
 }
 
 void px::Engine::run()
 {
   init();
+  CLOG(INFO, "PXEngine") << "The engine is fully initialised";
 
   m_fpsLimiter.reset();
   while (!m_window->isShouldClose())
   {
     loop();
-    m_deltaTime = m_fpsLimiter.sleep();
+//    m_deltaTime = m_fpsLimiter.sleep();
   }
   m_window->close();
 
@@ -56,6 +70,7 @@ void px::Engine::run()
 void px::Engine::reloadSettings() {
   // graphics
   m_fpsLimiter.setMaxFps(m_settings.graphicsSettings.maxFps);
+  CLOG(INFO, "PXEngine") << "The settings have been reloaded";
 }
 
 void px::Engine::init()
@@ -63,6 +78,7 @@ void px::Engine::init()
   EASY_BLOCK("px::Engine::init", profiler::colors::Orange)
 
   registerEventTypes();
+  CLOG(INFO, "PXEngine") << "";
 
   m_resourceManager = std::make_unique<ResourceManager>(*this, "./data");
   m_window = std::make_unique<Window>("PXE", 1280, 720);
@@ -103,6 +119,7 @@ void px::Engine::proxyEvents() {
     m_window->onMouseMoved.append([this] (float x, float y) {
       m_eventManager.emplaceEvent<MouseEvent>(x, y);
     });
+
     m_window->onKey.append([this] (KeyCode key, bool pressed, KeyModifiers::Enum mods) {
       m_eventManager.emplaceEvent<KeyEvent>(key, pressed);
 
@@ -229,6 +246,10 @@ px::Settings &px::Engine::getSettings() {
 
 px::SettingsWindow &px::Engine::getSettingsWindow() {
   return m_settingsWindow;
+}
+
+px::script::AngelScript &px::Engine::getScriptEngine() {
+  return m_scriptEngine;
 }
 
 px::World &px::Engine::createNewWorld()

@@ -6,9 +6,11 @@
 
 #include "model.hpp"
 #include <stack>
+#include <easylogging++.h>
 
 namespace px {
   void Model::loadFromFile(const std::string &path) {
+    CLOG(INFO, "PXEngine") << "Loading new model from " << path;
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 
@@ -16,6 +18,7 @@ namespace px {
       throw std::runtime_error("TODO: an adequate exception");
     }
     processNodes(scene->mRootNode, scene);
+    CLOG(INFO, "PXEngine") << "The model have been loaded successfully";
   }
 
   void Model::draw(const RenderStates &renderStates) const {
@@ -25,23 +28,30 @@ namespace px {
   }
 
   void Model::processNodes(aiNode *rootNode, const aiScene *scene) {
+    size_t processedNodesCount = 0;
+    size_t processedMeshesCount = 0;
+
     std::stack<aiNode *> nodes;
     nodes.push(rootNode);
 
     while (not nodes.empty()) {
       auto node = nodes.top();
       nodes.pop();
+      processedNodesCount += 1;
 
       // process all the node's meshes
       for (uint i = 0; i < node->mNumMeshes; i++) {
         aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
         m_meshes.push_back(processMesh(mesh, scene));
+        processedMeshesCount += 1;
       }
       // process children
       for (uint i = 0; i < node->mNumChildren; i++) {
         nodes.push(node->mChildren[i]);
       }
     }
+    CLOG(INFO, "PXEngine") << "\tNodes: "  << processedNodesCount;
+    CLOG(INFO, "PXEngine") << "\tMeshes: " << processedMeshesCount;
   }
 
   Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
@@ -51,7 +61,7 @@ namespace px {
 
     bool hasTexCoords = mesh->mTextureCoords[0];
 
-    printf("Загружаю меш с %d вертексами и %d полигонами\n", mesh->mNumVertices, mesh->mNumFaces);
+    CLOG(INFO, "PXEngine") << "\tFound a mesh with " << mesh->mNumVertices << " vertices and " << mesh->mNumFaces << " faces";
 
     for (uint i = 0; i < mesh->mNumVertices; i++) {
       Vertex vertex{};

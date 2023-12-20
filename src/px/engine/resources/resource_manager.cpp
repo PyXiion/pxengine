@@ -28,6 +28,9 @@ px::ShaderPtr px::ResourceManager::loadShader(const std::string &vsName, const s
   if (not reload and std::holds_alternative<ShaderPtr>(resource)) {
     return std::get<ShaderPtr>(resource);
   }
+  CLOG(INFO, "PXEngine") << "Loading new shader:";
+  CLOG(INFO, "PXEngine") << "\t" << vsName;
+  CLOG(INFO, "PXEngine") << "\t" << fsName;
 
   bgfx::ShaderHandle vsh = loadShaderFile(vsName, reload);
   bgfx::ShaderHandle fsh = BGFX_INVALID_HANDLE;
@@ -38,6 +41,8 @@ px::ShaderPtr px::ResourceManager::loadShader(const std::string &vsName, const s
 
   auto shader = makeShader(vsh, fsh);
   resource = shader;
+
+  CLOG(INFO, "PXEngine") << "The shader has been loaded successfully";
   return shader;
 }
 
@@ -54,7 +59,6 @@ bgfx::ShaderHandle px::ResourceManager::loadShaderFile(const std::string &filena
 
   switch (bgfx::getRendererType()) {
     case bgfx::RendererType::Noop:
-    case bgfx::RendererType::Direct3D9:  shaderType = "dx9"; break;
     case bgfx::RendererType::Direct3D11:
     case bgfx::RendererType::Direct3D12: shaderType = "dx11";  break;
     case bgfx::RendererType::Agc:
@@ -63,8 +67,7 @@ bgfx::ShaderHandle px::ResourceManager::loadShaderFile(const std::string &filena
     case bgfx::RendererType::Nvn:        shaderType = "nvn";   break;
     case bgfx::RendererType::OpenGL:     shaderType = "glsl";  break;
     case bgfx::RendererType::OpenGLES:   shaderType = "essl";  break;
-    case bgfx::RendererType::Vulkan:
-    case bgfx::RendererType::WebGPU:     shaderType = "spirv"; break;
+    case bgfx::RendererType::Vulkan:     shaderType = "spirv"; break;
 
     default:
       throw std::runtime_error("Unknown renderer type.");
@@ -80,6 +83,8 @@ bgfx::ShaderHandle px::ResourceManager::loadShaderFile(const std::string &filena
   bgfx::setName(handle, filename.c_str());
 
   resource = BgfxUniqueShaderHandle(handle);
+
+  CLOG(INFO, "PXEngine") << "Loaded shader " << filename << " (" << path << ")";
   return handle;
 }
 
@@ -110,6 +115,8 @@ px::TexturePtr px::ResourceManager::loadTexture(const std::string &texture, bool
   auto texturePtr = makeTexture();
   texturePtr->loadFromFile(path);
   resource = texturePtr;
+
+  CLOG(INFO, "PXEngine") << "Loaded texture " << texture << " (" << path << ")";
   return texturePtr;
 }
 
@@ -129,6 +136,8 @@ px::ResourceManager::RawType px::ResourceManager::loadRawFile(const std::string 
   RawType raw(ms.data(), ms.size());
   resource = std::move(ms);
 
+
+  CLOG(INFO, "PXEngine") << "Loaded raw " << _path << " (" << path << ")";
   return raw;
 }
 
@@ -151,6 +160,7 @@ const px::Localization &px::ResourceManager::loadLocalization(const std::string 
   loc->loadLanguage("ru");
 
   resource = std::move(loc);
+  CLOG(INFO, "PXEngine") << "Loaded localization " << localization;
   return *ptr;
 }
 

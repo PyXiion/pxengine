@@ -1,13 +1,17 @@
 #include "world.hpp"
 #include <fmt/format.h>
+#include <easylogging++.h>
 
 thread_local px::World *px::World::current_world;
 
 px::World::World(px::Engine &engine)
   : m_engine(engine) {
+  CLOG(INFO, "PXEngine") << "Created an empty world";
 }
 
-px::World::~World() = default;
+px::World::~World() {
+  CLOG(INFO, "PXEngine") << "The world at " << this << " is destroyed";
+}
 
 px::Engine &px::World::getEngine()
 {

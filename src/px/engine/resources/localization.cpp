@@ -10,6 +10,7 @@
 #include <yaml-cpp/yaml.h>
 #include <fmt/format.h>
 #include <easy/profiler.h>
+#include <easylogging++.h>
 
 namespace px {
   Localization::Localization(const std::string &folderPath, const std::string &languageCode) {
@@ -33,6 +34,7 @@ namespace px {
     std::stack<NodeAndPath> nodes;
     nodes.push({root, {}});
 
+    CLOG(INFO, "PXEngine") << "Localization (" << languageCode << "):";
     while (not nodes.empty()) {
       auto [node, path] = nodes.top();
       nodes.pop();
@@ -51,15 +53,16 @@ namespace px {
           auto str = value.as<std::string>();
           m_dict[dictKey] = str;
 
-          printf("%s = %s\n", dictKey.c_str(), str.c_str());
+          CLOG(INFO, "PXEngine") << "\t" << dictKey << " = \"" << str << "\"";
 
           // return to our map
         }
         // return to parent
         path.pop_back();
       }
-
     }
+
+    CLOG(INFO, "PXEngine") << "Loaded " << m_dict.size() << " strings";
   }
 
   const std::string &Localization::operator[](const std::string &key) const {
@@ -67,8 +70,10 @@ namespace px {
       throw std::out_of_range("There's no localization.");
 
     auto it = m_dict.find(key);
-    if (it == m_dict.end())
+    if (it == m_dict.end()) {
+      CLOG(ERROR, "PXEngine") << "Access to a non-existent localisation key " << key;
       throw std::out_of_range(fmt::format("There's no \"{}\" key in localization files.", key));
+    }
 
     return it->second;
   }

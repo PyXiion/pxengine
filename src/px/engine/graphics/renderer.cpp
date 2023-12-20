@@ -6,6 +6,7 @@
 
 #include <bgfx/platform.h>
 #include <easy/profiler.h>
+#include <easylogging++.h>
 #include "renderer.hpp"
 
 static bgfx::ViewId viewsCount = 0;
@@ -13,6 +14,7 @@ static bgfx::ViewId viewsCount = 0;
 namespace px {
   Renderer::Renderer(Window &window, bgfx::RendererType::Enum type)
     : m_viewId(viewsCount++) {
+    CLOG(INFO, "PXEngine") << "Initialising the renderer";
     EASY_BLOCK("Renderer::Renderer")
     // Call it before bgfx::init to signal to bgfx not to create a render thread.
     bgfx::renderFrame();
@@ -36,6 +38,8 @@ namespace px {
       throw std::runtime_error("Failed to init bgfx.");
     }
 
+    CLOG(INFO, "PXEngine") << "BGFX has been initialised successfully";
+
     bgfx::setViewClear(0
         , BGFX_CLEAR_COLOR|BGFX_CLEAR_DEPTH
         , 0x303030ff
@@ -54,6 +58,7 @@ namespace px {
 
     // And call it once
     onFramebufferResize(width, height);
+    CLOG(INFO, "PXEngine") << "The renderer has been initialised successfully";
   }
 
   Renderer::~Renderer() {

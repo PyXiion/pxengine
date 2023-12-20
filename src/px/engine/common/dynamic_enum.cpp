@@ -1,5 +1,4 @@
 #include "dynamic_enum.hpp"
-#include <algorithm>
 #include <stdexcept>
 
 px::DynamicEnum::EnumValue px::DynamicEnum::add(const std::string& key)

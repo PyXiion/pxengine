@@ -19,6 +19,7 @@
 
 #define PX_IMGUI_USE_ENTRY
 #include "common/imgui/imgui.hpp"
+#include "px/script/angel_script.hpp"
 #include "px/engine/ui/settings_window.hpp"
 #include "settings.hpp"
 
@@ -48,6 +49,7 @@ namespace px
     World *getWorld() const;
     Settings &getSettings();
     SettingsWindow &getSettingsWindow();
+    script::AngelScript &getScriptEngine();
 
     static Engine &getInstance();
 
@@ -95,6 +97,7 @@ namespace px
 
     BS::thread_pool m_threadPool;
 
+    script::AngelScript m_scriptEngine;
     EventManager m_eventManager;
 
     std::unique_ptr<ImGuiCtx> m_imgui;
