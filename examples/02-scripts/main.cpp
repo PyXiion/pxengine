@@ -10,15 +10,15 @@ void main() {
   player.hello();
 }
 
-PlayerPtr myPlayer;
+EntityPtr myEntity;
 void test(PlayerPtr player) {
-  myPlayer = player;
+  myEntity = PlayerPtr(player); // create a copy, because otherwise player will be nullptr (moving semantics)
   player.y = player.y * 3;
   print(player.y);
 }
+
 void test() {
-  myPlayer.y = myPlayer.y + 20;
-  myPlayer.where();
+  myEntity.where();
 }
 
 void hello(const string &in name) {
@@ -31,6 +31,25 @@ string makeHello(const string &in name) {
 
 void addHello(string &out toEdit, const string &in name) {
   toEdit += "\nHello " + name + "!";
+}
+
+class Enemy {
+  Enemy() {
+    print("Enemy created!");
+  }
+
+  void kill() {
+    if (isDead) {
+      print(someImportantString);
+    } else {
+      print("I'm dead now. " + someImportantString);
+      someImportantStringMutable += " I'm already dead.";
+      isDead = true;
+    }
+  }
+
+  float ususedVar;
+  bool isDead = false;
 }
 )";
 
@@ -78,12 +97,20 @@ void hello(Player *self) {
   fmt::print("Hello from X:{} Y:{}!\n", self->x, self->y);
 }
 
-int main() {
+std::string someImportantString;
+
+int main(int argc, char *argv[]) {
+  START_EASYLOGGINGPP(argc, argv);
   px::script::AngelScript as;
 
   // registering functions
   as.registerGlobalFunction("print", &print); // void print(const string &in)
   as.registerGlobalFunction("print", &printF); // void print(float)
+
+  // global variables
+  someImportantString = "You won!";
+  as.registerGlobalVariable<const std::string>("someImportantString", &someImportantString);
+  as.registerGlobalVariable("someImportantStringMutable", &someImportantString);
 
   // registering types
   as.registerObjectType<Player>("Player")
@@ -99,7 +126,8 @@ int main() {
     .property<&Player::health>("health");
 
 //   base ptr type
-  as.registerObjectType<EntityPtr>();
+  as.registerObjectType<EntityPtr>()
+    .method<&Entity::where>("where");
 
   // smart ptr type
   as.registerObjectType<PlayerPtr>()
@@ -148,4 +176,18 @@ int main() {
   std::string str = makeHello("PyXiion");
   addHello(str, "World");
   std::cout << str << std::endl;
+
+  // Test script classes
+  auto type = module.getType("Enemy");
+  auto factory = type.getFactory();
+  auto killEnemy = type.getMethod<void>("kill");
+  auto isDead = type.getProperty<bool>("isDead");
+
+  auto object = *factory();
+
+  std::cout << "isDead: " << std::boolalpha << isDead(object) << std::endl;
+  killEnemy(object);
+
+  std::cout << "isDead: " << std::boolalpha << isDead(object) << std::endl;
+  killEnemy(object);
 }
