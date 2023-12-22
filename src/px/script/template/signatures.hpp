@@ -15,11 +15,8 @@
 
 namespace px::script {
   namespace priv {
-    template<class...>
-    struct getArrOfNamesImpl;
-
     template<class ...T>
-    struct getArrOfNamesImpl<std::tuple<T...>> {
+    struct getArrOfNamesImpl {
       static auto constexpr inline N = sizeof...(T);
 
       static inline decltype(auto) get() {
@@ -29,6 +26,9 @@ namespace px::script {
         return arr;
       }
     };
+
+    template<class ...T>
+    struct getArrOfNamesImpl<std::tuple<T...>> : public getArrOfNamesImpl<T...> {};
 
     template<class>
     struct TupleFirstElem;
@@ -58,6 +58,15 @@ namespace px::script {
                        std::forward<std::string_view>(functionName),
                        fmt::join((args), ", "),
                        postfix);
+  }
+
+  template<class ...TArgs>
+  static inline decltype(auto) getFactorySignature(const char *typeName) {
+    auto &&args = priv::getArrOfNamesImpl<>::get();
+
+    return fmt::format("{0} @{0}({1})",
+                       typeName,
+                       fmt::join((args), ", "));
   }
 
   template<class T>

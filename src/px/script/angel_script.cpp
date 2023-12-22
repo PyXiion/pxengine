@@ -57,6 +57,10 @@ namespace px::script {
     m_handle->RegisterGlobalFunction(funSign.c_str(), asFUNCTION(funPtr), asCALL_CDECL);
   }
 
+  void AngelScript::registerGlobalVariable(const std::string &signature, void *ptr) {
+    m_handle->RegisterGlobalProperty(signature.c_str(), ptr);
+  }
+
   asIScriptEngine *AngelScript::getHandle() {
     return m_handle;
   }

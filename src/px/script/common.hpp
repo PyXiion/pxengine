@@ -12,8 +12,11 @@
 struct asIScriptEngine;
 struct asIScriptModule;
 struct asIScriptFunction;
+struct asIScriptObject;
 
 struct asIScriptContext;
+
+struct asITypeInfo;
 
 struct asSMessageInfo;
 

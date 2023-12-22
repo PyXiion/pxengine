@@ -8,6 +8,7 @@
 #define PX_ENGINE_MODULE_HPP
 #include "common.hpp"
 #include "function.hpp"
+#include "object_type.hpp"
 #include "template/signatures.hpp"
 
 namespace px::script {
@@ -30,6 +31,10 @@ namespace px::script {
       }
       CVLOG(1, "AngelScript") << "Requested AngelScript function by declaration " << decl;
       return Function<TReturn (typename priv::GetTypeAsNameImpl<TArgs>::Type...)>(priv::FunctionHandle(m_ctx, funcHandle));
+    }
+
+    auto getType(const std::string &typeName) {
+      return ObjectType(typeName, m_ctx, m_module);
     }
 
   private:

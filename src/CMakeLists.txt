@@ -34,6 +34,8 @@ set(PX_LIB_SOURCES
     px/script/object_type_builder.hpp
     px/utils/static_warning.hpp
     px/px.cpp
+    px/script/object_type.cpp
+    px/script/object_type.hpp
 )
 
 add_library(px ${PX_LIB_SOURCES})

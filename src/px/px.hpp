@@ -5,6 +5,8 @@
 #ifndef PX_PX_HPP
 #define PX_PX_HPP
 
+#define PX_ANYTHING_TO_VOID_PTR(var) (const_cast<void*>(reinterpret_cast<const void*>(var)))
+
 namespace px {
 
 }
