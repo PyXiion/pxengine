@@ -149,6 +149,22 @@ bool px::Window::isKeyPressed(int key) const
   return glfwGetKey(m_windowHandle, key) == GLFW_PRESS;
 }
 
+void px::Window::setCursorHidden(bool hidden) {
+  glfwSetInputMode(m_windowHandle, GLFW_CURSOR, hidden ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+}
+
+void px::Window::hideCursor() {
+  setCursorHidden(true);
+}
+
+void px::Window::showCursor() {
+  setCursorHidden(true);
+}
+
+bool px::Window::isCursorHidden() const {
+  return glfwGetInputMode(m_windowHandle, GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
+}
+
 void px::Window::pollEvents()
 {
   EASY_BLOCK("px::Window::pollEvents", profiler::colors::Cyan300)

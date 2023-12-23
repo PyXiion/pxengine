@@ -43,6 +43,14 @@ namespace px {
     std::pair<int, int> size();
     float getAspect();
 
+    void setCursorHidden(bool hidden);
+
+    void hideCursor();
+
+    void showCursor();
+
+    bool isCursorHidden() const;
+
     static void *getDisplayHandle();
     void *getNativeHandle();
 
