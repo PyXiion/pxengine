@@ -19,7 +19,7 @@ px::Engine &px::World::getEngine()
 }
 
 px::GameObjectPtr px::World::getObjectByName(const std::string &name) {
-  EASY_BLOCK("px::World::getObjectByName");
+  EASY_BLOCK("px::World::getObjectByName")
   auto it = m_gameObjectsByName.find(name);
   if (it != m_gameObjectsByName.end())
   {
@@ -33,7 +33,7 @@ const std::list<px::GameObjectPtr> &px::World::getAllGameObjects() const {
 }
 
 void px::World::updateObjectName(GameObjectPtr &gameObject, const std::string &newName) {
-  EASY_BLOCK("px::World::updateObjectName");
+  EASY_BLOCK("px::World::updateObjectName")
   std::lock_guard lk(m_gameObjectsMutex);
   if (m_gameObjectsByName.contains(newName)) {
     throw std::runtime_error("Данное имя уже занято!");
@@ -50,7 +50,7 @@ void px::World::updateObjectName(GameObjectPtr &gameObject, const std::string &n
 }
 
 void px::World::destroyObject(GameObjectIter &iterator) {
-  EASY_BLOCK("px::World::destroyObject");
+  EASY_BLOCK("px::World::destroyObject")
   // Get the object from it.
   auto obj = *iterator;
   auto &name = obj->getName();

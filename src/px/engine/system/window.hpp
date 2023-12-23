@@ -43,10 +43,10 @@ namespace px {
     std::pair<int, int> size();
     float getAspect();
 
-    void *getDisplayHandle();
+    static void *getDisplayHandle();
     void *getNativeHandle();
 
-    void pollEvents();
+    static void pollEvents();
 
     GLFWwindow *getHandle();
 

@@ -21,7 +21,7 @@ namespace px {
 
     void submit(const RenderStates &renderStates) const;
 
-    std::vector<TexturePtr> getTextures() const;
+    [[nodiscard]] std::vector<TexturePtr> getTextures() const;
 
   private:
     std::vector<Vertex> m_vertices;

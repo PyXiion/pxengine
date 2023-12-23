@@ -33,4 +33,13 @@ namespace px {
   void ModelRenderer::setRenderStates(RenderStates renderStates) {
     m_states = std::move(renderStates);
   }
+
+  void ModelRenderer::guiEditor() {
+    // draw texture
+    for (auto &mesh : m_model->getMeshes()) {
+      for (auto &texture : mesh.getTextures()) {
+        ImGui::Image(texture->getHandle(), {0, 100});
+      }
+    }
+  }
 } // px

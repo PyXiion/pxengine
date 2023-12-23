@@ -106,7 +106,7 @@ namespace px {
     return {std::move(vertices), std::move(indices), std::move(textures)};
   }
 
-  std::vector<TexturePtr> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type, const std::string &path) {
+  std::vector<TexturePtr> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type, [[maybe_unused]] const std::string &path) {
     std::vector<TexturePtr> textures;
     for (uint i = 0; i < mat->GetTextureCount(type); i++) {
       aiString str;

@@ -24,7 +24,7 @@ namespace px {
     explicit SettingsWindow(Engine &engine);
 
     void setOpened(bool opened);
-    bool isOpened();
+    bool isOpened() const;
 
   private:
     Engine &m_engine;

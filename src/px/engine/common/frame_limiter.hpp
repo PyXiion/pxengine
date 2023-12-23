@@ -18,7 +18,7 @@ namespace px
     using Duration = std::chrono::microseconds;
     using TimePoint = Clock::time_point;
 
-    Duration m_step;
+    Duration m_step{};
     TimePoint m_previousFrame;
     TimePoint m_nextFrame;
   };

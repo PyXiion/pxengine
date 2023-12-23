@@ -36,7 +36,7 @@ px::Window::~Window()
 
 void px::Window::create(const std::string &window_name, int width, int height)
 {
-  EASY_BLOCK("px::Window::create");
+  EASY_BLOCK("px::Window::create")
   std::lock_guard lk(m_glfwMutex);
 
   if (!glfwInit())
@@ -151,7 +151,7 @@ bool px::Window::isKeyPressed(int key) const
 
 void px::Window::pollEvents()
 {
-  EASY_BLOCK("px::Window::pollEvents", profiler::colors::Cyan300);
+  EASY_BLOCK("px::Window::pollEvents", profiler::colors::Cyan300)
   glfwPollEvents();
 }
 

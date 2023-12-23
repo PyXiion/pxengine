@@ -68,6 +68,7 @@ namespace px {
   }
 
   void Camera::setRotation(Vector3 direction) {
+    m_direction = direction;
     setRotation(
         glm::degrees(glm::atan(m_direction.y, m_direction.x)), // yaw
         glm::degrees(-std::asin(m_direction.z))                // pitch

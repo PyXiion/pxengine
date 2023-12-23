@@ -29,9 +29,9 @@ namespace px {
     std::vector<Mesh> m_meshes;
 
     void processNodes(aiNode *rootNode, const aiScene *scene);
-    Mesh processMesh(aiMesh *mesh, const aiScene *scene);
+    static Mesh processMesh(aiMesh *mesh, const aiScene *scene);
 
-    static std::vector<TexturePtr> loadMaterialTextures(aiMaterial *mat, aiTextureType type, const std::string &path);
+    static std::vector<TexturePtr> loadMaterialTextures(aiMaterial *mat, aiTextureType type, [[maybe_unused]] const std::string &path);
   };
 
   typedef std::shared_ptr<Model> ModelPtr;

@@ -40,7 +40,7 @@ void px::DebugInfoWindow::onTick(float dt)
 
 void px::DebugInfoWindow::onGuiDraw()
 {
-  EASY_BLOCK("px::DebugInfoWindow::onGuiDraw");
+  EASY_BLOCK("px::DebugInfoWindow::onGuiDraw")
   bool graphUpdate = false;
   if (m_secondTimer > 0.3f) {
     m_secondTimer = 0;

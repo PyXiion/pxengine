@@ -22,7 +22,6 @@ static void createLogger() {
 px::Engine::Engine()
   : m_maxFps(60)
   , m_maxTps(10)
-  , m_speed(1.0f)
   , m_deltaTime(1.0f / float(m_maxFps))
   , m_tickDeltaTime(1.0f / float(m_maxTps))
   , m_tickThreadShouldStop(false)
@@ -102,7 +101,7 @@ void px::Engine::init()
   proxyEvents();
 
   // Инициализация всего остального
-  EASY_BLOCK("Init event", profiler::colors::LightBlue);
+  EASY_BLOCK("Init event", profiler::colors::LightBlue)
   onInit(*this);
 }
 

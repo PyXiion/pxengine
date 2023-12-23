@@ -20,7 +20,7 @@ namespace px {
     ~Renderer();
 
     void beginFrame();
-    void renderFrame();
+    static void renderFrame();
 
     [[nodiscard]] bool isDebugEnabled() const;
     void setDebugEnabled(bool debugEnabled);

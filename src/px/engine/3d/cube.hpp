@@ -31,7 +31,7 @@ namespace px {
     Cube();
     ~Cube();
 
-    void draw(int i);
+    void draw([[maybe_unused]] int i);
 
   private:
     void createBuffers();

@@ -18,7 +18,7 @@ namespace px {
     void loadFromFile(const std::string &filename);
     void loadFromImage(const Image &image);
 
-    bgfx::TextureHandle getHandle() const;
+    [[nodiscard]] bgfx::TextureHandle getHandle() const;
 
   private:
     BgfxUniqueTextureHandle m_handle;

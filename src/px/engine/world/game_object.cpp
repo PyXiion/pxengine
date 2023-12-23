@@ -32,3 +32,16 @@ void px::GameObject::setName(const std::string &name)
 }
 
 void px::GameObject::guiEditor() {}
+
+bool px::GameObject::removeComponent(px::Component *componentToRemove) {
+  if (m_components.empty())
+    return false;
+
+  for (const auto &component : m_components) {
+    if (component.get() == componentToRemove) {
+      m_components.remove(component);
+      return true;
+    }
+  }
+  return false;
+}

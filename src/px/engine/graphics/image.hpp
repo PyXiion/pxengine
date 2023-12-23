@@ -25,8 +25,8 @@ namespace px {
     [[nodiscard]] const uint8_t *data() const;
 
   private:
-    Vector2i m_size;
-    int m_channels;
+    Vector2i m_size{};
+    int m_channels{};
     const uint8_t *m_data{};
   };
 

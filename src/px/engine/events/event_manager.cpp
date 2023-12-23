@@ -85,8 +85,7 @@ px::EventManager::EventManager()
 
 }
 
-px::EventManager::~EventManager() {
-}
+px::EventManager::~EventManager() = default;
 
 std::vector<std::pair<std::string, px::EventType>> px::EventManager::getEventIds() const {
   std::lock_guard lk(m_enumMutex);

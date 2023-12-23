@@ -65,7 +65,7 @@ template<class T, class ...TArgs>
   requires std::is_base_of_v<px::GameObject, T>
 std::shared_ptr<T> px::World::createGameObject(TArgs... args)
 {
-  EASY_BLOCK(__PRETTY_FUNCTION__);
+  EASY_BLOCK(__PRETTY_FUNCTION__)
 
   // Set the pointer to this world
   current_world = this;

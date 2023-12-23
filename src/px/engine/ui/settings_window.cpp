@@ -13,7 +13,7 @@ namespace px {
     , m_opened(false)
     , m_tab(Tab::Graphics) {
     engine.onInit.append([this](Engine &engine) {
-      EASY_BLOCK("px::SettingsWindow::SettingsWindow -> px::Engine::onInit");
+      EASY_BLOCK("px::SettingsWindow::SettingsWindow -> px::Engine::onInit")
       m_localization = &engine.getResourceManager().loadLocalization("core.lang");
       m_settings = &engine.getSettings();
     });
@@ -24,12 +24,12 @@ namespace px {
     m_opened = opened;
   }
 
-  bool SettingsWindow::isOpened() {
+  bool SettingsWindow::isOpened() const {
     return m_opened;
   }
 
   void SettingsWindow::onGuiDraw() {
-    EASY_BLOCK("SettingsWindow::onGuiDraw");
+    EASY_BLOCK("SettingsWindow::onGuiDraw")
     if (not m_opened || not m_localization || not m_settings) return;
     std::string title = m_localization->get("ui.settings.title") + "##settings";
     if (ImGui::Begin(title.c_str(), &m_opened)) {

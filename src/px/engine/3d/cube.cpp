@@ -46,8 +46,7 @@ namespace px {
     m_shader = px::Engine::getInstance().getResourceManager().loadShader("core.shaders.vs_cubes",
                                                                           "core.shaders.fs_cubes");
   }
-  Cube::~Cube() {
-  }
+  Cube::~Cube() = default;
 
   void Cube::createBuffers() {
     EASY_BLOCK("Cube::createBuffers")
@@ -69,7 +68,7 @@ namespace px {
     rm["core.cube.ib"] = m_ibh;
   }
 
-  void Cube::draw(int i) {
+  void Cube::draw([[maybe_unused]] int i) {
     EASY_BLOCK("Cube::draw")
     constexpr uint64_t state = 0
                      | BGFX_STATE_WRITE_R

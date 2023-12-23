@@ -21,6 +21,8 @@ namespace px {
     void setModel(ModelPtr model);
     void setRenderStates(RenderStates renderStates);
 
+    void guiEditor() override;
+
   private:
     ModelPtr m_model;
 

@@ -408,7 +408,7 @@ namespace px {
 } // px
 
 bool ImGui::InputVector3(const char *label, px::Vector3 &v, const char *format, ImGuiInputTextFlags flags) {
-  bool result;
+  [[maybe_unused]] bool result;
   float xyz[3] = {v.x, v.y, v.z};
 
   if (ImGui::InputFloat3(label, xyz, format, flags)) {

@@ -9,7 +9,7 @@ namespace px
 {
   class Transform : public BaseComponent<Transform, "core.transform"> {
   public:
-    Transform(Vector3 position = {0, 0, 0}, Vector3 eulerAngles = {0, 0, 0});
+    explicit Transform(Vector3 position = {0, 0, 0}, Vector3 eulerAngles = {0, 0, 0});
 
     void move(Vector3 offset);
     void rotate(Vector3 angles);

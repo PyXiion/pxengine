@@ -17,8 +17,7 @@ px::ResourceManager::ResourceManager(Engine &engine, std::string rootDir)
 
 }
 
-px::ResourceManager::~ResourceManager() {
-}
+px::ResourceManager::~ResourceManager() = default;
 
 px::ShaderPtr px::ResourceManager::loadShader(const std::string &vsName, const std::string &fsName, bool reload) {
   EASY_BLOCK("px::ResourceManager::loadShader")
