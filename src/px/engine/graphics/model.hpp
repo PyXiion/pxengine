@@ -19,6 +19,9 @@ namespace px {
 
   class Model {
   public:
+    Model() = default;
+    explicit Model(const std::string &path) { loadFromFile(path); }
+
     void loadFromFile(const std::string &path);
 
     void draw(const RenderStates &renderStates) const;
@@ -36,7 +39,7 @@ namespace px {
 
   typedef std::shared_ptr<Model> ModelPtr;
   template <class ...TArgs>
-  inline static ModelPtr makeModel(TArgs ...args) { return std::make_shared<Model>(std::forward<TArgs>(args)...); }
+  inline static ModelPtr makeModel(TArgs &&...args) { return std::make_shared<Model>(std::forward<TArgs>(args)...); }
 
 } // px
 

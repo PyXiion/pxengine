@@ -15,6 +15,10 @@ namespace px {
     m_transform = getGameObject()->getComponent<px::Transform>();
   }
 
+  ModelRenderer::ModelRenderer(const std::string &model) {
+    setModel(model);
+  }
+
   void ModelRenderer::subscribeEvents() {
     auto &engine = getGameObject()->getWorld().getEngine();
     listen(engine.onDraw, [this] {draw();});
@@ -28,6 +32,11 @@ namespace px {
 
   void ModelRenderer::setModel(ModelPtr model) {
     m_model = std::move(model);
+  }
+
+  void ModelRenderer::setModel(const std::string &model) {
+    auto &resources = getGameObject()->getWorld().getEngine().getResourceManager();
+    setModel(resources.loadModel(model));
   }
 
   void ModelRenderer::setRenderStates(RenderStates renderStates) {

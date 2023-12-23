@@ -17,8 +17,10 @@ namespace px {
   class ModelRenderer : public BaseComponent<ModelRenderer, "core.model_renderer">, protected EventListener {
   public:
     ModelRenderer();
+    ModelRenderer(const std::string &model);
 
     void setModel(ModelPtr model);
+    void setModel(const std::string &model);
     void setRenderStates(RenderStates renderStates);
 
     void guiEditor() override;
