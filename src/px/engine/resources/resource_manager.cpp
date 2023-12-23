@@ -10,6 +10,27 @@
 
 namespace fs = std::filesystem;
 
+static fs::path checkExtensionsForFilename(fs::path filename, std::vector<std::string> extensions) {
+  CVLOG(2, "PXEngine") << "Looking for file at " << filename;
+
+  bool found = false;
+  for (auto ext : extensions) {
+    filename.replace_extension(ext);
+
+    if (not fs::exists(filename)) {
+      CVLOG(2, "PXEngine") << "\t" << filename << " does not exist";
+      continue;
+    }
+    found = true;
+  }
+  if (not found) {
+    filename.replace_extension("");
+    throw std::runtime_error(fmt::format("Failed to find file at {} (possible extensions: {})", filename.string(), fmt::join(extensions, " ")));
+  }
+  CVLOG(2, "PXEngine") << "\t" << filename << " found";
+  return filename;
+}
+
 px::ResourceManager::ResourceManager(Engine &engine, std::string rootDir)
   : m_engine(engine)
   , m_rootDir(std::move(rootDir))
@@ -42,6 +63,29 @@ px::ShaderPtr px::ResourceManager::loadShader(const std::string &vsName, const s
   resource = shader;
 
   CLOG(INFO, "PXEngine") << "The shader has been loaded successfully";
+  return shader;
+}
+
+px::ModelPtr px::ResourceManager::loadModel(const std::string &model, bool reload) {
+  EASY_BLOCK("px::ResourceManager::loadModel")
+
+  Resource &resource = (*this)[model];
+  if (not reload and std::holds_alternative<ShaderPtr>(resource)) {
+    return std::get<ModelPtr>(resource);
+  }
+  CLOG(INFO, "PXEngine") << "Loading model " << model;
+
+  std::vector<std::string> shaderPath = ResourceManager::parseResourcePath(model);
+  fs::path path = m_rootDir;
+  for (const auto& i : shaderPath)
+    path /= i;
+
+  path = checkExtensionsForFilename(path, {".obj"});
+
+  auto shader = makeModel(path);
+  resource = shader;
+
+  CLOG(INFO, "PXEngine") << "The model \"" << model << "\" has been loaded successfully";
   return shader;
 }
 
@@ -100,16 +144,7 @@ px::TexturePtr px::ResourceManager::loadTexture(const std::string &texture, bool
     path /= i;
 
   // check extensions
-  auto extensions = {".png", ".jpg", ".jpeg", ".bmp", ".gif", ".tga", ".psd"};
-  bool found = false;
-  for (auto ext : extensions) {
-    path.replace_extension(ext);
-    if (not fs::exists(path))
-      continue;
-    found = true;
-  }
-  if (not found)
-    throw std::runtime_error("Texture not found.");
+  path = checkExtensionsForFilename(path, {".png", ".jpg", ".jpeg", ".bmp", ".gif", ".tga", ".psd"});
 
   auto texturePtr = makeTexture();
   texturePtr->loadFromFile(path);
@@ -177,6 +212,7 @@ std::string px::ResourceManager::absolutePath(const std::string &_path)
 std::vector<std::string> px::ResourceManager::parseResourcePath(const std::string &path) {
   return px::split(path, ".");
 }
+
 
 px::ResourceManager::Resource &px::ResourceManager::operator[](const std::string &key) {
   return m_cached[key];

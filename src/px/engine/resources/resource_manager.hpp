@@ -12,6 +12,7 @@
 #include "bgfx_handle.hpp"
 #include "../graphics/texture.hpp"
 #include "px/engine/graphics/shader.hpp"
+#include "px/engine/graphics/model.hpp"
 
 namespace px
 { 
@@ -28,7 +29,8 @@ namespace px
         None,
         BgfxUniqueVertexBufferHandle, BgfxUniqueIndexBufferHandle,
         BgfxUniqueShaderHandle, ShaderPtr,
-        RawTypeHandler, LocalizationPtr, TexturePtr>;
+        RawTypeHandler, LocalizationPtr, TexturePtr,
+        ModelPtr>;
 
   public:
     ResourceManager(Engine &engine, std::string rootDir);
@@ -46,6 +48,8 @@ namespace px
     /// \param fsName The file name of the fragment shader.
     /// \return A bgfx program handle
     ShaderPtr loadShader(const std::string &vsName, const std::string &fsName, bool reload = false);
+
+    ModelPtr loadModel(const std::string &model, bool reload = false);
 
     const Localization &loadLocalization(const std::string &localization, bool reload = false);
 
@@ -65,5 +69,7 @@ namespace px
     std::string absolutePath(const std::string &_path);
 
     static std::vector<std::string> parseResourcePath(const std::string &path);
+
+
   };
 } // namespace px
