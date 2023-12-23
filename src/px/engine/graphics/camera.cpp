@@ -31,7 +31,7 @@ namespace px {
 
   void Camera::lookAt(Vector3 pos) {
     m_direction = glm::normalize(pos - m_position);
-    m_changed = true;
+    setRotation(m_direction);
   }
 
   void Camera::lookAt(float x, float y, float z) {
