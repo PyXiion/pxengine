@@ -46,7 +46,9 @@ namespace px {
     ;
 
 
-    bgfx::setTexture(0, s_texture, m_textures[0]->getHandle());
+    for (auto i = 0; i < m_textures.size(); i++) {
+      bgfx::setTexture(i, s_texture, m_textures[i]->getHandle());
+    }
 
     bgfx::setState(state);
     bgfx::setVertexBuffer(0, m_vb);
