@@ -11,6 +11,7 @@
 #include "../system/window.hpp"
 #include "../events/event_listener.hpp"
 #include "../math/vector.hpp"
+#include "render_states.hpp"
 
 namespace px {
 
@@ -28,6 +29,8 @@ namespace px {
     [[nodiscard]] bgfx::ViewId getViewId() const;
 
     [[nodiscard]] px::Vector2i getFramebufferSize() const;
+
+    RenderStates getDefaultRenderStates() const;
 
   private:
     std::uint32_t m_reset;

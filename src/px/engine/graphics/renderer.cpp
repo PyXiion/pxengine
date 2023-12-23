@@ -99,4 +99,12 @@ namespace px {
   px::Vector2i Renderer::getFramebufferSize() const {
     return m_framebufferSize;
   }
+
+  px::RenderStates Renderer::getDefaultRenderStates() const {
+    RenderStates states;
+    states.viewId = m_viewId;
+    states.state = RenderStates::defaultState;
+
+    return states;
+  }
 } // px
