@@ -17,9 +17,16 @@ namespace px {
 
   class Mesh {
   public:
+    Mesh();
     Mesh(std::vector<Vertex> vertices, std::vector<IndexType> indices, std::vector<TexturePtr> textures);
 
+    void create(std::vector<Vertex> vertices, std::vector<IndexType> indices, std::vector<TexturePtr> textures);
+
     void submit(const RenderStates &renderStates) const;
+
+    void setTexture(std::size_t i, TexturePtr texture);
+
+    void setTextures(std::vector<TexturePtr> textures);
 
     [[nodiscard]] std::vector<TexturePtr> getTextures() const;
 

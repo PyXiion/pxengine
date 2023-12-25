@@ -5,7 +5,7 @@
 //
 
 #include <iostream>
-#include <bgfx/bgfx.h>
+#include <easylogging++.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include "../../../../bgfx.cmake/bimg/3rdparty/stb/stb_image.h"
 #include "image.hpp"
@@ -17,8 +17,10 @@ namespace px {
 
   void Image::loadFromFile(const std::string &filename) {
     m_data = stbi_load(filename.c_str(), &m_size.x, &m_size.y, &m_channels, STBI_rgb_alpha);
-    if (stbi_failure_reason())
+    if (stbi_failure_reason()) {
+      CLOG(ERROR, "PXEngine") << "Failed to load image \"" << filename << "\"";
       throw std::runtime_error(stbi_failure_reason());
+    }
   }
 
   void Image::clear() {

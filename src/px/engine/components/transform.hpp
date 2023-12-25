@@ -7,7 +7,7 @@
 
 namespace px
 {
-  class Transform : public BaseComponent<Transform, "core.transform"> {
+  class Transform : public BaseComponent<"core.transform"> {
   public:
     explicit Transform(Vector3 position = {0, 0, 0}, Vector3 eulerAngles = {0, 0, 0});
 

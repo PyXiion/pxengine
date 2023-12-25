@@ -29,59 +29,48 @@ set(PX_ENGINE_SOURCES
     common/imgui/imgui.cpp common/imgui/imgui.hpp
 
     components/component.cpp components/component.hpp
+    components/transform.cpp components/transform.hpp
+
+    components/graphics/model_renderer.cpp components/graphics/model_renderer.hpp
 
     events/event.hpp
     events/event_fabric.hpp
     events/event_manager.cpp events/event_manager.hpp
 
+    events/common/key_event.hpp
+    events/common/mouse_event.hpp
+
     graphics/camera.cpp graphics/camera.hpp
+    graphics/image.cpp graphics/image.hpp
+    graphics/mesh.cpp graphics/mesh.hpp
+    graphics/model.cpp graphics/model.hpp
+    graphics/render_states.cpp graphics/render_states.hpp
     graphics/renderer.cpp graphics/renderer.hpp
+    graphics/shader.cpp graphics/shader.hpp
+    graphics/texture.cpp graphics/texture.hpp
+    graphics/uniform.cpp graphics/uniform.hpp
+    graphics/vertex.hpp
 
     math/matrix.cpp math/matrix.hpp
     math/vector.cpp math/vector.hpp
 
     resources/bgfx_handle.hpp
+    resources/localization.cpp resources/localization.hpp
     resources/resource_manager.cpp resources/resource_manager.hpp
 
     system/general.cpp system/general.hpp
     system/keycodes.hpp
     system/window.cpp system/window.hpp
 
+    ui/settings_window.cpp ui/settings_window.hpp
+    ui/widgets.hpp
+
     ui/debug/info_window.cpp ui/debug/info_window.hpp
 
     utils/bgfx_utils.cpp utils/bgfx_utils.hpp
 
     world/game_object.cpp world/game_object.hpp
-    components/transform.cpp components/transform.hpp
     world/world.cpp world/world.hpp
-    resources/localization.cpp
-    resources/localization.hpp
-    components/graphics/sprite_render.cpp
-    components/graphics/sprite_renderer.hpp
-    graphics/image.cpp
-    graphics/image.hpp
-    graphics/texture.cpp
-    graphics/texture.hpp
-    ui/widgets.hpp
-    graphics/mesh.cpp
-    graphics/mesh.hpp
-    graphics/vertex.hpp
-    graphics/shader.cpp
-    graphics/shader.hpp
-    ui/settings_window.cpp
-    ui/settings_window.hpp
-    graphics/model.cpp
-    graphics/model.hpp
-    components/graphics/model_renderer.cpp
-    components/graphics/model_renderer.hpp
-    graphics/render_states.cpp
-    graphics/render_states.hpp
-    components/transform.cpp
-    components/transform.hpp
-    events/common/mouse_event.hpp
-    events/common/key_event.hpp
-    graphics/uniform.cpp
-    graphics/uniform.hpp
 )
 
 foreach(SHADER ${PX_ENGINE_SHADER_SOURCES})

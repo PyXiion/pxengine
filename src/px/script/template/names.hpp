@@ -12,13 +12,11 @@
 #include <px/templates.hpp>
 #include "px/utils/static_warning.hpp"
 
-
-
-namespace px {
-  namespace script {
-
-    template<class T>
-    std::string getTypeBaseAsName();
+namespace px::script {
+  template<class T>
+  std::string getTypeBaseAsName();
+}
+// Primitives
 
 #define PX_AS_TYPENAME(cppType, asTypeName)                     \
   template<>                                                    \
@@ -32,29 +30,29 @@ namespace px {
     return asTypeName;                                                    \
   }
 
-    // Primitives
+PX_AS_TYPENAME(void,       "void")
 
-    PX_AS_TYPENAME(void,       "void")
+PX_AS_TYPENAME(bool,       "bool")
 
-    PX_AS_TYPENAME(bool,       "bool")
+PX_AS_TYPENAME(int8_t,     "int8")
+PX_AS_TYPENAME(uint8_t,   "uint8")
 
-    PX_AS_TYPENAME(int8_t,     "int8")
-    PX_AS_TYPENAME(uint8_t,   "uint8")
+PX_AS_TYPENAME(int16_t,    "int16")
+PX_AS_TYPENAME(uint16_t,  "uint16")
 
-    PX_AS_TYPENAME(int16_t,    "int16")
-    PX_AS_TYPENAME(uint16_t,  "uint16")
+PX_AS_TYPENAME(int32_t,    "int")
+PX_AS_TYPENAME(uint32_t,  "uint")
 
-    PX_AS_TYPENAME(int32_t,    "int")
-    PX_AS_TYPENAME(uint32_t,  "uint")
+PX_AS_TYPENAME(int64_t,    "int64")
+PX_AS_TYPENAME(uint64_t,  "uint64")
 
-    PX_AS_TYPENAME(int64_t,    "int64")
-    PX_AS_TYPENAME(uint64_t,  "uint64")
+PX_AS_TYPENAME(float,      "float")
+PX_AS_TYPENAME(double,     "double")
 
-    PX_AS_TYPENAME(float,      "float")
-    PX_AS_TYPENAME(double,     "double")
+PX_AS_TYPENAME(std::string,"string")
 
-    PX_AS_TYPENAME(std::string,"string")
-
+namespace px {
+  namespace script {
     template<class T>
     struct in {
       typedef T Type;
@@ -164,7 +162,7 @@ namespace px {
     }
 
     template<class T>
-    using getType = priv::GetTypeAsNameImpl<T>::Type;
+    using getType = typename priv::GetTypeAsNameImpl<T>::Type;
 
   } // px
 

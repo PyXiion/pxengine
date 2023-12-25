@@ -64,7 +64,7 @@ namespace px {
         static_assert(std::is_base_of_v<EventListener, Object>, "The class of the method does not inherit from EventListener.");
 
         handle = callback.append([this, fun](auto &&...args) {
-          auto self = reinterpret_cast<Object *>(this); // everything is fine (maybe) =D (I'm not sure)
+          auto self = (Object *)(this); // everything is fine (maybe) =D (I'm not sure)
           (self->*fun)(std::forward<decltype(args)>(args)...);
         });
       }

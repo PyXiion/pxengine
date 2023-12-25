@@ -8,6 +8,7 @@
 #include <mutex>
 #include <utility>
 #include <easylogging++.h>
+#include <fmt/format.h>
 
 namespace px {
   static std::once_flag layoutInitOnce;
@@ -21,11 +22,28 @@ namespace px {
       .end();
   }
 
+  Mesh::Mesh() {
+  }
+
   Mesh::Mesh(std::vector<Vertex> vertices, std::vector<IndexType> indices, std::vector<TexturePtr> textures)
     : m_vertices(std::move(vertices))
     , m_indices(std::move(indices))
     , m_textures(std::move(textures)) {
     std::call_once(layoutInitOnce, initLayout);
+
+    m_vb = createVertexBuffer();
+    m_ib = createIndexBuffer();
+
+    if (not s_texture) {
+      s_texture.create("s_texColor", bgfx::UniformType::Sampler);
+    }
+  }
+
+  void Mesh::create(std::vector<Vertex> vertices, std::vector<IndexType> indices, std::vector<TexturePtr> textures) {
+    std::call_once(layoutInitOnce, initLayout);
+    m_vertices = std::move(vertices);
+    m_indices = std::move(indices);
+    m_textures = std::move(textures);
 
     m_vb = createVertexBuffer();
     m_ib = createIndexBuffer();
@@ -79,6 +97,20 @@ namespace px {
                            << " (Size: " << size << " bytes"
                            << ", indices: " << m_indices.size() << ")";
     return handle;
+  }
+
+  void Mesh::setTexture(std::size_t i, TexturePtr texture) {
+    if (m_textures.size() < i) {
+      m_textures[i] = std::move(texture);
+    } else {
+      CLOG(ERROR, "PXEngine") << "Mesh::setTexture out of range.";
+      CLOG(ERROR, "PXEngine") << "\t";
+      throw std::out_of_range(fmt::format("setTexture({0}, {1}) ot of range. m_textures.size() < i === {2} < {0}", i, fmt::ptr(texture.get()), m_textures.size()));
+    }
+  }
+
+  void Mesh::setTextures(std::vector<TexturePtr> textures) {
+    m_textures = std::move(textures);
   }
 
   std::vector<TexturePtr> Mesh::getTextures() const {

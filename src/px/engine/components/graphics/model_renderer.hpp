@@ -14,10 +14,10 @@
 
 namespace px {
 
-  class ModelRenderer : public BaseComponent<ModelRenderer, "core.model_renderer">, protected EventListener {
+  class ModelRenderer : public BaseComponent<"core.model_renderer">, protected EventListener {
   public:
     ModelRenderer();
-    ModelRenderer(const std::string &model);
+    explicit ModelRenderer(const std::string &model);
 
     void setModel(ModelPtr model);
     void setModel(const std::string &model);

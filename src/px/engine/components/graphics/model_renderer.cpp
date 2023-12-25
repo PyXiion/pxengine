@@ -6,7 +6,7 @@
 
 #include "model_renderer.hpp"
 #include <utility>
-#include "../../engine.hpp"
+#include "px/engine/engine.hpp"
 
 namespace px {
   ModelRenderer::ModelRenderer() {
@@ -20,8 +20,8 @@ namespace px {
   }
 
   void ModelRenderer::subscribeEvents() {
-    auto &engine = getGameObject()->getWorld().getEngine();
-    listen(engine.onDraw, [this] {draw();});
+    auto engine = getGameObject()->getEngine();
+    listen(engine->onDraw, &ModelRenderer::draw);
   }
 
   void ModelRenderer::draw() {
@@ -35,7 +35,7 @@ namespace px {
   }
 
   void ModelRenderer::setModel(const std::string &model) {
-    auto &resources = getGameObject()->getWorld().getEngine().getResourceManager();
+    auto &resources = getGameObject()->getEngine()->getResourceManager();
     setModel(resources.loadModel(model));
   }
 

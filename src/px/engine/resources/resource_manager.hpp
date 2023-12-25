@@ -10,7 +10,7 @@
 #include <px/memory_stream.hpp>
 #include "localization.hpp"
 #include "bgfx_handle.hpp"
-#include "../graphics/texture.hpp"
+#include "px/engine/graphics/texture.hpp"
 #include "px/engine/graphics/shader.hpp"
 #include "px/engine/graphics/model.hpp"
 
@@ -35,6 +35,12 @@ namespace px
   public:
     ResourceManager(Engine &engine, std::string rootDir);
     ~ResourceManager();
+
+    ResourceManager(const ResourceManager &) = delete;
+    ResourceManager &operator=(const ResourceManager &) = delete;
+
+    ResourceManager(ResourceManager &&) = delete;
+    ResourceManager &operator=(ResourceManager &&) = delete;
 
     Resource &operator[](const std::string &key);
 

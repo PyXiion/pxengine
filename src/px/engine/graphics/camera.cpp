@@ -12,7 +12,7 @@
 
 namespace px {
   Camera::Camera()
-    : m_renderer(getWorld().getEngine().getRenderer())
+    : m_renderer(getEngine()->getRenderer())
     , m_yaw(0), m_pitch(0) {
 
   }

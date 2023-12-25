@@ -5,6 +5,7 @@
 //
 
 #include "texture.hpp"
+#include <easylogging++.h>
 
 namespace px {
   void Texture::loadFromFile(const std::string &filename) {
@@ -15,12 +16,26 @@ namespace px {
 
   void Texture::loadFromImage(const Image &image) {
     EASY_BLOCK("px::Texture::loadFromImage")
+
     auto size = image.size();
+    CLOG(INFO, "PXEngine") << "Creating new texture...";
+    CLOG(INFO, "PXEngine") << "\tSize: " << size.x << " " << size.y;
+    CLOG(INFO, "PXEngine") << "\tChannels: " << image.channels();
+
+    bgfx::TextureFormat::Enum format;
+    if (image.channels() == 3) {
+      format = bgfx::TextureFormat::RGB8;
+      CLOG(INFO, "PXEngine") << "\tFormat: RGB8";
+    } else if (image.channels() == 2) {
+      format = bgfx::TextureFormat::RGBA8;
+      CLOG(INFO, "PXEngine") << "\tFormat: RGBA8";
+    }
+
     auto res =
         bgfx::createTexture2D(
             size.x, size.y,
             false, 1,
-            bgfx::TextureFormat::RGBA8,
+            format,
             BGFX_SAMPLER_U_CLAMP
             | BGFX_SAMPLER_V_CLAMP
             | BGFX_SAMPLER_MIN_POINT
@@ -29,6 +44,7 @@ namespace px {
         );
 
     if (!bgfx::isValid(res)) {
+      CLOG(INFO, "PXEngine") << "Failed new texture";
       throw std::runtime_error("Invalid texture.");
     }
 

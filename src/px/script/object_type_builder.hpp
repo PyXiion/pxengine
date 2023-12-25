@@ -101,7 +101,10 @@ namespace px::script {
 
     template<class T, class TReturn, class ...TArgs>
     struct MethodImpl<TReturn (T::*)(TArgs...)> : public PtrHolder<TReturn (T::*)(TArgs...)> {
-      using PtrHolder<TReturn (T::*)(TArgs...)>::ptr;
+      using PtrType = TReturn (T::*)(TArgs...);
+      using PtrHolder<PtrType>::ptr;
+
+      constexpr MethodImpl(PtrType ptr) : PtrHolder<PtrType>(ptr) {}
 
       template<class U>
       using ProxyPointerType = TReturn (*)(U, TArgs...);
@@ -109,7 +112,10 @@ namespace px::script {
 
     template<class T, class TReturn, class ...TArgs>
     struct MethodImpl<TReturn (T::*)(TArgs...) const> : public PtrHolder<TReturn (T::*)(TArgs...) const> {
-      using PtrHolder<TReturn (T::*)(TArgs...) const>::ptr;
+      using PtrType = TReturn (T::*)(TArgs...) const;
+      using PtrHolder<PtrType>::ptr;
+
+      constexpr MethodImpl(PtrType ptr) : PtrHolder<PtrType>(ptr) {}
 
       template<class U>
       using ProxyPointerType = TReturn (*)(U, TArgs...);
@@ -120,7 +126,7 @@ namespace px::script {
       constexpr Method(T ptr) : MethodImpl<T>(ptr) {}
 
       using MethodImpl<T>::ptr;
-      using typename MethodImpl<T>::ProxyPointerType;
+      using MethodImpl<T>::ProxyPointerType;
     };
 
     template<class T, class U>
@@ -136,6 +142,8 @@ namespace px::script {
       using PtrType = U (T::*);
       using PtrHolder<PtrType>::ptr;
 
+      constexpr FieldImpl(PtrType ptr) : PtrHolder<PtrType>(ptr) {}
+
       [[nodiscard]] int getOffset() const {
         return getPropertyOffset<T, PtrType>(ptr);
       };
@@ -145,6 +153,8 @@ namespace px::script {
     struct FieldImpl<const U (T::*)> : public PtrHolder<const U (T::*)> {
       using PtrType = const U (T::*);
       using PtrHolder<PtrType>::ptr;
+
+      constexpr FieldImpl(PtrType ptr) : PtrHolder<const U(T::*)>(ptr) {}
 
       [[nodiscard]] int getOffset() const {
         return getPropertyOffset<T, PtrType>(ptr);
@@ -352,7 +362,7 @@ namespace px::script {
     };
     template<class T>
     struct DefaultValue<T&> {
-      inline static T &f() { return *static_cast<T *>(0); }
+      inline static T &f() { return *static_cast<T *>(reinterpret_cast<void*>(1)); }
     };
   }
 

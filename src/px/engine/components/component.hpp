@@ -45,7 +45,7 @@ namespace px {
   template <class T>
   concept ComponentType = std::is_base_of_v<Component, T> or std::is_same_v<Component, T>;
 
-  template<typename T, px::string_literal ID, ComponentType TParent = Component>
+  template<px::string_literal ID, ComponentType TParent = Component>
   class BaseComponent : public TParent {
   public:
     virtual ~BaseComponent() = default;

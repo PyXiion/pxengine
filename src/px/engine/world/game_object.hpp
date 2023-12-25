@@ -9,6 +9,7 @@
 
 namespace px
 {
+  class Engine;
   class World;
   class GameObject;
 
@@ -25,7 +26,8 @@ namespace px
     GameObject();
     virtual ~GameObject() = default;
     
-    World &getWorld();
+    World *getWorld();
+    Engine *getEngine();
 
     /// @brief Установить имя (идентификатор) объекту.
     /// @param name 

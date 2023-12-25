@@ -70,7 +70,7 @@ void px::Transform::guiEditor() {
   changed |= ImGui::InputVector3("Rotation", m_rotation);
 
   if (ImGui::SmallButton("Teleport to the camera")) {
-    auto camera = getGameObject()->getWorld().getEngine().getCamera();
+    auto camera = getGameObject()->getEngine()->getCamera();
     setPosition(camera->getPosition());
     changed = true;
   }

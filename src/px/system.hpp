@@ -4,6 +4,7 @@
 
 #ifndef PX_SYSTEM_HPP
 #define PX_SYSTEM_HPP
+#include <algorithm>
 #include <concepts>
 #include <bit>
 #include "exports.hpp"

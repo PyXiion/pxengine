@@ -22,6 +22,7 @@ static fs::path checkExtensionsForFilename(fs::path filename, std::vector<std::s
       continue;
     }
     found = true;
+    break;
   }
   if (not found) {
     filename.replace_extension("");
@@ -34,8 +35,8 @@ static fs::path checkExtensionsForFilename(fs::path filename, std::vector<std::s
 px::ResourceManager::ResourceManager(Engine &engine, std::string rootDir)
   : m_engine(engine)
   , m_rootDir(std::move(rootDir))
+  , m_cached()
 {
-
 }
 
 px::ResourceManager::~ResourceManager() = default;
