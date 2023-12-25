@@ -1,19 +1,24 @@
 #include <iostream>
 #include "px/script/angel_script.hpp"
+#include "some_manager.hpp"
+#include "player.hpp"
 
 const char *code =
 R"(
 void main() {
   Player player;
 
-  player.x = 2435;
+  manager.speed = 25;
+  player.x = manager.speed * 3;
+  manager.reset();
+
   player.hello();
 }
 
 EntityPtr myEntity;
 void test(PlayerPtr player) {
   myEntity = PlayerPtr(player); // create a copy, because otherwise player will be nullptr (moving semantics)
-  player.y = player.y * 3;
+  player.y = player.y * 3 + manager.speed;
   print(player.y);
 }
 
@@ -60,35 +65,6 @@ void printF(float f) {
   std::cout << f << std::endl;
 }
 
-struct Entity {
-  virtual ~Entity() = default;
-
-  float health {30.0f};
-
-  virtual void where() const = 0;
-};
-typedef std::shared_ptr<Entity> EntityPtr;
-
-PX_AS_TYPENAME          (Entity, "Entity");
-PX_AS_TYPENAME_SMART_PTR(Entity, "EntityPtr");
-
-struct Player : public Entity {
-  virtual ~Player() = default;
-
-  void where() const final {
-    std::cout << x << " " << y << std::endl;
-  }
-
-  const float maxHealth {5.0f};
-
-  float x{};
-  float y{};
-};
-typedef std::shared_ptr<Player> PlayerPtr;
-
-PX_AS_TYPENAME          (Player, "Player");
-PX_AS_TYPENAME_SMART_PTR(Player, "PlayerPtr");
-
 void printP(const PlayerPtr &ptr) {
   std::cout << ptr->x << std::endl;
 }
@@ -97,12 +73,10 @@ void hello(Player *self) {
   fmt::print("Hello from X:{} Y:{}!\n", self->x, self->y);
 }
 
-std::string someImportantString;
+static std::string someImportantString;
+static SomeManager manager;
 
-int main(int argc, char *argv[]) {
-  START_EASYLOGGINGPP(argc, argv);
-  px::script::AngelScript as;
-
+void registerAS(px::script::AngelScript &as) {
   // registering functions
   as.registerGlobalFunction("print", &print); // void print(const string &in)
   as.registerGlobalFunction("print", &printF); // void print(float)
@@ -112,36 +86,52 @@ int main(int argc, char *argv[]) {
   as.registerGlobalVariable<const std::string>("someImportantString", &someImportantString);
   as.registerGlobalVariable("someImportantStringMutable", &someImportantString);
 
+  // static object
+  as.registerObjectType<SomeManager*>("SomeManager")
+      .method<&SomeManager::reset>("reset")
+
+      .property<&SomeManager::speed>("speed");
+
+  as.registerGlobalVariable("manager", &manager);
+
   // registering types
+
   as.registerObjectType<Player>("Player")
-    .property<&Player::x>("x")
-    .property<&Player::y>("y")
-    .property<&Player::maxHealth>("maxHealth")
+      .property<&Player::x>("x")
+      .property<&Player::y>("y")
+      .property<&Player::maxHealth>("maxHealth")
 
-    .method<&Player::where>("where")
+      .method<&Player::where>("where")
 
-    .proxyMethod("hello", &hello)
+      .proxyMethod("hello", &hello)
 
-    // from derived
-    .property<&Player::health>("health");
+          // from derived
+      .property<&Player::health>("health");
 
 //   base ptr type
   as.registerObjectType<EntityPtr>()
-    .method<&Entity::where>("where");
+      .method<&Entity::where>("where");
 
   // smart ptr type
   as.registerObjectType<PlayerPtr>()
-    .derived<Entity>()
+      .derived<Entity>()
 
-    .property<&Player::x>("x")
-    .property<&Player::y>("y")
-    .property<&Player::maxHealth>("maxHealth")
+      .property<&Player::x>("x")
+      .property<&Player::y>("y")
+      .property<&Player::maxHealth>("maxHealth")
 
-    .method<&Player::where>("where");
+      .method<&Player::where>("where");
 
 //  smart.registerMethod<&Player::where>("where");
 
   as.registerGlobalFunction("print", &printP); // void print(const PlayerPtr &in)
+}
+
+int main(int argc, char *argv[]) {
+  START_EASYLOGGINGPP(argc, argv);
+  px::script::AngelScript as;
+
+  registerAS(as);
 
   // building script
   auto builder = as.createModuleBuilder();
@@ -150,6 +140,7 @@ int main(int argc, char *argv[]) {
 
   auto module = builder.build();
 
+  // accessing
   auto main = module.getFunction<void>("main");
 
   auto test =  module.getFunction<void, PlayerPtr>("test"); // overloaded functions
@@ -160,6 +151,7 @@ int main(int argc, char *argv[]) {
   auto makeHello = module.getFunction<std::string, const std::string &>("makeHello");
   auto addHello = module.getFunction<void, px::out<std::string>, const std::string &>("addHello");
 
+  // calling
   main();
 
   {
@@ -177,7 +169,7 @@ int main(int argc, char *argv[]) {
   addHello(str, "World");
   std::cout << str << std::endl;
 
-  // Test script classes
+  // Script classes
   auto type = module.getType("Enemy");
   auto factory = type.getFactory();
   auto killEnemy = type.getMethod<void>("kill");
