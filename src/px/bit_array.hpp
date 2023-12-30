@@ -50,18 +50,22 @@ namespace px {
     };
 
   public:
+    BitArray() {
+      std::fill(std::begin(m_data), std::end(m_data), std::byte(0));
+    }
+
     inline BitReference at(std::size_t bit) {
       if (bit >= N)
         throw std::out_of_range("Bit is out of range");
-      std::size_t byte = PX_DIVISION_ROUND_UP(bit, 8z);
-      return BitReference(m_data[byte], bit % 8z);
+      std::size_t byte = bit / 8;
+      return BitReference(m_data[byte], bit % 8);
     }
 
     inline ConstBitReference at(std::size_t bit) const {
       if (bit >= N)
         throw std::out_of_range("Bit is out of range");
-      std::size_t byte = PX_DIVISION_ROUND_UP(bit, 8z);
-      return ConstBitReference(m_data[byte], bit % 8z);
+      std::size_t byte = bit / 8;
+      return ConstBitReference(m_data[byte], bit % 8);
     }
 
     inline BitReference operator[](std::size_t bit) {
@@ -72,7 +76,7 @@ namespace px {
     }
 
   private:
-    std::byte m_data[PX_DIVISION_ROUND_UP(N, 8z)] {};
+    std::byte m_data[PX_DIVISION_ROUND_UP(N, 8)]{};
   };
 } // px
 

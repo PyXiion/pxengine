@@ -1,4 +1,6 @@
 project(google_tests)
+set(CMAKE_CXX_STANDARD 23)
+
 add_subdirectory(lib)
 
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
@@ -13,9 +15,10 @@ add_executable(google_tests_run
     threading_task_queue_test.cpp
     raw_memory_test.cpp
     string_utils_test.cpp
+    engine/resource_manager.cpp
 )
 
 # linking google_tests_run with google_tests_run which will be tested
-target_link_libraries(google_tests_run px)
+target_link_libraries(google_tests_run px px_engine)
 
 target_link_libraries(google_tests_run gtest gtest_main)

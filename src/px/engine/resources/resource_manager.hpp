@@ -1,39 +1,25 @@
 #pragma once
 #include <string>
 #include <unordered_map>
-#include <bgfx/bgfx.h>
 #include <vector>
-#include <memory>
-#include <variant>
-#include <px/hash_utils.hpp>
-#include <px/raw_memory.hpp>
-#include <px/memory_stream.hpp>
-#include "localization.hpp"
-#include "bgfx_handle.hpp"
-#include "px/engine/graphics/texture.hpp"
-#include "px/engine/graphics/shader.hpp"
-#include "px/engine/graphics/model.hpp"
+#include <any>
+#include <fmt/format.h>
+#include <easylogging++.h>
+#include "resource_traits.hpp"
 
-namespace px
-{ 
+namespace px {
   class Engine;
+
+  template<class T>
+  class ResourceTraits;
+
   class ResourceManager
   {
   public:
-    struct None {};
-    using RawType = px::RawConstMemory<char>;
-    using RawTypeHandler = px::MemoryStream;
-    using LocalizationPtr = std::unique_ptr<Localization>;
-
-    using Resource = std::variant<
-        None,
-        BgfxUniqueVertexBufferHandle, BgfxUniqueIndexBufferHandle,
-        BgfxUniqueShaderHandle, ShaderPtr,
-        RawTypeHandler, LocalizationPtr, TexturePtr,
-        ModelPtr>;
+    using Resource = std::any;
 
   public:
-    ResourceManager(Engine &engine, std::string rootDir);
+    explicit ResourceManager(std::string rootDir);
     ~ResourceManager();
 
     ResourceManager(const ResourceManager &) = delete;
@@ -44,38 +30,62 @@ namespace px
 
     Resource &operator[](const std::string &key);
 
-    /// Loads a shader from a file.
-    /// \param filename The name of the file without a pre-directory. It will be determined automatically depending on the current graphics API.
-    /// \return A bgfx shader handle
-    bgfx::ShaderHandle loadShaderFile(const std::string &filename, bool reload = false);
+    template<class T>
+    auto get(const std::string &resourceId, bool loadIfNotExists = true) -> px::Resource<T> {
+      if (not m_cached.contains(resourceId) or not m_cached[resourceId].has_value()) {
+        if (loadIfNotExists)
+          return load<T>(resourceId);
+        else {
+          CLOG(ERROR, "PXEngine") << "Resource \"" << resourceId << "\" not found";
+          throw std::runtime_error(fmt::format("Resource \"{}\" not found", resourceId));
+        }
+      }
 
-    /// Loads a shader program from files.
-    /// \param vsName The file name of the vertex shader.
-    /// \param fsName The file name of the fragment shader.
-    /// \return A bgfx program handle
-    ShaderPtr loadShader(const std::string &vsName, const std::string &fsName, bool reload = false);
 
-    ModelPtr loadModel(const std::string &model, bool reload = false);
+      auto &any = m_cached[resourceId];
 
-    const Localization &loadLocalization(const std::string &localization, bool reload = false);
+      if (any.type() != typeid(px::Resource<T>)) {
+        CLOG(ERROR, "PXEngine") << "The requested resource type does not match the requested type. "
+                                << any.type().name() << " vs " << typeid(T).name();
 
-    TexturePtr loadTexture(const std::string &texture, bool reload = false);
+        throw std::runtime_error("The requested resource type does not match the requested type");
 
-    RawType loadRawFile(const std::string &path, bool reload = false);
+      } else {
+        return std::any_cast<px::Resource<T>>(any);
+      }
+    }
+
+    template<class T>
+    void set(const std::string &resourceId, T &&resource) {
+      m_cached[resourceId] = std::forward<T>(resource);
+    }
+
+    template<class T>
+    auto load(const std::string &resourceId) -> px::Resource<T> {
+      using Traits = resources::Traits<T>;
+
+      std::string path = resources::getPath<Traits>(resourceId);
+
+      if constexpr (not LoadableResourceTraits<Traits>) {
+        CLOG(ERROR, "PXEngine") << "Failed to load resource " << resourceId
+        << " type " << typeid(T).name() << " has no load function. You should create a traits for this type.";
+        throw std::runtime_error("Failed to load resource");
+      } else {
+        std::ifstream ifs(path);
+        if (not ifs.is_open()) {
+          CLOG(ERROR, "PXEngine") << "Failed to open \"" << path + "\"";
+          throw std::runtime_error("Failed to open \"" + path + "\"");
+        }
+
+        px::Resource<T> ptr = resources::load<Traits>(*this, ifs);
+        set(resourceId, ptr);
+        return ptr;
+      }
+    }
 
   private:
-    Engine &m_engine;
-
     std::string m_rootDir;
 
     std::unordered_map<std::string, Resource> m_cached;
-    /// Makes the path absolute depending on the root directory of the resources.
-    /// \param _path A path.
-    /// \return An absolute path.
-    std::string absolutePath(const std::string &_path);
-
-    static std::vector<std::string> parseResourcePath(const std::string &path);
-
-
   };
 } // namespace px

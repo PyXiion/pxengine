@@ -23,6 +23,7 @@ add_subdirectory(easyloggingpp)
 include_directories(easyloggingpp/src/)
 
 add_subdirectory(src)
+add_subdirectory(google_tests)
 add_subdirectory(examples)
 
 #install(TARGETS game

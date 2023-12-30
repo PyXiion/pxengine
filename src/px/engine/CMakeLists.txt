@@ -71,6 +71,8 @@ set(PX_ENGINE_SOURCES
 
     world/game_object.cpp world/game_object.hpp
     world/world.cpp world/world.hpp
+    resources/resource_traits.cpp
+    resources/resource_traits.hpp
 )
 
 foreach(SHADER ${PX_ENGINE_SHADER_SOURCES})
