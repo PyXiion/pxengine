@@ -1,3 +1,6 @@
 [submodule "bgfx.cmake"]
 	path = bgfx.cmake
 	url = https://github.com/bkaradzic/bgfx.cmake
+[submodule "easyloggingpp"]
+	path = easyloggingpp
+	url = https://github.com/abumq/easyloggingpp
