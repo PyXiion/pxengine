@@ -9,6 +9,7 @@
 
 #include "px/engine/events/event_listener.hpp"
 #include "px/engine/settings.hpp"
+#include "px/engine/resources/resource_traits.hpp"
 
 namespace px {
   class Engine;
@@ -28,7 +29,7 @@ namespace px {
 
   private:
     Engine &m_engine;
-    const Localization *m_localization;
+    Resource<Localization> m_localization;
     Settings *m_settings;
 
     Tab m_tab;

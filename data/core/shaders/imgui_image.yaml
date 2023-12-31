@@ -1,0 +1,2 @@
+vertex: core.shaders.vs_imgui_image
+fragment: core.shaders.fs_imgui_image

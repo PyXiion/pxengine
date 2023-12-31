@@ -15,7 +15,23 @@ namespace px {
     const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-      throw std::runtime_error("TODO: an adequate exception");
+      throw std::runtime_error("TODO: an adequate exception"); // TODO
+    }
+    processNodes(scene->mRootNode, scene);
+    CLOG(INFO, "PXEngine") << "The model have been loaded successfully";
+  }
+
+  void Model::loadFromStream(std::istream &stream) {
+    CLOG(INFO, "PXEngine") << "Loading new model from stream (" << &stream << ")";
+
+    std::vector<char> buffer {std::istreambuf_iterator<char>(stream),
+                              std::istreambuf_iterator<char>()};
+
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(buffer.data(), buffer.size(), aiProcess_Triangulate | aiProcess_FlipUVs);
+
+    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+      throw std::runtime_error("TODO: an adequate exception"); // TODO
     }
     processNodes(scene->mRootNode, scene);
     CLOG(INFO, "PXEngine") << "The model have been loaded successfully";
@@ -122,5 +138,15 @@ namespace px {
 
   const std::vector<Mesh> &Model::getMeshes() {
     return m_meshes;
+  }
+
+  std::vector<std::string> resources::Traits<Model>::extensions {
+    ".obj"
+  };
+
+  Resource<Model> resources::Traits<Model>::load(ResourceManager &rm, std::istream &stream) {
+    auto model = makeModel();
+    model->loadFromStream(stream);
+    return model;
   }
 } // pc

@@ -11,6 +11,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include "px/engine/resources/resource_traits.hpp"
 #include "mesh.hpp"
 #include "shader.hpp"
 #include "render_states.hpp"
@@ -23,6 +24,7 @@ namespace px {
     explicit Model(const std::string &path) { loadFromFile(path); }
 
     void loadFromFile(const std::string &path);
+    void loadFromStream(std::istream &stream);
 
     void draw(const RenderStates &renderStates) const;
 
@@ -41,6 +43,14 @@ namespace px {
   template <class ...TArgs>
   inline static ModelPtr makeModel(TArgs &&...args) { return std::make_shared<Model>(std::forward<TArgs>(args)...); }
 
+  namespace resources {
+    template<>
+    struct Traits<Model> {
+      static std::vector<std::string> extensions;
+
+      static Resource<Model> load(ResourceManager &rm, std::istream &stream);
+    };
+  }
 } // px
 
 #endif //PX_ENGINE_MODEL_HPP

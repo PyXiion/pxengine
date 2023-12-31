@@ -7,6 +7,7 @@
 #include "common/frame_limiter.hpp"
 #include "px/engine/events/common/mouse_event.hpp"
 #include "px/engine/events/common/key_event.hpp"
+#include "px/engine/resources/localization.hpp"
 
 static std::once_flag createLoggerFlag;
 static void createLogger() {
@@ -79,7 +80,12 @@ void px::Engine::init()
   registerEventTypes();
   CLOG(INFO, "PXEngine") << "";
 
-  m_resourceManager = std::make_unique<ResourceManager>(*this, "./data");
+  m_resourceManager = std::make_unique<ResourceManager>("./data");
+
+  // set default language
+  auto lang = m_resourceManager->get<Localization>("core.lang.ru");
+  m_resourceManager->set("core.lang", lang);
+
   m_window = std::make_unique<Window>("PXE", 1280, 720);
 
   m_controls = std::make_unique<Controls>(*this, *m_window);

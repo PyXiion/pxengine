@@ -43,8 +43,7 @@ namespace px {
     std::call_once(initVertices, &PosColorVertex::init);
     createBuffers();
 
-    m_shader = px::Engine::getInstance().getResourceManager().loadShader("core.shaders.vs_cubes",
-                                                                          "core.shaders.fs_cubes");
+    m_shader = px::Engine::getInstance().getResourceManager().get<Shader>("core.shaders.cube");
   }
   Cube::~Cube() = default;
 

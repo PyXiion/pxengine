@@ -23,6 +23,17 @@ namespace px {
     }
   }
 
+  void Image::loadFromStream(std::istream &istream) {
+    static stbi_io_callbacks callbacks = {
+        &read, &skip, &eof
+    };
+    stbi_load_from_callbacks(&callbacks, &istream, &m_size.x, &m_size.y, &m_channels, STBI_rgb_alpha);
+    if (stbi_failure_reason()) {
+      CLOG(ERROR, "PXEngine") << "Failed to load image from stream";
+      throw std::runtime_error(stbi_failure_reason());
+    }
+  }
+
   void Image::clear() {
     if (m_data) {
       m_channels = 0;
@@ -42,5 +53,17 @@ namespace px {
 
   const uint8_t *Image::data() const {
     return m_data;
+  }
+
+  auto Image::read(void *user, char *data, int size) -> int {
+    return static_cast<int>(((std::istream*)user)->readsome(data, size));
+  }
+
+  auto Image::skip(void *user, int n) -> void {
+    ((std::istream*)user)->ignore(n);
+  }
+
+  auto Image::eof(void *user) -> int {
+    return ((std::istream*)user)->eof() ? 1 : 0;
   }
 } // px

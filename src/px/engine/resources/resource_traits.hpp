@@ -10,6 +10,7 @@
 #include <string>
 #include <fstream>
 #include <memory>
+#include "px/raw_memory.hpp"
 
 namespace px {
 
@@ -26,15 +27,13 @@ namespace px {
   extern std::vector<std::string> parseId(const std::string &id);
 
   namespace resources {
-    std::string getDefaultPath(const std::string &id, const std::vector<std::string> &extensions);
+    std::string getDefaultPath(const std::string &root, const std::string &id, const std::vector<std::string> &extensions);
 
     // hack to print the type name
     template<class U> struct TypeName { static inline constexpr bool value = false; };
 
     template<class T>
-    struct Traits {
-      static_assert(TypeName<T>::value, "Create a resource traits for this type");
-    };
+    struct Traits;
 
   } // resources
 
@@ -72,7 +71,7 @@ namespace px {
 
   template<class T>
   concept HasResourceTraitGetPath = requires {
-    { T::getPath(std::declval<std::string>()) } -> std::convertible_to<std::string>;
+    { T::getPath(std::declval<std::string>(), std::declval<std::string>()) } -> std::convertible_to<std::string>;
   };
 
   template<class T>
@@ -82,12 +81,18 @@ namespace px {
 
   // helper functions
   namespace resources {
+    static thread_local std::string currentResourceId;
+
+    void setCurrentResourceId(const std::string &value);
+
+    const std::string &getCurrentResourceId();
+
     template<class Traits>
-    inline std::string getPath(const std::string &resourceId) {
+    inline std::string getPath(const std::string &root, const std::string &resourceId) {
       if constexpr (HasResourceTraitGetPath<Traits>) {
-        return Traits::getPath(resourceId);
+        return Traits::getPath(root, resourceId);
       } else if constexpr (HasResourceTraitExtensions<Traits>) {
-        return getDefaultPath(resourceId, Traits::extensions);
+        return getDefaultPath(root, resourceId, Traits::extensions);
       } else {
         static_assert(TypeName<Traits>::value, "Failed to getPath for the type. Declare 'static std::string getPath(std::string resourceId)' or a list of extensions 'static std::vector<std::string> extensions'");
       }
@@ -103,6 +108,22 @@ namespace px {
         static_assert(TypeName<Traits>::value);
       }
     }
+
+    // text files
+    template<>
+    struct Traits<std::string> {
+      static std::vector<std::string> extensions;
+
+      static Resource<std::string> load(std::ifstream &is);
+    };
+
+    // binary files
+    template<>
+    struct Traits<std::vector<char>> {
+      static std::vector<std::string> extensions;
+
+      static Resource<std::vector<char>> load(std::istream &is);
+    };
   }
 } // px
 

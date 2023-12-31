@@ -1,0 +1,2 @@
+vertex: core.shaders.vs_cubes
+fragment: core.shaders.fs_cubes

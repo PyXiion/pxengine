@@ -64,23 +64,18 @@ namespace px {
     auto load(const std::string &resourceId) -> px::Resource<T> {
       using Traits = resources::Traits<T>;
 
-      std::string path = resources::getPath<Traits>(resourceId);
+      resources::setCurrentResourceId(resourceId);
+      std::string path = resources::getPath<Traits>(m_rootDir, resourceId);
 
-      if constexpr (not LoadableResourceTraits<Traits>) {
-        CLOG(ERROR, "PXEngine") << "Failed to load resource " << resourceId
-        << " type " << typeid(T).name() << " has no load function. You should create a traits for this type.";
-        throw std::runtime_error("Failed to load resource");
-      } else {
-        std::ifstream ifs(path);
-        if (not ifs.is_open()) {
-          CLOG(ERROR, "PXEngine") << "Failed to open \"" << path + "\"";
-          throw std::runtime_error("Failed to open \"" + path + "\"");
-        }
-
-        px::Resource<T> ptr = resources::load<Traits>(*this, ifs);
-        set(resourceId, ptr);
-        return ptr;
+      std::ifstream ifs(path);
+      if (not ifs.is_open()) {
+        CLOG(ERROR, "PXEngine") << "Failed to open \"" << path + "\"";
+        throw std::runtime_error("Failed to open \"" + path + "\"");
       }
+
+      px::Resource<T> ptr = resources::load<Traits>(*this, ifs);
+      set(resourceId, ptr);
+      return ptr;
     }
 
   private:

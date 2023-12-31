@@ -35,7 +35,7 @@ public:
     renderer->setModel("example.model.cube");
 
     px::RenderStates states = engine.getRenderer().getDefaultRenderStates();
-    states.shaderPtr = engine.getResourceManager().loadShader("core.shaders.vs_mesh", "core.shaders.fs_mesh");
+    states.shaderPtr = engine.getResourceManager().get<px::Shader>("core.shaders.cube");
     renderer->setRenderStates(states);
 
     m_camera = world.createGameObject<px::Camera>();

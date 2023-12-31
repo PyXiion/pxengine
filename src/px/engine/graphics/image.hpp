@@ -18,6 +18,7 @@ namespace px {
     ~Image();
 
     void loadFromFile(const std::string &filename);
+    void loadFromStream(std::istream &istream);
     void clear();
 
     [[nodiscard]] Vector2i size() const;
@@ -28,6 +29,10 @@ namespace px {
     Vector2i m_size{};
     int m_channels{};
     const uint8_t *m_data{};
+
+    static int read(void *user, char *data, int size);
+    static void skip(void *user, int n);
+    static int eof(void *user);
   };
 
 } // px

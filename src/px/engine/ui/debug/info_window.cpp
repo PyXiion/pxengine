@@ -5,9 +5,10 @@
 #include <imgui/imgui.h>
 
 #include <easy/profiler.h>
-#include "../../general.hpp"
-#include "../../system/general.hpp"
-#include "../../engine.hpp"
+#include "px/engine/general.hpp"
+#include "px/engine/system/general.hpp"
+#include "px/engine/engine.hpp"
+#include "px/engine/resources/localization.hpp"
 
 px::DebugInfoWindow::DebugInfoWindow(px::Engine &engine)
   : m_engine(engine)
@@ -15,8 +16,8 @@ px::DebugInfoWindow::DebugInfoWindow(px::Engine &engine)
   , m_worldSelectedObject(nullptr)
 {
   EASY_BLOCK("px::DebugInfoWindow::DebugInfoWindow")
-  m_engine.onInit.append([this](auto &engine) {
-    m_localization = &engine.getResourceManager().loadLocalization("core.lang");
+  m_engine.onInit.append([this](px::Engine &engine) {
+    m_localization = engine.getResourceManager().get<Localization>("core.lang");
   });
 
   listen(m_engine.onPostUpdate, &DebugInfoWindow::onUpdate);

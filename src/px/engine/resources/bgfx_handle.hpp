@@ -41,6 +41,9 @@ namespace px {
     }
 
     operator T() const {
+      return get();
+    }
+    T get() const {
       return m_handle;
     }
 

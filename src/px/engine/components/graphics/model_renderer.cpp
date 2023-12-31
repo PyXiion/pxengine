@@ -36,7 +36,7 @@ namespace px {
 
   void ModelRenderer::setModel(const std::string &model) {
     auto &resources = getGameObject()->getEngine()->getResourceManager();
-    setModel(resources.loadModel(model));
+    setModel(resources.get<Model>(model));
   }
 
   void ModelRenderer::setRenderStates(RenderStates renderStates) {

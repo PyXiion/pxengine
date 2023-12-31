@@ -9,6 +9,7 @@
 #include <memory>
 #include <bgfx/bgfx.h>
 #include "px/engine/resources/bgfx_handle.hpp"
+#include "px/engine/resources/resource_traits.hpp"
 
 namespace px {
 
@@ -26,6 +27,22 @@ namespace px {
 
   template <class ...TArgs>
   inline static ShaderPtr makeShader(TArgs ...args) { return std::make_shared<Shader>(std::forward<TArgs>(args)...); }
+
+  namespace resources {
+    template<>
+    struct Traits<BgfxUniqueShaderHandle> {
+      static std::string getPath(const std::string &root, const std::string &resourceId);
+
+      static Resource<BgfxUniqueShaderHandle> load(std::istream &is);
+    };
+
+    template<>
+    struct Traits<Shader> {
+      static std::vector<std::string> extensions;
+
+      static Resource<Shader> load(ResourceManager &manager, std::istream &is);
+    };
+  } // resources
 } // px
 
 #endif //PX_ENGINE_SHADER_HPP

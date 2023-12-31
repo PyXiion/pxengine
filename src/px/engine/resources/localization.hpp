@@ -8,16 +8,15 @@
 #define PX_ENGINE_LOCALIZATION_HPP
 #include <unordered_map>
 #include <string>
+#include "resource_traits.hpp"
 
 namespace px {
 
   class Localization {
   public:
     Localization() = default;
-    Localization(const std::string &folderPath, const std::string &languageCode);
 
-    void setFolder(const std::string &path);
-    void loadLanguage(const std::string &languageCode);
+    void loadLanguage(std::istream &input);
 
     const std::string &operator[](const std::string &key) const;
 
@@ -25,10 +24,18 @@ namespace px {
     const char *getc(const std::string &key) const;
 
   private:
-    std::string m_folder;
     std::unordered_map<std::string, std::string> m_dict;
   };
 
+  namespace resources {
+    template<>
+    struct Traits<Localization> {
+      static std::vector<std::string> extensions;
+
+      static Resource<Localization> load(std::istream &is);
+    };
+
+  }
 } // px
 
 #endif //PX_ENGINE_LOCALIZATION_HPP

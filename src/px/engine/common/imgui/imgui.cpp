@@ -285,10 +285,10 @@ namespace px {
         ;
 
     auto &rm = px::Engine::getInstance().getResourceManager();
-    m_shader = rm.loadShader("core.shaders.vs_ocornut_imgui", "core.shaders.fs_ocornut_imgui");
+    m_shader = rm.get<Shader>("core.shaders.imgui");
 
     u_imageLodEnabled = bgfx::createUniform("u_imageLodEnabled", bgfx::UniformType::Vec4);
-    m_imageShader = rm.loadShader("core.shaders.vs_imgui_image", "core.shaders.fs_imgui_image");
+    m_imageShader = rm.get<Shader>("core.shaders.imgui_image");
 
 
     m_layout
@@ -309,13 +309,13 @@ namespace px {
 
       auto &resources = m_engine.getResourceManager();
 
-      auto regular = resources.loadRawFile("core/font/roboto/regular.ttf");
-      auto italic  = resources.loadRawFile("core/font/roboto/italic.ttf");
-      auto bold    = resources.loadRawFile("core/font/roboto/bold.ttf");
+      auto regular = resources.get<std::vector<char>>("core.font.roboto.regular");
+      auto italic  = resources.get<std::vector<char>>("core.font.roboto.italic");
+      auto bold    = resources.get<std::vector<char>>("core.font.roboto.bold");
 
-      io.Fonts->AddFontFromMemoryTTF((void*)regular.data(), regular.size(), 16.0f, &config, ranges);
-      io.Fonts->AddFontFromMemoryTTF((void*)italic.data(),  italic.size(),  16.0f, &config, ranges);
-      io.Fonts->AddFontFromMemoryTTF((void*)bold.data(),    bold.size(),    16.0f, &config, ranges);
+      io.Fonts->AddFontFromMemoryTTF((void*)regular->data(), regular->size(), 16.0f, &config, ranges);
+      io.Fonts->AddFontFromMemoryTTF((void*)italic->data(),  italic->size(),  16.0f, &config, ranges);
+      io.Fonts->AddFontFromMemoryTTF((void*)bold->data(),    bold->size(),    16.0f, &config, ranges);
     }
     CLOG(INFO, "PXEngine") << "Loaded ImGui resources";
 

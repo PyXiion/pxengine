@@ -1,0 +1,2 @@
+vertex: core.shaders.vs_ocornut_imgui
+fragment: core.shaders.fs_ocornut_imgui

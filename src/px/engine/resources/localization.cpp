@@ -11,21 +11,13 @@
 #include <fmt/format.h>
 #include <easy/profiler.h>
 #include <easylogging++.h>
+#include "resource_traits.hpp"
 
 namespace px {
-  Localization::Localization(const std::string &folderPath, const std::string &languageCode) {
-    setFolder(folderPath);
-    loadLanguage(languageCode);
-  }
-
-  void Localization::setFolder(const std::string &path) {
-    m_folder = path;
-  }
-
-  void Localization::loadLanguage(const std::string &languageCode) {
+  void Localization::loadLanguage(std::istream &input) {
     EASY_BLOCK("Localization::loadLanguage")
     using std::filesystem::path;
-    YAML::Node root = YAML::LoadFile(path(m_folder) / (languageCode + ".yaml"));
+    YAML::Node root = YAML::Load(input);
 
     struct NodeAndPath {
       YAML::Node node;
@@ -34,7 +26,7 @@ namespace px {
     std::stack<NodeAndPath> nodes;
     nodes.push({root, {}});
 
-    CLOG(INFO, "PXEngine") << "Localization (" << languageCode << "):";
+    CLOG(INFO, "PXEngine") << "Loading a localization config:";
     while (not nodes.empty()) {
       auto [node, path] = nodes.top();
       nodes.pop();
@@ -66,12 +58,9 @@ namespace px {
   }
 
   const std::string &Localization::operator[](const std::string &key) const {
-    if (m_folder.empty())
-      throw std::out_of_range("There's no localization.");
-
     auto it = m_dict.find(key);
     if (it == m_dict.end()) {
-      CLOG(ERROR, "PXEngine") << "Access to a non-existent localisation key " << key;
+      CLOG(ERROR, "PXEngine") << "Access to a non-existent localization key " << key;
       throw std::out_of_range(fmt::format("There's no \"{}\" key in localization files.", key));
     }
 
@@ -84,5 +73,14 @@ namespace px {
 
   const char *Localization::getc(const std::string &key) const {
     return (*this)[key].c_str();
+  }
+
+  std::vector<std::string> resources::Traits<Localization>::extensions {
+      ".yml", ".yaml"
+  };
+  Resource<Localization> resources::Traits<Localization>::load(std::istream &is) {
+    auto loc = makeResource<Localization>();
+    loc->loadLanguage(is);
+    return loc;
   }
 } // px
