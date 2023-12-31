@@ -114,7 +114,7 @@ TEST_F(ResourceManagerTest, GetPathTest) {
   ASSERT_THROW(getPath<Traits<SomeResourceWithExtensions>>("path.to.nonexistent.resource"), std::runtime_error);
 }
 
-// test resource getting
+// test ResourceManager::get
 TEST_F(ResourceManagerTest, LoadTest) {
   // get with non-loaded resource
   ASSERT_THROW(resourceManager.get<SomeResourceWithExtensions>("path.to.resource", false), std::runtime_error);
@@ -130,4 +130,13 @@ TEST_F(ResourceManagerTest, LoadTest) {
   ASSERT_EQ(resource->value, someOtherText);
 
   ASSERT_THROW(resourceManager.get<SomeResourceWithExtensions>("path.to.nonexistent.resource"), std::runtime_error);
+}
+
+// test ResourceManager::set
+TEST_F(ResourceManagerTest, SetTest) {
+  auto resource = px::makeResource<SomeResource>("Good resource");
+
+  resourceManager.set("some.good.resource", resource);
+
+  ASSERT_EQ(resource->value, resourceManager.get<SomeResource>("some.good.resource")->value);
 }

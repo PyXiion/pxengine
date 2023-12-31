@@ -56,8 +56,8 @@ namespace px {
     }
 
     template<class T>
-    void set(const std::string &resourceId, T &&resource) {
-      m_cached[resourceId] = std::forward<T>(resource);
+    void set(const std::string &resourceId, px::Resource<T> resource) {
+      m_cached[resourceId] = std::forward<px::Resource<T>>(resource);
     }
 
     template<class T>
