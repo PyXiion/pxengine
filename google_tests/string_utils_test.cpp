@@ -21,6 +21,7 @@ TEST(StringUtilsTest, StringSplit) {
   };
 
   for (std::size_t i = 0; i < expected.size(); i++) {
-    EXPECT_EQ(expected[i], splitted[i]);
+    EXPECT_EQ(expected[i], splitted[i])
+              << "  i = " << i;;
   }
 }

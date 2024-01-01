@@ -12,54 +12,66 @@
 
 namespace px {
   /// https://stackoverflow.com/questions/34672441/stdis-base-of-for-template-classes
-  template <template <class...> class base, class derived>
+  template<template <class...> class base, class derived>
   struct is_base_of_template_impl {
-    template<class ...Ts>
-    static constexpr std::true_type  test(const base<Ts...> *);
+    template<class... Ts>
+    static constexpr std::true_type test(const base<Ts...> *);
+
     static constexpr std::false_type test(...);
 
-    using type = decltype(test(std::declval<derived*>()));
+    using type = decltype(test(std::declval<derived *>()));
   };
 
-  template <template <class...> class base, class derived>
-  using is_base_of_template = typename is_base_of_template_impl<base,derived>::type;
+  template<template <class...> class base, class derived>
+  using is_base_of_template = typename is_base_of_template_impl<base, derived>::type;
 
-  template <template <class...> class base, class derived>
-  constexpr bool is_base_of_template_v = is_base_of_template<base,derived>::value;
+  template<template <class...> class base, class derived>
+  constexpr bool is_base_of_template_v = is_base_of_template<base, derived>::value;
 
-  template <typename> struct function_traits;
+  template<typename>
+  struct function_traits;
 
-  template <typename T>
-  struct function_traits : public function_traits<decltype(&std::remove_reference_t<T>::operator())> { };
+  template<typename T>
+  struct function_traits : public function_traits<decltype(&std::remove_reference_t<T>::operator())> {
+  };
 
-  template <typename T>
-  struct function_traits<std::function<T>> : public function_traits<T> { };
+  template<typename T>
+  struct function_traits<std::function<T> > : public function_traits<T> {
+  };
 
-  template <typename Return, typename ...Args>
-  struct function_traits<Return (*)(Args...)> : public function_traits<Return (Args...)> { };
+  template<typename Return, typename... Args>
+  struct function_traits<Return (*)(Args...)> : public function_traits<Return (Args...)> {
+  };
 
-  template <typename Return, typename ...Args>
-  struct function_traits<Return (Args...) const> : public function_traits<Return (Args...)> { };
+  template<typename Return, typename... Args>
+  struct function_traits<Return (Args...) const> : public function_traits<Return (Args...)> {
+  };
 
-  template <typename TClass, typename Return, typename ...Args>
+  template<typename TClass, typename Return, typename... Args>
   struct function_traits<Return (TClass::*)(Args...)> : public function_traits<Return (Args...)> {
     typedef TClass instance_type;
 
     constexpr static bool is_member = true; // override
   };
-  template <typename TClass, typename Return, typename ...Args>
-  struct function_traits<Return (TClass::* const)(Args...)> : public function_traits<Return (TClass::*)(Args...)> {};
 
-  template <typename TClass, typename Return, typename ...Args>
+  template<typename TClass, typename Return, typename... Args>
+  struct function_traits<Return (TClass::* const)(Args...)> : public function_traits<Return (TClass::*)(Args...)> {
+  };
+
+  template<typename TClass, typename Return, typename... Args>
   struct function_traits<Return (TClass::*)(Args...) const> : public function_traits<Return (TClass::*)(Args...)> {
     constexpr static bool is_const = true; // override
   };
-  template <typename TClass, typename Return, typename ...Args>
-  struct function_traits<Return (TClass::* const)(Args...) const> : public function_traits<Return (TClass::*)(Args...) const> {};
 
-  template <typename Return, typename ...Args>
+  template<typename TClass, typename Return, typename... Args>
+  struct function_traits<Return (TClass::*
+        const)(Args...) const> : public function_traits<Return (TClass::*)(Args...) const> {
+  };
+
+  template<typename Return, typename... Args>
   struct function_traits<Return (Args...)> {
     typedef Return (*signature)(Args...);
+
     typedef Return return_type;
 
     typedef std::tuple<Args...> arguments;
@@ -89,6 +101,21 @@ namespace px {
     inline constexpr static bool is_const = true;
   };
 
+  // Function signature concept
+  namespace priv {
+    template<class T>
+    struct function_signature_impl : std::false_type {};
+
+    template<class T, class ...TArgs>
+    struct function_signature_impl<T (TArgs...)> : std::true_type {};
+
+    template<class T, class ...TArgs>
+    struct function_signature_impl<T (TArgs...) noexcept> : std::true_type {};
+  }
+
+  template<class T>
+  concept FunctionSignature = priv::function_signature_impl<T>::value;
+
   // Lord, save the StackOverflow
   // Useful links:
   // https://stackoverflow.com/questions/14336813/static-cast-in-a-template
@@ -100,9 +127,11 @@ namespace px {
   template<auto N>
   struct string_literal {
     constexpr string_literal() = default;
+
     constexpr string_literal(const char (&str)[N]) {
       std::copy_n(str, N, value);
     }
+
     char value[N]{};
   };
 

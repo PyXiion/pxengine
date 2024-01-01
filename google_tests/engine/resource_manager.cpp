@@ -24,7 +24,7 @@ namespace {
 namespace px::resources {
   template<>
   struct Traits<SomeResource> {
-    static std::string getPath(const std::string &resourceId) {
+    static std::string getPath(const std::string &root, const std::string &resourceId) {
       fs::path path;
       auto parsed = parseId(resourceId);
       auto last = parsed.size() - 1;
@@ -98,20 +98,20 @@ private:
 TEST_F(ResourceManagerTest, GetPathTest) {
   using namespace px::resources;
 
-  auto path = getPath<Traits<SomeResource>>("path.to.resource");
+  auto path = getPath<Traits<SomeResource>>("./", "path.to.resource");
   ASSERT_EQ(path, "path/to/folder_before_file/resource");
 
-  path = getPath<Traits<SomeResource>>("path.to.other.resource");
-  ASSERT_EQ(path, "path/to/other/folder_before_file/resource");
+  path = getPath<Traits<SomeResource>>("./root", "path.to.other.resource");
+  ASSERT_EQ(path, "root/path/to/other/folder_before_file/resource");
 
-  path = getPath<Traits<SomeResourceWithExtensions>>("path.to.resource");
+  path = getPath<Traits<SomeResourceWithExtensions>>("./", "path.to.resource");
   ASSERT_EQ(path, "path/to/resource.txt");
 
-  path = getPath<Traits<SomeResourceWithExtensions>>("path.to.other.resource");
+  path = getPath<Traits<SomeResourceWithExtensions>>("./", "path.to.other.resource");
   ASSERT_EQ(path, "path/to/other/resource.text");
 
   // check non-exist files
-  ASSERT_THROW(getPath<Traits<SomeResourceWithExtensions>>("path.to.nonexistent.resource"), std::runtime_error);
+  ASSERT_THROW(getPath<Traits<SomeResourceWithExtensions>>("./", "path.to.nonexistent.resource"), std::runtime_error);
 }
 
 // test ResourceManager::get

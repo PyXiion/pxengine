@@ -135,21 +135,21 @@ int main(int argc, char *argv[]) {
 
   // building script
   auto builder = as.createModuleBuilder();
-  builder.startNewModule("main");
-  builder.addSection(code, "code.as");
+  builder.begin("main");
+  builder.code(code, "code.as");
 
   auto module = builder.build();
 
   // accessing
-  auto main = module.getFunction<void>("main");
+  auto main = module.getFunction<void()>("main");
 
-  auto test =  module.getFunction<void, PlayerPtr>("test"); // overloaded functions
-  auto test2 = module.getFunction<void>           ("test");
+  auto test =  module.getFunction<void (PlayerPtr)>("test"); // overloaded functions
+  auto test2 = module.getFunction<void()>           ("test");
 
-  auto hello = module.getFunction<void, const std::string&>("hello");
+  auto hello = module.getFunction<void (const std::string&)>("hello");
 
-  auto makeHello = module.getFunction<std::string, const std::string &>("makeHello");
-  auto addHello = module.getFunction<void, px::out<std::string>, const std::string &>("addHello");
+  auto makeHello = module.getFunction<std::string (const std::string &)>("makeHello");
+  auto addHello = module.getFunction<void (px::out<std::string>, const std::string &)>("addHello");
 
   // calling
   main();
@@ -172,7 +172,7 @@ int main(int argc, char *argv[]) {
   // Script classes
   auto type = module.getType("Enemy");
   auto factory = type.getFactory();
-  auto killEnemy = type.getMethod<void>("kill");
+  auto killEnemy = type.getMethod<void()>("kill");
   auto isDead = type.getProperty<bool>("isDead");
 
   auto object = *factory();

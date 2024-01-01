@@ -59,5 +59,16 @@ namespace px {
     void *priv::ObjectTypeHandle::getPropertyAddress(asIScriptObject *obj, uint property) {
       return obj->GetAddressOfProperty(property);
     }
+
+    bool priv::ObjectTypeHandle::derivesFrom(const ObjectTypeHandle &base) const {
+      if (m_typeInfo and base.m_typeInfo) {
+        return m_typeInfo->DerivesFrom(base.m_typeInfo);
+      }
+      return false;
+    }
+
+    bool ObjectType::derivesFrom(const ObjectType &base) const {
+      return m_type.derivesFrom(base.m_type);
+    }
   } // px
 } // script

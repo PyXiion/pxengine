@@ -17,7 +17,7 @@ namespace px {
 
   void Image::loadFromFile(const std::string &filename) {
     m_data = stbi_load(filename.c_str(), &m_size.x, &m_size.y, &m_channels, STBI_rgb_alpha);
-    if (stbi_failure_reason()) {
+    if (not m_data) {
       CLOG(ERROR, "PXEngine") << "Failed to load image \"" << filename << "\"";
       throw std::runtime_error(stbi_failure_reason());
     }
@@ -27,8 +27,8 @@ namespace px {
     static stbi_io_callbacks callbacks = {
         &read, &skip, &eof
     };
-    stbi_load_from_callbacks(&callbacks, &istream, &m_size.x, &m_size.y, &m_channels, STBI_rgb_alpha);
-    if (stbi_failure_reason()) {
+    m_data = stbi_load_from_callbacks(&callbacks, &istream, &m_size.x, &m_size.y, &m_channels, STBI_rgb_alpha);
+    if (not m_data) {
       CLOG(ERROR, "PXEngine") << "Failed to load image from stream";
       throw std::runtime_error(stbi_failure_reason());
     }
@@ -55,15 +55,20 @@ namespace px {
     return m_data;
   }
 
-  auto Image::read(void *user, char *data, int size) -> int {
-    return static_cast<int>(((std::istream*)user)->readsome(data, size));
+  int Image::read(void *user, char *data, int size) {
+    auto stream = (std::istream*)user;
+
+    stream->read(data, size);
+    return size;
   }
 
-  auto Image::skip(void *user, int n) -> void {
-    ((std::istream*)user)->ignore(n);
+  void Image::skip(void *user, int n) {
+    auto stream = (std::istream*)user;
+    stream->ignore(n);
   }
 
-  auto Image::eof(void *user) -> int {
-    return ((std::istream*)user)->eof() ? 1 : 0;
+  int Image::eof(void *user) {
+    auto stream = (std::istream*)user;
+    return (stream->eof()) ? 1 : 0;
   }
 } // px

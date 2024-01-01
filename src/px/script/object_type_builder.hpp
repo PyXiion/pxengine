@@ -20,34 +20,33 @@ namespace px::script {
     // Object type flags
     namespace ObjTypeFlags {
       enum Enum {
-        Reference                        = (1<<0),
-        Value                            = (1<<1),
-        GC                               = (1<<2),
-        POD                              = (1<<3),
-        NoHandle                         = (1<<4),
-        Scoped                           = (1<<5),
-        Template                         = (1<<6),
-        AsHandle                         = (1<<7),
-        Class                            = (1<<8),
-        ClassConstructor                 = (1<<9),
-        ClassDestructor                  = (1<<10),
-        ClassAssigment                   = (1<<11),
-        ClassCopyConstructor             = (1<<12),
-        ClassMoreConstructors            = (1<<31),
-        Primitive                        = (1<<13),
-        Float                            = (1<<14),
-        Array                            = (1<<15),
-        AllInts                          = (1<<16),
-        AllFloats                        = (1<<17),
-        NoCount                          = (1<<18),
-        Align8                           = (1<<19),
-        ImplicitHandle                   = (1<<20)
+        Reference =             (1 << 0),
+        Value =                 (1 << 1),
+        GC =                    (1 << 2),
+        POD =                   (1 << 3),
+        NoHandle =              (1 << 4),
+        Scoped =                (1 << 5),
+        Template =              (1 << 6),
+        AsHandle =              (1 << 7),
+        Class =                 (1 << 8),
+        ClassConstructor =      (1 << 9),
+        ClassDestructor =       (1 << 10),
+        ClassAssigment =        (1 << 11),
+        ClassCopyConstructor =  (1 << 12),
+        ClassMoreConstructors = (1 << 31),
+        Primitive =             (1 << 13),
+        Float =                 (1 << 14),
+        Array =                 (1 << 15),
+        AllInts =               (1 << 16),
+        AllFloats =             (1 << 17),
+        NoCount =               (1 << 18),
+        Align8 =                (1 << 19),
+        ImplicitHandle =        (1 << 20)
       };
     } // ObjTypeFlags
 
     // Behaviours
-    namespace ObjBehaviour
-    {
+    namespace ObjBehaviour {
       enum Enum {
         // Value object memory management
         Construct,
@@ -69,19 +68,24 @@ namespace px::script {
     // AS binding
     void registerClassType(asIScriptEngine *engine, const std::string &name, int size, ObjTypeFlags::Enum flags);
 
-    void registerClassBehaviour(asIScriptEngine *engine, const std::string &name, ObjBehaviour::Enum behaviour, const std::string &declaration, void *funcPtr);
+    void registerClassBehaviour(asIScriptEngine *engine, const std::string &name, ObjBehaviour::Enum behaviour,
+                                const std::string &declaration, void *funcPtr);
 
-    struct DummyClass {};
+    struct DummyClass {
+    };
+
     typedef void (DummyClass::*DummyMethod)();
 
     template<class T>
-    inline decltype(auto) makeDummyMethod(T &t) {
+    decltype(auto) makeDummyMethod(T &t) {
       return reinterpret_cast<DummyMethod>(t);
     };
 
-    void registerMethod(asIScriptEngine *engine, const std::string &name, const std::string &declaration, DummyMethod funcPtr);
+    void registerMethod(asIScriptEngine *engine, const std::string &name, const std::string &declaration,
+                        DummyMethod funcPtr);
 
-    void registerProxyMethod(asIScriptEngine *engine, const std::string &name, const std::string &declaration, void *funcPtr);
+    void registerProxyMethod(asIScriptEngine *engine, const std::string &name, const std::string &declaration,
+                             void *funcPtr);
 
     void registerProperty(asIScriptEngine *engine, const std::string &name, const std::string &declaration, int offset);
 
@@ -89,33 +93,36 @@ namespace px::script {
 
     template<class T>
     struct PtrHolder {
-      constexpr PtrHolder(T ptr) : ptr(ptr) {}
+      constexpr PtrHolder(T ptr) : ptr(ptr) {
+      }
 
       T ptr;
 
-      inline operator T() const { return ptr; }
+      operator T() const { return ptr; }
     };
 
-    template<class, class ...>
+    template<class, class...>
     struct MethodImpl;
 
-    template<class T, class TReturn, class ...TArgs>
+    template<class T, class TReturn, class... TArgs>
     struct MethodImpl<TReturn (T::*)(TArgs...)> : public PtrHolder<TReturn (T::*)(TArgs...)> {
       using PtrType = TReturn (T::*)(TArgs...);
       using PtrHolder<PtrType>::ptr;
 
-      constexpr MethodImpl(PtrType ptr) : PtrHolder<PtrType>(ptr) {}
+      constexpr MethodImpl(PtrType ptr) : PtrHolder<PtrType>(ptr) {
+      }
 
       template<class U>
       using ProxyPointerType = TReturn (*)(U, TArgs...);
     };
 
-    template<class T, class TReturn, class ...TArgs>
+    template<class T, class TReturn, class... TArgs>
     struct MethodImpl<TReturn (T::*)(TArgs...) const> : public PtrHolder<TReturn (T::*)(TArgs...) const> {
       using PtrType = TReturn (T::*)(TArgs...) const;
       using PtrHolder<PtrType>::ptr;
 
-      constexpr MethodImpl(PtrType ptr) : PtrHolder<PtrType>(ptr) {}
+      constexpr MethodImpl(PtrType ptr) : PtrHolder<PtrType>(ptr) {
+      }
 
       template<class U>
       using ProxyPointerType = TReturn (*)(U, TArgs...);
@@ -123,7 +130,8 @@ namespace px::script {
 
     template<class T>
     struct Method : public MethodImpl<T> {
-      constexpr Method(T ptr) : MethodImpl<T>(ptr) {}
+      constexpr Method(T ptr) : MethodImpl<T>(ptr) {
+      }
 
       using MethodImpl<T>::ptr;
       using MethodImpl<T>::ProxyPointerType;
@@ -131,7 +139,7 @@ namespace px::script {
 
     template<class T, class U>
     int getPropertyOffset(U property) {
-      return (int)(size_t)(&(reinterpret_cast<T*>(100000)->*property))-100000;
+      return (int) (size_t) (&(reinterpret_cast<T *>(100000)->*property)) - 100000;
     }
 
     template<class>
@@ -142,7 +150,8 @@ namespace px::script {
       using PtrType = U (T::*);
       using PtrHolder<PtrType>::ptr;
 
-      constexpr FieldImpl(PtrType ptr) : PtrHolder<PtrType>(ptr) {}
+      constexpr FieldImpl(PtrType ptr) : PtrHolder<PtrType>(ptr) {
+      }
 
       [[nodiscard]] int getOffset() const {
         return getPropertyOffset<T, PtrType>(ptr);
@@ -154,7 +163,8 @@ namespace px::script {
       using PtrType = const U (T::*);
       using PtrHolder<PtrType>::ptr;
 
-      constexpr FieldImpl(PtrType ptr) : PtrHolder<const U(T::*)>(ptr) {}
+      constexpr FieldImpl(PtrType ptr) : PtrHolder<const U(T::*)>(ptr) {
+      }
 
       [[nodiscard]] int getOffset() const {
         return getPropertyOffset<T, PtrType>(ptr);
@@ -163,29 +173,31 @@ namespace px::script {
 
     template<class T>
     struct Field : public FieldImpl<T> {
-      constexpr Field(T ptr) : FieldImpl<T>(ptr) {}
+      constexpr Field(T ptr) : FieldImpl<T>(ptr) {
+      }
     };
 
     template<class T>
-    struct Field<FieldImpl<T>> : public FieldImpl<T> {
-      constexpr Field(T ptr) : FieldImpl<T>(ptr) {}
+    struct Field<FieldImpl<T> > : public FieldImpl<T> {
+      constexpr Field(T ptr) : FieldImpl<T>(ptr) {
+      }
     };
 
     template<class T>
     struct TypeTraits {
       constexpr static inline bool hasDefaultConstructor = std::is_default_constructible_v<T>;
-      constexpr static inline bool hasDestructor         = std::is_destructible_v<T>;
+      constexpr static inline bool hasDestructor = std::is_destructible_v<T>;
       constexpr static inline bool hasAssignmentOperator = requires(T &a, const T &b) { a = b; };
-      constexpr static inline bool hasCopyConstructor    = std::is_copy_constructible_v<T>;
+      constexpr static inline bool hasCopyConstructor = std::is_copy_constructible_v<T>;
 
-      constexpr static inline bool isFloat     = std::is_floating_point_v<T>;
+      constexpr static inline bool isFloat = std::is_floating_point_v<T>;
       constexpr static inline bool isPrimitive = std::is_integral_v<T> or std::is_pointer_v<T> or std::is_enum_v<T>;
-      constexpr static inline bool isClass     = std::is_class_v<T>;
-      constexpr static inline bool isArray     = std::is_array_v<T>;
+      constexpr static inline bool isClass = std::is_class_v<T>;
+      constexpr static inline bool isArray = std::is_array_v<T>;
 
       constexpr static inline bool isAlign8 = alignof(T) == 8;
 
-      template<class TReturn, class ...TArgs>
+      template<class TReturn, class... TArgs>
       using MethodType = TReturn (T::*)(TArgs...);
 
       template<class U>
@@ -214,8 +226,7 @@ namespace px::script {
         if constexpr (Traits::isAlign8)
           flags |= ObjTypeFlags::Align8;
         return flags;
-      }
-      else if constexpr (Traits::isArray) {
+      } else if constexpr (Traits::isArray) {
         return ObjTypeFlags::Array;
       }
 
@@ -226,8 +237,8 @@ namespace px::script {
     template<class T>
     struct FunctionSignatureImpl;
 
-    template<class TReturn, class ...TArgs>
-    struct FunctionSignatureImpl<std::function<TReturn (TArgs...)>> {
+    template<class TReturn, class... TArgs>
+    struct FunctionSignatureImpl<std::function<TReturn (TArgs...)> > {
       typedef TReturn (*Signature)(TArgs...);
     };
 
@@ -235,14 +246,14 @@ namespace px::script {
     using FunctionSignature = typename FunctionSignatureImpl<T>::Signature;
 
     // Helpers
-    template<class T, class ...TArgs>
-    void Constructor(void *memory, TArgs ...args) {
-      new (memory) T(std::forward<TArgs>(args)...);
+    template<class T, class... TArgs>
+    void Constructor(void *memory, TArgs... args) {
+      new(memory) T(std::forward<TArgs>(args)...);
     }
 
     template<class T>
     void CopyConstructor(void *memory, const T &other) {
-      new (memory) T(other);
+      new(memory) T(other);
     }
 
     template<class T>
@@ -251,7 +262,7 @@ namespace px::script {
     }
 
     template<class T, class U = T>
-    T &assigment(T& self, const U &other) {
+    T &assigment(T &self, const U &other) {
       return self = other;
     }
   }
@@ -268,19 +279,23 @@ namespace px::script {
     using ThisType = AsTypeBuilder<T>;
     using Traits = priv::TypeTraits<T>;
 
-    template<class Return, class ...Args>
+    template<class Return, class... Args>
     using ProxyFunction = Return (*)(Args...);
 
   public:
     explicit AsTypeBuilder(asIScriptEngine *engine, std::string &&name)
-        : m_engine(std::forward<asIScriptEngine *>(engine))
+      : m_engine(std::forward<asIScriptEngine *>(engine))
         , m_name(std::forward<decltype(name)>(name)) {
       CLOG(INFO, "AngelScript") << "New AngelScript type \"" << m_name << "\"" << " with size " << sizeof(T);
-      priv::registerClassType(m_engine, std::string(m_name), sizeof(T), static_cast<priv::ObjTypeFlags::Enum>(priv::ObjTypeFlags::Value | priv::getClassFlags<T>()));
+      priv::registerClassType(m_engine, std::string(m_name), sizeof(T),
+                              static_cast<priv::ObjTypeFlags::Enum>(
+                                priv::ObjTypeFlags::Value | priv::getClassFlags<T>()));
       registerBehaviour();
     }
+
     explicit AsTypeBuilder(asIScriptEngine *&&engine)
-        : AsTypeBuilder(std::forward<decltype(engine)>(engine), std::string(getTypeAsName<T>())) {}
+      : AsTypeBuilder(std::forward<decltype(engine)>(engine), std::string(getTypeAsName<T>())) {
+    }
 
     // Method
     template<priv::Method Method>
@@ -290,22 +305,25 @@ namespace px::script {
 
       CLOG(INFO, "AngelScript") << "\t" << declaration;
       if constexpr (sizeof(Method.ptr) == 8) {
-        CLOG(INFO, "AngelScript") << "\t\t at " << reinterpret_cast<void*>(Method.ptr);
+        CLOG(INFO, "AngelScript") << "\t\t at " << reinterpret_cast<void *>(Method.ptr);
       } else {
-        union { decltype(&Method.ptr) mptr; void *raw[2]; };
+        union {
+          decltype(&Method.ptr) mptr;
+          void *raw[2];
+        };
         CLOG(INFO, "AngelScript") << "\t\t at " << raw[0] << " " << raw[1];
       }
 
       return *this;
     };
 
-    template<class TReturn, class ...TArgs>
-    ThisType &proxyMethod(std::string_view &&name, ProxyFunction<TReturn, T*, TArgs...> proxy) {
+    template<class TReturn, class... TArgs>
+    ThisType &proxyMethod(std::string_view &&name, ProxyFunction<TReturn, T *, TArgs...> proxy) {
       const std::string declaration = getSignature<TReturn (*)(TArgs...)>(std::forward<decltype(name)>(name));
-      priv::registerProxyMethod(m_engine, m_name, declaration, reinterpret_cast<void*>(proxy));
+      priv::registerProxyMethod(m_engine, m_name, declaration, reinterpret_cast<void *>(proxy));
 
       CLOG(INFO, "AngelScript") << "\t" << declaration;
-      CLOG(INFO, "AngelScript") << "\t\t at " << reinterpret_cast<void*>(proxy) << " (proxy)";
+      CLOG(INFO, "AngelScript") << "\t\t at " << reinterpret_cast<void *>(proxy) << " (proxy)";
 
       return *this;
     }
@@ -330,23 +348,28 @@ namespace px::script {
       CLOG(INFO, "AngelScript") << "\tBehaviour:";
       // default empty constructor
       if constexpr (Traits::hasDefaultConstructor) {
-        priv::registerClassBehaviour(m_engine, m_name, priv::ObjBehaviour::Construct, "void f()", reinterpret_cast<void *>(&priv::Constructor<T>));
+        priv::registerClassBehaviour(m_engine, m_name, priv::ObjBehaviour::Construct, "void f()",
+                                     reinterpret_cast<void *>(&priv::Constructor<T>));
         CLOG(INFO, "AngelScript") << "\t\t+ Empty constructor";
       }
       // copy constructor
       if constexpr (Traits::hasCopyConstructor) {
-        priv::registerClassBehaviour(m_engine, m_name, priv::ObjBehaviour::Construct, fmt::format("void f(const {} &in)", m_name), reinterpret_cast<void *>(&priv::CopyConstructor<T>));
+        priv::registerClassBehaviour(m_engine, m_name, priv::ObjBehaviour::Construct,
+                                     fmt::format("void f(const {} &in)", m_name),
+                                     reinterpret_cast<void *>(&priv::CopyConstructor<T>));
         CLOG(INFO, "AngelScript") << "\t\t+ Copy constructor";
       }
 
-      // assigment operator
+      // assigetResourceManagergment operator
       if constexpr (Traits::hasAssignmentOperator) {
-        priv::registerProxyMethod(m_engine, m_name, fmt::format("{0} &opAssign(const {0} &in)", m_name), reinterpret_cast<void *>(&priv::assigment<T>));
+        priv::registerProxyMethod(m_engine, m_name, fmt::format("{0} &opAssign(const {0} &in)", m_name),
+                                  reinterpret_cast<void *>(&priv::assigment<T>));
         CLOG(INFO, "AngelScript") << "\t\t+ Assigment operator";
       }
 
       // destructor
-      priv::registerClassBehaviour(m_engine, m_name, priv::ObjBehaviour::Destruct, "void f()", reinterpret_cast<void *>(&priv::Destructor<T>));
+      priv::registerClassBehaviour(m_engine, m_name, priv::ObjBehaviour::Destruct, "void f()",
+                                   reinterpret_cast<void *>(&priv::Destructor<T>));
       CLOG(INFO, "AngelScript") << "\t\t+ Destructor";
     }
   };
@@ -360,32 +383,37 @@ namespace px::script {
     struct DefaultValue {
       inline static T f() { return T(); }
     };
+
     template<class T>
-    struct DefaultValue<T&> {
-      inline static T &f() { return *static_cast<T *>(reinterpret_cast<void*>(1)); }
+    struct DefaultValue<T &> {
+      inline static T &f() { return *static_cast<T *>(reinterpret_cast<void *>(1)); }
     };
   }
 
   // Smart pointer
   template<class T>
-  struct AsTypeBuilder<std::shared_ptr<T>> {
+  struct AsTypeBuilder<std::shared_ptr<T> > {
   private:
-    using ThisType = AsTypeBuilder<std::shared_ptr<T>>;
+    using ThisType = AsTypeBuilder<std::shared_ptr<T> >;
     using Self = std::shared_ptr<T>;
     using Traits = priv::TypeTraits<Self>;
 
-    template<class Return, class ...Args>
+    template<class Return, class... Args>
     using ProxyFunction = Return (*)(Args...);
 
   public:
     explicit AsTypeBuilder(asIScriptEngine *engine)
-        : AsTypeBuilder(std::forward<decltype(engine)>(engine), std::string(getTypeAsName<Self>())) {}
+      : AsTypeBuilder(std::forward<decltype(engine)>(engine), std::string(getTypeAsName<Self>())) {
+    }
 
     explicit AsTypeBuilder(asIScriptEngine *engine, std::string &&name)
-        : m_engine(std::forward<asIScriptEngine *>(engine))
+      : m_engine(std::forward<asIScriptEngine *>(engine))
         , m_name(std::forward<decltype(name)>(name)) {
-      CLOG(INFO, "AngelScript") << "New AngelScript type \"" << m_name << "\" (smart pointer)" << " with size " << sizeof(Self) << " (" << sizeof(T) << ")";
-      priv::registerClassType(m_engine, m_name, sizeof(Self), static_cast<priv::ObjTypeFlags::Enum>(priv::ObjTypeFlags::Value | priv::getClassFlags<T>()));
+      CLOG(INFO, "AngelScript") << "New AngelScript type \"" << m_name << "\" (smart pointer)" << " with size " <<
+          sizeof(Self) << " (" << sizeof(T) << ")";
+      priv::registerClassType(m_engine, m_name, sizeof(Self),
+                              static_cast<priv::ObjTypeFlags::Enum>(
+                                priv::ObjTypeFlags::Value | priv::getClassFlags<T>()));
       registerBehaviour();
     }
 
@@ -406,7 +434,7 @@ namespace px::script {
 
       // to this conversion
       std::string decl = fmt::format("{} opCast() const", m_name);
-      void *funcPtr = reinterpret_cast<void*>(static_cast<ToThisPtr>(&std::dynamic_pointer_cast<T, Base>));
+      void *funcPtr = reinterpret_cast<void *>(static_cast<ToThisPtr>(&std::dynamic_pointer_cast<T, Base>));
 
       priv::registerProxyMethod(m_engine, std::string(basePtrName), decl, funcPtr);
       CLOG(INFO, "AngelScript") << "\t\t " << decl;
@@ -414,7 +442,7 @@ namespace px::script {
 
       // to base conversion
       decl = fmt::format("{} opImplCast() const", basePtrName);
-      funcPtr = reinterpret_cast<void*>(static_cast<ToBasePtr>(&std::dynamic_pointer_cast<Base, T>));
+      funcPtr = reinterpret_cast<void *>(static_cast<ToBasePtr>(&std::dynamic_pointer_cast<Base, T>));
 
       priv::registerProxyMethod(m_engine, m_name, decl, funcPtr);
       CLOG(INFO, "AngelScript") << "\t\t " << decl;
@@ -433,7 +461,7 @@ namespace px::script {
 
       typedef typename TMethod::template ProxyPointerType<Self> Ptr;
 
-      Ptr proxy = [](Self self, auto ...args) {
+      Ptr proxy = [](Self self, auto... args) {
         if (not self) {
           priv::setCtxException("Attempting to call method of a null pointer");
           fmt::print("Attempting to call method of a null pointer\n");
@@ -445,7 +473,7 @@ namespace px::script {
       priv::registerProxyMethod(m_engine, m_name, declaration, reinterpret_cast<void *>(proxy));
 
       CLOG(INFO, "AngelScript") << "\t" << declaration;
-      CLOG(INFO, "AngelScript") << "\t\tat " << reinterpret_cast<void*>(proxy);
+      CLOG(INFO, "AngelScript") << "\t\tat " << reinterpret_cast<void *>(proxy);
 
       return *this;
     };
@@ -481,15 +509,15 @@ namespace px::script {
 
       priv::registerProxyMethod(m_engine, m_name, getDecl, reinterpret_cast<void *>(getter));
       CLOG(INFO, "AngelScript") << "\t\t proxied with:";
-      CLOG(INFO, "AngelScript") << "\t\t\t " << getDecl << " at " << reinterpret_cast<void*>(getter);
+      CLOG(INFO, "AngelScript") << "\t\t\t " << getDecl << " at " << reinterpret_cast<void *>(getter);
 
       if constexpr (not FieldTraits::is_const) {
         auto getRefDecl = fmt::format("{}& get_{}() property", getTypeAsName<Type>(), name);
-        RefGetterPtr refGetter = [](Self &self) -> Type& {
+        RefGetterPtr refGetter = [](Self &self) -> Type &{
           if (not self) {
             priv::setCtxException("Attempting to access member of a null pointer");
             fmt::print("Attempting to access member of a null pointer (refGetter, ptr: {})\n", fmt::ptr(self.get()));
-            return priv::DefaultValue<Type&>::f();
+            return priv::DefaultValue<Type &>::f();
           }
           return (self.get())->*(Field.ptr);
         };
@@ -507,8 +535,8 @@ namespace px::script {
         priv::registerProxyMethod(m_engine, m_name, getRefDecl, reinterpret_cast<void *>(refGetter));
         priv::registerProxyMethod(m_engine, m_name, setDecl, reinterpret_cast<void *>(refSetter));
 
-        CLOG(INFO, "AngelScript") << "\t\t\t " << getRefDecl << " at " << reinterpret_cast<void*>(refGetter);
-        CLOG(INFO, "AngelScript") << "\t\t\t " << setDecl << " at " << reinterpret_cast<void*>(refSetter);
+        CLOG(INFO, "AngelScript") << "\t\t\t " << getRefDecl << " at " << reinterpret_cast<void *>(refGetter);
+        CLOG(INFO, "AngelScript") << "\t\t\t " << setDecl << " at " << reinterpret_cast<void *>(refSetter);
       }
 
       return *this;
@@ -522,47 +550,54 @@ namespace px::script {
       CLOG(INFO, "AngelScript") << "\tBehaviour:";
       // default empty constructor
       if constexpr (Traits::hasDefaultConstructor) {
-        priv::registerClassBehaviour(m_engine, m_name, priv::ObjBehaviour::Construct, "void f()", reinterpret_cast<void *>(&priv::Constructor<Self>));
+        priv::registerClassBehaviour(m_engine, m_name, priv::ObjBehaviour::Construct, "void f()",
+                                     reinterpret_cast<void *>(&priv::Constructor<Self>));
         CLOG(INFO, "AngelScript") << "\t\t+ Empty constructor";
       }
       // copy constructor
       if constexpr (Traits::hasCopyConstructor) {
-        priv::registerClassBehaviour(m_engine, m_name, priv::ObjBehaviour::Construct, fmt::format("void f(const {} &in)", m_name), reinterpret_cast<void *>(&priv::CopyConstructor<Self>));
+        priv::registerClassBehaviour(m_engine, m_name, priv::ObjBehaviour::Construct,
+                                     fmt::format("void f(const {} &in)", m_name),
+                                     reinterpret_cast<void *>(&priv::CopyConstructor<Self>));
         CLOG(INFO, "AngelScript") << "\t\t+ Copy constructor";
       }
 
       // assigment operator
       if constexpr (Traits::hasAssignmentOperator) {
-        priv::registerProxyMethod(m_engine, m_name, fmt::format("{0} &opAssign(const {0} &in)", m_name), reinterpret_cast<void *>(&priv::assigment<Self>));
+        priv::registerProxyMethod(m_engine, m_name, fmt::format("{0} &opAssign(const {0} &in)", m_name),
+                                  reinterpret_cast<void *>(&priv::assigment<Self>));
         CLOG(INFO, "AngelScript") << "\t\t+ Assigment operator";
       }
 
       // destructor
-      priv::registerClassBehaviour(m_engine, m_name, priv::ObjBehaviour::Destruct, "void f()", reinterpret_cast<void *>(&priv::Destructor<Self>));
+      priv::registerClassBehaviour(m_engine, m_name, priv::ObjBehaviour::Destruct, "void f()",
+                                   reinterpret_cast<void *>(&priv::Destructor<Self>));
       CLOG(INFO, "AngelScript") << "\t\t+ Destructor";
     }
   };
 
   // Reference (AngelScript won't count or instanciate it on its own)
   template<class T>
-  struct AsTypeBuilder<T*> {
+  struct AsTypeBuilder<T *> {
   private:
-    typedef AsTypeBuilder<T*> ThisType;
-    typedef T* Self;
+    typedef AsTypeBuilder<T *> ThisType;
+    typedef T *Self;
 
-    template<class Return, class ...Args>
+    template<class Return, class... Args>
     using ProxyFunction = Return (*)(Args...);
 
   public:
-
     explicit AsTypeBuilder(asIScriptEngine *engine)
-        : AsTypeBuilder(std::forward<decltype(engine)>(engine), std::string(getTypeAsName<Self>())) {}
+      : AsTypeBuilder(std::forward<decltype(engine)>(engine), std::string(getTypeAsName<T>())) {
+    }
 
     explicit AsTypeBuilder(asIScriptEngine *engine, std::string &&name)
-        : m_engine(std::forward<asIScriptEngine *>(engine))
+      : m_engine(std::forward<asIScriptEngine *>(engine))
         , m_name(std::forward<decltype(name)>(name)) {
-      CLOG(INFO, "AngelScript") << "New AngelScript type \"" << m_name << "\" (reference, size " << sizeof(T) << "B)";
-      priv::registerClassType(m_engine, m_name, 0, static_cast<priv::ObjTypeFlags::Enum>(priv::ObjTypeFlags::Reference | priv::ObjTypeFlags::NoCount));
+      CLOG(INFO, "AngelScript") << "New AngelScript type \"" << m_name << "\" (no count)";
+      priv::registerClassType(m_engine, m_name, 0,
+                              static_cast<priv::ObjTypeFlags::Enum>(
+                                priv::ObjTypeFlags::Reference | priv::ObjTypeFlags::NoCount));
     }
 
     // Same code (AsTypeBuilder<T>)
@@ -576,22 +611,25 @@ namespace px::script {
 
       CLOG(INFO, "AngelScript") << "\t" << declaration;
       if constexpr (sizeof(Method.ptr) == 8) {
-        CLOG(INFO, "AngelScript") << "\t\t at " << reinterpret_cast<void*>(Method.ptr);
+        CLOG(INFO, "AngelScript") << "\t\t at " << reinterpret_cast<void *>(Method.ptr);
       } else {
-        union { decltype(&Method.ptr) mptr; void *raw[2]; };
+        union {
+          decltype(&Method.ptr) mptr;
+          void *raw[2];
+        };
         CLOG(INFO, "AngelScript") << "\t\t at " << raw[0] << " " << raw[1];
       }
 
       return *this;
     };
 
-    template<class TReturn, class ...TArgs>
-    ThisType &proxyMethod(std::string_view &&name, ProxyFunction<TReturn, T*, TArgs...> proxy) {
+    template<class TReturn, class... TArgs>
+    ThisType &proxyMethod(std::string_view &&name, ProxyFunction<TReturn, T *, TArgs...> proxy) {
       const std::string declaration = getSignature<TReturn (*)(TArgs...)>(std::forward<decltype(name)>(name));
-      priv::registerProxyMethod(m_engine, m_name, declaration, reinterpret_cast<void*>(proxy));
+      priv::registerProxyMethod(m_engine, m_name, declaration, reinterpret_cast<void *>(proxy));
 
       CLOG(INFO, "AngelScript") << "\t" << declaration;
-      CLOG(INFO, "AngelScript") << "\t\t at " << reinterpret_cast<void*>(proxy) << " (proxy)";
+      CLOG(INFO, "AngelScript") << "\t\t at " << reinterpret_cast<void *>(proxy) << " (proxy)";
 
       return *this;
     }
@@ -611,8 +649,6 @@ namespace px::script {
   private:
     asIScriptEngine *m_engine;
     std::string m_name;
-
-
   };
 } // px::script
 

@@ -10,9 +10,6 @@
 namespace px {
   class Engine;
 
-  template<class T>
-  class ResourceTraits;
-
   class ResourceManager
   {
   public:

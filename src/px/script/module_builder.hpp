@@ -20,11 +20,12 @@ namespace px::script {
     explicit ModuleBuilder(AngelScript &as);
     ~ModuleBuilder();
 
-    void startNewModule(const std::string &name);
+    ModuleBuilder &begin(const std::string &name);
 
-    void addSectionFromFile(const std::string &filename);
-    void addSection(const std::string &code, const std::string &sourcename);
+    ModuleBuilder &codeFromFile(const std::string &filename);
+    ModuleBuilder &code(const std::string &code, const std::string &sourceName);
 
+    ModuleBuilder &end();
     Module build();
 
   private:

@@ -4,33 +4,33 @@
 // Created by pyxiion on 13.12.23.
 //
 
-#ifndef PX_ENGINE_MODULE_HPP
-#define PX_ENGINE_MODULE_HPP
+#ifndef PX_ENGINE_SCRIPT_MODULE_HPP
+#define PX_ENGINE_SCRIPT_MODULE_HPP
+#include "px/px.hpp"
 #include "common.hpp"
 #include "function.hpp"
 #include "object_type.hpp"
-#include "template/signatures.hpp"
 
 namespace px::script {
-
   class Module {
   public:
     explicit Module(asIScriptContext *ctx, asIScriptModule *module);
+
     ~Module();
 
-    template<class TReturn, class ...TArgs>
+    template<FunctionSignature T>
     auto getFunction(const std::string &funcName) {
-      const std::string decl = getSignature<TReturn (TArgs...)>(funcName);
+      const std::string decl = getSignature<T>(funcName);
 
       asIScriptFunction *funcHandle = getFunctionByDecl(decl);
 
-
       if (not funcHandle) {
-        CLOG(ERROR, "AngelScript") << "Failed to get a function by declaration " << decl;
-        throw std::runtime_error(fmt::format("Failed to get function {} by declaration {}.", funcName, decl));
+        PX_THROW_AND_LOG("AngelScript", std::runtime_error,
+                         "Failed to get function {} by declaration \"{}\"", funcName, decl);
       }
+
       CVLOG(1, "AngelScript") << "Requested AngelScript function by declaration " << decl;
-      return Function<TReturn (typename priv::GetTypeAsNameImpl<TArgs>::Type...)>(priv::FunctionHandle(m_ctx, funcHandle));
+      return priv::GetFunctionType<T>(priv::FunctionHandle(m_ctx, funcHandle));
     }
 
     auto getType(const std::string &typeName) {
@@ -39,11 +39,10 @@ namespace px::script {
 
   private:
     asIScriptContext *m_ctx;
-    asIScriptModule  *m_module;
+    asIScriptModule *m_module;
 
     asIScriptFunction *getFunctionByDecl(const std::string &funcDecl);
   };
-
 } // px::script
 
-#endif //PX_ENGINE_MODULE_HPP
+#endif //PX_ENGINE_SCRIPT_MODULE_HPP

@@ -12,6 +12,7 @@
 #include <easy/profiler.h>
 #include <easylogging++.h>
 #include "resource_traits.hpp"
+#include "px/px.hpp"
 
 namespace px {
   void Localization::loadLanguage(std::istream &input) {
@@ -60,8 +61,7 @@ namespace px {
   const std::string &Localization::operator[](const std::string &key) const {
     auto it = m_dict.find(key);
     if (it == m_dict.end()) {
-      CLOG(ERROR, "PXEngine") << "Access to a non-existent localization key " << key;
-      throw std::out_of_range(fmt::format("There's no \"{}\" key in localization files.", key));
+      PX_THROW_AND_LOG("PXEngine", std::runtime_error, "There's no \"{}\" key in localization files.", key);
     }
 
     return it->second;

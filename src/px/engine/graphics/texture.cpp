@@ -5,6 +5,7 @@
 //
 
 #include "texture.hpp"
+#include "px/px.hpp"
 #include <easylogging++.h>
 
 namespace px {
@@ -44,8 +45,7 @@ namespace px {
         );
 
     if (!bgfx::isValid(res)) {
-      CLOG(INFO, "PXEngine") << "Failed new texture";
-      throw std::runtime_error("Invalid texture.");
+      PX_THROW_AND_LOG("PXEngine", std::runtime_error, "Failed to load texture");
     }
 
     m_handle = res;

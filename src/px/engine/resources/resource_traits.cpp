@@ -46,10 +46,13 @@ namespace px {
 
     // text files
     std::vector<std::string> Traits<std::string>::extensions = {
-        "", ".txt", ".text", ".log", ".msg"
+        "", ".txt", ".text", ".log", ".msg",
+
+        // for scripts
+        ".as"
     };
 
-    Resource<std::string> Traits<std::string>::load(std::ifstream &ifs) {
+    Resource<std::string> Traits<std::string>::load(std::istream &ifs) {
       return makeResource<std::string>(std::istreambuf_iterator<char>(ifs),
                                        std::istreambuf_iterator<char>());
     }

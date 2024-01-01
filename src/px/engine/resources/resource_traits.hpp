@@ -114,7 +114,7 @@ namespace px {
     struct Traits<std::string> {
       static std::vector<std::string> extensions;
 
-      static Resource<std::string> load(std::ifstream &is);
+      static Resource<std::string> load(std::istream &is);
     };
 
     // binary files

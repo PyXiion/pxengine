@@ -10,27 +10,36 @@
 #include <stdexcept>
 #include <utility>
 #include "easylogging++.h"
+#include "template/signatures.hpp"
 
 namespace px::script {
   namespace priv {
     class FunctionHandle {
     public:
       FunctionHandle(asIScriptContext *context, asIScriptFunction *function, asIScriptObject *self = nullptr);
+
       ~FunctionHandle();
 
       FunctionHandle(const FunctionHandle &other);
+
       FunctionHandle &operator=(const FunctionHandle &other);
 
       FunctionHandle(FunctionHandle &&other) noexcept;
+
       FunctionHandle &operator=(FunctionHandle &&other) noexcept;
 
       void prepare();
 
-      void setArg(int arg, std::int8_t   value);
-      void setArg(int arg, std::int16_t  value);
-      void setArg(int arg, std::int32_t  value);
-      void setArg(int arg, std::int64_t  value);
-      void setArg(int arg, float  value);
+      void setArg(int arg, std::int8_t value);
+
+      void setArg(int arg, std::int16_t value);
+
+      void setArg(int arg, std::int32_t value);
+
+      void setArg(int arg, std::int64_t value);
+
+      void setArg(int arg, float value);
+
       void setArg(int arg, double value);
 
       void setArgAddress(int arg, void **ptr);
@@ -59,22 +68,24 @@ namespace px::script {
       }
 
       void *getReturnAddress();
+
       void *getReturnObject();
 
       const char *getDeclaration();
 
       void setThis(asIScriptObject *self);
 
-      template<class ...TArgs>
-      void setArgs(TArgs ...args) {
+      template<class... TArgs>
+      void setArgs(TArgs... args) {
         int i = 0;
-        ([&]{
+        ([&] {
           if constexpr (AsPrimitive<TArgs>) {
             setArg(i, std::forward<TArgs>(args));
           } else if constexpr (AsAddress<TArgs>) {
-            setArgAddress(i, (void**)&args);
-          } else { // pass copy of the arg
-            setArgObject(i, (void*)&args);
+            setArgAddress(i, (void **) &args);
+          } else {
+            // pass copy of the arg
+            setArgObject(i, (void *) &args);
           }
 
           // some logging
@@ -86,31 +97,35 @@ namespace px::script {
       };
 
     private:
+      void check();
 
-      asIScriptContext  *m_ctx;
+      asIScriptContext *m_ctx;
       asIScriptFunction *m_func;
-      asIScriptObject   *m_self;
+      asIScriptObject *m_self;
     };
   }
-  template<class TReturn, class ...TArgs>
+
+  template<class TReturn, class... TArgs>
   class Function;
 
-  template<class TReturn, class ...TArgs>
+  template<class TReturn, class... TArgs>
   class Function<TReturn (TArgs...)> {
-  private:
-    using ThisType = Function<TReturn (TArgs...)>;
-
     static constexpr inline bool isReturning = not std::is_same_v<TReturn, void>;
 
   public:
-    explicit Function(priv::FunctionHandle handle)
-        : m_handle(std::move(handle)) {}
+    Function()
+      : m_handle(nullptr, nullptr) {
+    }
 
-    inline TReturn operator()(TArgs ...args) {
+    explicit Function(priv::FunctionHandle handle)
+      : m_handle(std::move(handle)) {
+    }
+
+    TReturn operator()(TArgs... args) {
       return call(std::forward<TArgs>(args)...);
     }
 
-    inline TReturn call(TArgs ...args) {
+    TReturn call(TArgs... args) {
       CVLOG(1, "AngelScript") << "Calling the function \"" << m_handle.getDeclaration() << "\"";
       m_handle.prepare();
 
@@ -118,8 +133,7 @@ namespace px::script {
 
       int r = m_handle.execute();
       if (r < 0) {
-        CLOG(ERROR, "AngelScript") << "Failed to call function.";
-        throw std::runtime_error("Failed AS function execution.");
+        PX_THROW_AND_LOG("AngelScript", std::runtime_error, "Failed to call a function");
       }
 
       return m_handle.getReturn<TReturn>();
@@ -130,20 +144,25 @@ namespace px::script {
   };
 
   // Method
-  template<class TReturn, class ...TArgs>
+  template<class TReturn, class... TArgs>
   class Method;
 
-  template<class TReturn, class ...TArgs>
+  template<class TReturn, class... TArgs>
   class Method<TReturn (TArgs...)> {
   public:
-    explicit Method(priv::FunctionHandle handle)
-        : m_handle(std::move(handle)) {}
+    Method()
+      : m_handle(nullptr, nullptr) {
+    }
 
-    inline TReturn operator()(asIScriptObject *self, TArgs ...args) {
+    explicit Method(priv::FunctionHandle handle)
+      : m_handle(std::move(handle)) {
+    }
+
+    TReturn operator()(asIScriptObject *self, TArgs... args) {
       return call(self, std::forward<TArgs>(args)...);
     }
 
-    inline TReturn call(asIScriptObject *self, TArgs ...args) {
+    TReturn call(asIScriptObject *self, TArgs... args) {
       CVLOG(1, "AngelScript") << "Calling method \"" << m_handle.getDeclaration() << "\"";
       CVLOG(1, "AngelScript") << "\tSelf: " << self;
 
@@ -154,8 +173,9 @@ namespace px::script {
 
       int r = m_handle.execute();
       if (r < 0) {
-        CLOG(ERROR, "AngelScript") << "Failed to call method.";
-        throw std::runtime_error("Failed AS method execution.");
+        auto msg = "Failed AS method execution";
+        CLOG(ERROR, "AngelScript") << msg;
+        throw std::runtime_error(msg);
       }
 
       return m_handle.getReturn<TReturn>();
@@ -165,6 +185,29 @@ namespace px::script {
     priv::FunctionHandle m_handle;
   };
 
+  namespace priv {
+    template<class>
+    struct GetFunctionTypeImpl;
+
+    template<class T, class... TArgs>
+    struct GetFunctionTypeImpl<T (TArgs...)> {
+      typedef Function<T (typename GetTypeAsNameImpl<TArgs>::Type...)> Type;
+    };
+
+    template<class T>
+    using GetFunctionType = typename GetFunctionTypeImpl<T>::Type;
+
+    template<class>
+    struct GetMethodTypeImpl;
+
+    template<class T, class... TArgs>
+    struct GetMethodTypeImpl<T (TArgs...)> {
+      typedef Method<T (typename GetTypeAsNameImpl<TArgs>::Type...)> Type;
+    };
+
+    template<FunctionSignature T>
+    using GetMethodType = typename GetMethodTypeImpl<T>::Type;
+  }
 } // px::script
 
 #endif //PX_ENGINE_FUNCTION_HPP

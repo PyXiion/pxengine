@@ -15,33 +15,34 @@
 
 namespace px::script {
   namespace priv {
-    template<class ...T>
+    template<class... T>
     struct getArrOfNamesImpl {
       static auto constexpr inline N = sizeof...(T);
 
-      static inline decltype(auto) get() {
-        std::array<std::string_view, N> arr {
+      static decltype(auto) get() {
+        std::array<std::string_view, N> arr{
           getTypeAsName<T, true>()...
         };
         return arr;
       }
     };
 
-    template<class ...T>
-    struct getArrOfNamesImpl<std::tuple<T...>> : public getArrOfNamesImpl<T...> {};
+    template<class... T>
+    struct getArrOfNamesImpl<std::tuple<T...> > : public getArrOfNamesImpl<T...> {
+    };
 
     template<class>
     struct TupleFirstElem;
 
-    template<class TFirst, class ...TOther>
-    struct TupleFirstElem<std::tuple<TFirst, TOther...>> {
+    template<class TFirst, class... TOther>
+    struct TupleFirstElem<std::tuple<TFirst, TOther...> > {
       typedef TFirst First;
       typedef std::tuple<TOther...> Other;
     };
-  }
+  } // namespace priv
 
   template<class T>
-  static inline decltype(auto) getSignature(std::string_view &&functionName) {
+  static decltype(auto) getSignature(std::string_view &&functionName) {
     typedef function_traits<T> Traits;
     auto &&retType = getTypeAsName<typename Traits::return_type>();
 
@@ -60,17 +61,17 @@ namespace px::script {
                        postfix);
   }
 
-  template<class ...TArgs>
-  static inline decltype(auto) getFactorySignature(const char *typeName) {
-    auto &&args = priv::getArrOfNamesImpl<>::get();
+  template<class... TArgs>
+  static decltype(auto) getFactorySignature(const char *typeName) {
+    auto &&args = priv::getArrOfNamesImpl<TArgs...>::get();
 
-    return fmt::format("{0} @{0}({1})",
-                       typeName,
-                       fmt::join((args), ", "));
+    return format("{0} @{0}({1})",
+                  typeName,
+                  fmt::join((args), ", "));
   }
 
   template<class T>
-  static inline decltype(auto) getProxySignature(std::string_view &&functionName, bool isConst) {
+  static decltype(auto) getProxySignature(std::string_view &&functionName, bool isConst) {
     typedef function_traits<T> Traits;
     static_assert(not Traits::is_member);
 
@@ -92,14 +93,16 @@ namespace px::script {
   }
 
   template<class T>
-  static inline decltype(auto) getPropertySignature(std::string_view &&propertyName) {
+  static decltype(auto) getPropertySignature(std::string_view &&propertyName) {
     typedef px::field_traits<T> Traits;
     decltype(auto) type = getTypeAsName<typename Traits::type>();
 
     if constexpr (Traits::is_const) {
-      return fmt::format("const {} {}", std::forward<decltype(type)>(type), std::forward<decltype(propertyName)>(propertyName));
+      return fmt::format("const {} {}", std::forward<decltype(type)>(type),
+                         std::forward<decltype(propertyName)>(propertyName));
     } else {
-      return fmt::format("{} {}", std::forward<decltype(type)>(type), std::forward<decltype(propertyName)>(propertyName));
+      return fmt::format("{} {}", std::forward<decltype(type)>(type),
+                         std::forward<decltype(propertyName)>(propertyName));
     }
   }
 } // px::script

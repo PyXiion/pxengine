@@ -66,6 +66,7 @@ namespace px::script {
   }
 
   void priv::FunctionHandle::prepare() {
+    check();
     m_ctx->Prepare(m_func);
     CVLOG(2, "AngelScript") << "Preparing context " << m_ctx << " with function " << m_func;
 
@@ -76,91 +77,120 @@ namespace px::script {
   }
 
   void priv::FunctionHandle::setArg(int arg, std::int8_t value) {
+    check();
     CVLOG(2, "AngelScript") << "\tArg[" << arg << "] int8 " << value << " (" << static_cast<std::uint8_t>(value) << ")";
     m_ctx->SetArgByte(arg, value);
   }
 
   void priv::FunctionHandle::setArg(int arg, std::int16_t value) {
+    check();
     CVLOG(2, "AngelScript") << "\tArg[" << arg << "] int16 " << value << " (" << static_cast<std::uint16_t>(value) << ")";
     m_ctx->SetArgWord(arg, value);
   }
 
   void priv::FunctionHandle::setArg(int arg, std::int32_t value) {
+    check();
     CVLOG(2, "AngelScript") << "\tArg[" << arg << "] int32 " << value << " (" << static_cast<std::uint32_t>(value) << ")";
     m_ctx->SetArgDWord(arg, value);
   }
 
   void priv::FunctionHandle::setArg(int arg, std::int64_t value) {
+    check();
     CVLOG(2, "AngelScript") << "\tArg[" << arg << "] int64 " << value << " (" << static_cast<std::uint64_t>(value) << ")";
     m_ctx->SetArgQWord(arg, value);
   }
 
   void priv::FunctionHandle::setArg(int arg, float value) {
+    check();
     CVLOG(2, "AngelScript") << "\tArg[" << arg << "] float " << value;
     m_ctx->SetArgFloat(arg, value);
   }
 
   void priv::FunctionHandle::setArg(int arg, double value) {
+    check();
     CVLOG(2, "AngelScript") << "\tArg[" << arg << "] double " << value;
     m_ctx->SetArgDouble(arg, value);
   }
 
   void priv::FunctionHandle::setArgAddress(int arg, void **ptr) {
+    check();
     CVLOG(2, "AngelScript") << "\tArg[" << arg << "] address " << ptr;
     m_ctx->SetArgAddress(arg, ptr);
   }
 
   void priv::FunctionHandle::setArgObject(int arg, void *ptr) {
+    check();
     CVLOG(2, "AngelScript") << "\tArg[" << arg << "] object " << ptr;
     m_ctx->SetArgObject(arg, ptr);
   }
 
   int priv::FunctionHandle::execute() {
+    check();
     CVLOG(2, "AngelScript") << "Executing context " << m_ctx;
     return m_ctx->Execute();
   }
 
   template<>
   std::int8_t priv::FunctionHandle::getReturn() {
+    check();
 //    CVLOG(2, "AngelScript") << "\tGot byte return " << m_ctx;
     return m_ctx->GetReturnByte();
   }
 
   template<>
   std::int16_t priv::FunctionHandle::getReturn() {
+    check();
     return m_ctx->GetReturnWord();
   }
 
   template<>
   std::int32_t priv::FunctionHandle::getReturn() {
+    check();
     return m_ctx->GetReturnDWord();
   }
 
   template<>
   std::int64_t priv::FunctionHandle::getReturn() {
+    check();
     return m_ctx->GetReturnQWord();
   }
 
   template<>
   float priv::FunctionHandle::getReturn() {
+    check();
     return m_ctx->GetReturnFloat();
   }
 
   template<>
   double priv::FunctionHandle::getReturn() {
+    check();
     return m_ctx->GetReturnDouble();
   }
 
   void *priv::FunctionHandle::getReturnAddress() {
+    check();
     return m_ctx->GetAddressOfReturnValue();
   }
 
   void *priv::FunctionHandle::getReturnObject() {
+    check();
     return m_ctx->GetReturnObject();
   }
 
   const char *priv::FunctionHandle::getDeclaration() {
+    check();
     return m_func->GetDeclaration();
+  }
+
+  void priv::FunctionHandle::check() {
+    if (not m_func) {
+      CLOG(ERROR, "AngelScript") << "Calling a function with nullptr function ptr";
+      throw std::runtime_error("Calling a function with nullptr function ptr");
+    }
+    if (not m_ctx) {
+      CLOG(ERROR, "AngelScript") << "Calling a function with nullptr context";
+      throw std::runtime_error("Calling a function with nullptr context");
+    }
   }
 
 } // px::script

@@ -77,10 +77,17 @@ namespace px {
       };
 
       template<class T>
+      struct GetTypeAsNameImpl<T*> {
+        inline static std::string name = getTypeBaseAsName<T>() + "@";
+
+        typedef T* Type;
+      };
+
+      template<class T>
       struct GetTypeAsNameImpl<const T> {
         inline static std::string name = "const " + getTypeBaseAsName<T>();
 
-        typedef T Type;
+        typedef const T Type;
       };
 
       template<>
@@ -147,12 +154,12 @@ namespace px {
         typedef const in<T> Type;
       };
       template<class T>
-      struct CorrectedArgReference<const in<T>&> : public CorrectedArgReference<const in<T>> {};
+      struct CorrectedArgReference<const in<T>&> : CorrectedArgReference<const in<T>> {};
 
     } // priv
 
     template<class T, bool arg = false>
-    constexpr inline std::string_view getTypeAsName() {
+    constexpr std::string_view getTypeAsName() {
       if constexpr (arg) {
         return priv::GetTypeAsNameImpl<typename priv::CorrectedArgReference<T>::Type>::name;
       } else {
