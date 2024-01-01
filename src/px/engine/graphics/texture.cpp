@@ -57,7 +57,8 @@ namespace px {
 
   namespace resources {
     std::vector<std::string> Traits<Texture>::extensions {
-      ".png", ".jpg", ".jpeg", ".bmp"
+        ".png", ".jpg", ".jpeg", ".tga", ".bmp",
+        ".gif", ".hdr", ".pic", ".ppm", ".pgm"
     };
 
     Resource<Texture> Traits<Texture>::load(std::istream &is) {
