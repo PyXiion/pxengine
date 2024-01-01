@@ -15,7 +15,10 @@ namespace px
     void rotate(Vector3 angles);
 
     void setPosition(Vector3 position);
+    void setPosition(float x, float y, float z);
+
     void setRotation(Vector3 eulerAngles);
+    void setRotation(float x, float y, float z);
 
     [[nodiscard]] Vector3 getRotation() const;
     [[nodiscard]] Vector3 getPosition() const;

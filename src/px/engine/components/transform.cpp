@@ -31,10 +31,18 @@ void px::Transform::setPosition(Vector3 position)
   m_position = position;
 }
 
+void px::Transform::setPosition(float x, float y, float z) {
+  setPosition({x, y, z});
+}
+
 void px::Transform::setRotation(Vector3 eulerAngles)
 {
   m_isCached = false;
   m_rotation = eulerAngles;
+}
+
+void px::Transform::setRotation(float x, float y, float z) {
+  setRotation({x, y, z});
 }
 
 px::Vector3 px::Transform::getRotation() const

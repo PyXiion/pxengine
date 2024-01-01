@@ -36,6 +36,8 @@ set(PX_LIB_SOURCES
     px/px.cpp
     px/script/object_type.cpp
     px/script/object_type.hpp
+    px/script/as_counter.hpp
+    px/script/as_counter.cpp
     px/script/object_type_builder.hpp
 )
 
