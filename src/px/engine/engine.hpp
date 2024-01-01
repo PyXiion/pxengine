@@ -17,7 +17,6 @@
 #include "graphics/renderer.hpp"
 #include "graphics/camera.hpp"
 
-#define PX_IMGUI_USE_ENTRY
 #include "common/imgui/imgui.hpp"
 #include "px/script/angel_script.hpp"
 #include "px/engine/ui/settings_window.hpp"
