@@ -7,6 +7,7 @@
 #include "common/frame_limiter.hpp"
 #include "px/engine/events/common/mouse_event.hpp"
 #include "px/engine/events/common/key_event.hpp"
+#include "px/engine/scripts/binding.hpp"
 #include "px/engine/resources/localization.hpp"
 
 static std::once_flag createLoggerFlag;
@@ -103,6 +104,8 @@ void px::Engine::init()
   m_imgui->Create();
 
   m_tickLoopThread = std::make_unique<std::thread>([this] { tickThread(); });
+
+  bind::bindEngine(m_scriptEngine);
 
   proxyEvents();
 
