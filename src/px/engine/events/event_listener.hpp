@@ -49,7 +49,7 @@ namespace px {
     /// \param callback Your CallbackList
     /// \param fun Your lambda or class member
     template<class TCallback, class T>
-    void listen(TCallback &callback, T fun) {
+    void listen(TCallback &callback, T fun, bool prepend = false) {
       typename TCallback::Handle handle;
       using TCallbackFunction = typename TCallback::Callback;
 
@@ -58,15 +58,23 @@ namespace px {
 
       // check if is a lambda or static function
       if constexpr (std::is_convertible_v<T, TCallbackFunction &&>) {
-        handle = callback.append(fun);
+        if (prepend)
+          handle = callback.prepend(fun);
+        else
+          handle = callback.append(fun);
       } else if constexpr (FunctionTraits::is_member) { // is class member
         using Object = typename FunctionTraits::instance_type;
         static_assert(std::is_base_of_v<EventListener, Object>, "The class of the method does not inherit from EventListener.");
 
-        handle = callback.append([this, fun](auto &&...args) {
+        auto proxy = [this, fun](auto &&...args) {
           auto self = (Object *)(this); // everything is fine (maybe) =D (I'm not sure)
           (self->*fun)(std::forward<decltype(args)>(args)...);
-        });
+        };
+
+        if (prepend)
+          handle = callback.prepend(proxy);
+        else
+          handle = callback.append(proxy);
       }
 
       // Plan the destruction
