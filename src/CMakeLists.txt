@@ -43,6 +43,11 @@ set(PX_LIB_SOURCES
     px/script/common.cpp
 )
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  message("DEBUG")
+  add_compile_definitions(PX_DEBUG)
+endif ()
+
 add_library(px ${PX_LIB_SOURCES})
 
 find_package(Angelscript REQUIRED)
