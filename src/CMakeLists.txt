@@ -39,6 +39,8 @@ set(PX_LIB_SOURCES
     px/script/as_counter.hpp
     px/script/as_counter.cpp
     px/script/object_type_builder.hpp
+    px/script/exceptions.hpp
+    px/script/common.cpp
 )
 
 add_library(px ${PX_LIB_SOURCES})

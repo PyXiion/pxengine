@@ -79,7 +79,8 @@ namespace px::script {
 
     typedef typename Traits::arguments Arguments;
     typedef priv::TupleFirstElem<Arguments> SplittedArgs;
-    static_assert(std::is_pointer_v<typename SplittedArgs::First>);
+    using FirstArg = typename SplittedArgs::First;
+    static_assert(std::is_pointer_v<FirstArg> or std::is_reference_v<FirstArg>);
 
     auto &&args = priv::getArrOfNamesImpl<typename SplittedArgs::Other>::get();
 
@@ -94,16 +95,11 @@ namespace px::script {
 
   template<class T>
   static decltype(auto) getPropertySignature(std::string_view &&propertyName) {
-    typedef px::field_traits<T> Traits;
+    typedef field_traits<T> Traits;
     decltype(auto) type = getTypeAsName<typename Traits::type>();
 
-    if constexpr (Traits::is_const) {
-      return fmt::format("const {} {}", std::forward<decltype(type)>(type),
-                         std::forward<decltype(propertyName)>(propertyName));
-    } else {
-      return fmt::format("{} {}", std::forward<decltype(type)>(type),
-                         std::forward<decltype(propertyName)>(propertyName));
-    }
+    return fmt::format("{} {}", std::forward<decltype(type)>(type),
+                       std::forward<decltype(propertyName)>(propertyName));
   }
 } // px::script
 

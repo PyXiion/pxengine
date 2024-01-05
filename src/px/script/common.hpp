@@ -6,6 +6,7 @@
 
 #ifndef PX_ENGINE_COMMON_HPP
 #define PX_ENGINE_COMMON_HPP
+#include <angelscript.h>
 #include <cstdint>
 #include <type_traits>
 
@@ -13,6 +14,7 @@ struct asIScriptEngine;
 struct asIScriptModule;
 struct asIScriptFunction;
 struct asIScriptObject;
+struct asIScriptGeneric;
 
 struct asIScriptContext;
 
@@ -34,6 +36,34 @@ namespace px::script {
 
   template<class T>
   concept AsObject = not AsPrimitive<T> and not AsAddress<T>;
+
+  class GenericManipulator {
+  public:
+    explicit GenericManipulator(asIScriptGeneric *generic);
+
+    [[nodiscard]] void *getAuxiliary() const;
+    [[nodiscard]] void *getObject() const;
+
+    template<class T>
+    T getArg(unsigned index);
+
+    void setReturnAddress(void *);
+
+  private:
+    asIScriptGeneric *m_generic;
+
+    void *getArgAddress(unsigned index);
+  };
+
+  template<class T>
+  T GenericManipulator::getArg(unsigned index) {
+    if constexpr (std::is_reference_v<T>) {
+      using Ptr = std::remove_reference_t<T>*;
+      return *reinterpret_cast<Ptr>(m_generic->GetArgAddress(index));
+    } else {
+      return *reinterpret_cast<T *>(m_generic->GetArgObject(index));
+    }
+  }
 }
 
 #endif //PX_ENGINE_COMMON_HPP

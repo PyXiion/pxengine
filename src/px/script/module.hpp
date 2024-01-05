@@ -6,10 +6,12 @@
 
 #ifndef PX_ENGINE_SCRIPT_MODULE_HPP
 #define PX_ENGINE_SCRIPT_MODULE_HPP
+
 #include "px/px.hpp"
 #include "common.hpp"
 #include "function.hpp"
 #include "object_type.hpp"
+#include "exceptions.hpp"
 
 namespace px::script {
   class Module {
@@ -25,7 +27,7 @@ namespace px::script {
       asIScriptFunction *funcHandle = getFunctionByDecl(decl);
 
       if (not funcHandle) {
-        PX_THROW_AND_LOG("AngelScript", std::runtime_error,
+        PX_THROW_AND_LOG("AngelScript", FunctionNotFound,
                          "Failed to get function {} by declaration \"{}\"", funcName, decl);
       }
 

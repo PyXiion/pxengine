@@ -9,7 +9,7 @@
 #include "common.hpp"
 #include "function.hpp"
 #include "template/signatures.hpp"
-
+#include "exceptions.hpp"
 
 namespace px::script {
   namespace priv {
@@ -40,9 +40,7 @@ namespace px::script {
 
       asIScriptFunction *funcHandle = m_type.getFactoryByDecl(decl);
       if (not funcHandle) {
-        auto msg = fmt::format("Failed to get a factory by declaration {}", decl);
-        CLOG(ERROR, "AngelScript") << msg;
-        throw std::runtime_error(msg);
+        PX_THROW_AND_LOG("AngelScript", FactoryNotFound, "Failed to get a factory by declaration {}", decl);
       }
       CVLOG(1, "AngelScript") << "Requested AngelScript factory by declaration " << decl;
 
@@ -63,9 +61,7 @@ namespace px::script {
         funcHandle = m_type.getMethodByDecl(decl + " const");
 
       if (not funcHandle) {
-        auto msg = fmt::format("Failed to get a method by declaration {}", decl);
-        CLOG(ERROR, "AngelScript") << msg;
-        throw std::runtime_error(msg);
+        PX_THROW_AND_LOG("AngelScript", MethodNotFound, "Failed to get a method by declaration {}", decl);
       }
       CVLOG(1, "AngelScript") << "Requested AngelScript method by declaration " << decl;
 
@@ -85,8 +81,7 @@ namespace px::script {
           return *reinterpret_cast<T*>(address);
         };
       };
-      CLOG(ERROR, "AngelScript") << "Failed to get property " << signature;
-      throw std::runtime_error("Failed to get property " + signature);
+      PX_THROW_AND_LOG("AngelScript", PropertyNotFound, "Failed to get property {}", signature);
     }
 
     [[nodiscard]] bool derivesFrom(const ObjectType &base) const;

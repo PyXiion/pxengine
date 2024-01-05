@@ -11,6 +11,7 @@
 #include <utility>
 #include "easylogging++.h"
 #include "template/signatures.hpp"
+#include "px/px.hpp"
 
 namespace px::script {
   namespace priv {
