@@ -7,19 +7,27 @@
 
 #include <exception>
 
+#define PX_NEW_EXCEPTION(exception, parent)       \
+class exception : public parent {                 \
+public:                                           \
+  explicit exception(std::string msg = "")   \
+    : parent(std::move(msg)) {}                              \
+}
+
+
 namespace px {
 
   class Exception : public std::exception {
   public:
-    inline explicit Exception(const char *msg = nullptr)
-      : m_msg(msg) {}
+    inline explicit Exception(std::string msg = "")
+      : m_msg(std::move(msg)) {}
 
-    [[nodiscard]] inline const char *what() const noexcept override {
-      return m_msg ? m_msg : "Unknown exception";
+    [[nodiscard]] const char *what() const noexcept override {
+      return m_msg.empty() ? "Unknown exception" : m_msg.c_str();
     }
 
   private:
-    const char *m_msg;
+    std::string m_msg;
   };
 
 } // px
