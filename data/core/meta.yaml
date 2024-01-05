@@ -1,0 +1,7 @@
+name: Core
+
+scripts:
+  sources:
+    - script.angel_behaviour
+    - script.fps_camera
+    - script.main
