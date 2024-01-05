@@ -23,11 +23,11 @@ namespace px::script {
     template<class T>
     inline void registerGlobalVariable(std::string_view &&name, T *ptr);
 
-    template<class T, class ...U>
-    inline void registerGlobalFunction(std::string_view &&name, T (*ptr)(U...));
+    template<FunctionSignature T>
+    inline void registerGlobalFunction(std::string_view &&name, T *fun);
 
-    template<class T, class ...U>
-    inline void registerGlobalFunctionWithDecl(const std::string &decl, T (*ptr)(U...));
+    template<FunctionSignature T>
+    inline void registerGlobalFunctionWithDecl(const std::string &decl, T *&&fun);
 
     template<class T>
     inline AsTypeBuilder<T> registerObjectType();
@@ -53,18 +53,18 @@ namespace px::script {
     void registerGlobalVariable(const std::string &signature, void *ptr);
   };
 
-  template<class T, class ...U>
-  void AngelScript::registerGlobalFunction(std::string_view &&name, T (*ptr)(U...)) {
-    auto signature = getSignature<T (U...)>(std::forward<decltype(name)>(name));
+  template<FunctionSignature T>
+  void AngelScript::registerGlobalFunction(std::string_view &&name, T *fun) {
+    auto signature = getSignature<T>(std::forward<decltype(name)>(name));
 
-    registerGlobalFunction(signature, PX_ANYTHING_TO_VOID_PTR(ptr));
+    registerGlobalFunction(signature, PX_ANYTHING_TO_VOID_PTR(fun));
     CLOG(INFO, "AngelScript") << "Registered an AngelScript global function with a signature \"" << signature <<
-                              "\" and function pointer at " << PX_ANYTHING_TO_VOID_PTR(ptr);
+                              "\" and function pointer at " << PX_ANYTHING_TO_VOID_PTR(fun);
   }
 
-  template<class T, class... U>
-  void AngelScript::registerGlobalFunctionWithDecl(const std::string &decl, T (*ptr)(U...)) {
-    registerGlobalFunction(decl, PX_ANYTHING_TO_VOID_PTR(ptr));
+  template<FunctionSignature T>
+  void AngelScript::registerGlobalFunctionWithDecl(const std::string &decl, T *&&fun) {
+    registerGlobalFunction(decl, PX_ANYTHING_TO_VOID_PTR(fun));
   }
 
   template<class T>
