@@ -21,6 +21,7 @@
 #include "px/script/angel_script.hpp"
 #include "px/engine/ui/settings_window.hpp"
 #include "settings.hpp"
+#include "module.hpp"
 
 namespace px
 {
@@ -42,6 +43,8 @@ namespace px
 
     /// @brief Запускает игровой движок.
     void run();
+
+    void loadModule(const std::string &pathToModule);
 
     void reloadSettings();
 
@@ -97,6 +100,8 @@ namespace px
     std::unique_ptr<Controls> m_controls;
 
     std::unique_ptr<std::thread> m_tickLoopThread;
+
+    std::vector<ModulePtr> m_modules;
 
     CameraPtr m_camera;
 

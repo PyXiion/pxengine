@@ -15,6 +15,7 @@ set(PX_ENGINE_SHADER_SOURCES
 )
 set(PX_ENGINE_SOURCES
     engine.cpp engine.hpp
+    module.cpp module.hpp
     general.hpp
     settings.hpp
 

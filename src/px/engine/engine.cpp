@@ -68,6 +68,14 @@ void px::Engine::run()
   onExit(*this);
 }
 
+void px::Engine::loadModule(const std::string &pathToModule) {
+  ModulePtr ptr = makeModule(*this, pathToModule);
+
+  ptr->load();
+
+  m_modules.push_back(std::move(ptr));
+}
+
 void px::Engine::reloadSettings() {
   // graphics
   m_fpsLimiter.setMaxFps(m_settings.graphicsSettings.maxFps);
@@ -108,6 +116,9 @@ void px::Engine::init()
   bind::bindEngine(m_scriptEngine);
 
   proxyEvents();
+
+  // Core module
+  loadModule("./data/core");
 
   // Инициализация всего остального
   EASY_BLOCK("Init event", profiler::colors::LightBlue)
