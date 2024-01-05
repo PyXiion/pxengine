@@ -25,5 +25,14 @@
 #define PX_THROW_AND_LOG(logger, errorType, message, ...) \
   do { auto msg = fmt::format(message, ##__VA_ARGS__); CLOG(ERROR, logger) << msg; throw errorType(msg); } while (0)
 
+#define PX_IF_DEBUG if constexpr (px::isDebug)
+
+namespace px {
+  #ifdef PX_DEBUG
+  constexpr bool isDebug = true;
+  #else // DEBUG
+  constexpr bool isDebug = false;
+  #endif
+}
 
 #endif //PX_PX_HPP
