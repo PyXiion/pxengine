@@ -56,13 +56,9 @@ namespace px::script {
   };
 
   template<class T>
-  T GenericManipulator::getArg(unsigned index) {
-    if constexpr (std::is_reference_v<T>) {
-      using Ptr = std::remove_reference_t<T>*;
-      return *reinterpret_cast<Ptr>(m_generic->GetArgAddress(index));
-    } else {
-      return *reinterpret_cast<T *>(m_generic->GetArgObject(index));
-    }
+  T GenericManipulator::getArg(const unsigned index) {
+    using Ptr = std::remove_reference_t<T>*;
+    return *reinterpret_cast<Ptr>(m_generic->GetAddressOfArg(index));
   }
 }
 
