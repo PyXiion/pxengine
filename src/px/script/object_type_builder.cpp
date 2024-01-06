@@ -6,52 +6,73 @@
 
 #include "object_type_builder.hpp"
 #include <angelscript.h>
-#include <cassert>
 
 namespace px::script {
   void priv::registerClassType(asIScriptEngine *engine, const std::string &name, int size,
                                script::priv::ObjTypeFlags::Enum flags) {
     int r = engine->RegisterObjectType(name.c_str(), size, flags);
-    assert(r >= 0);
+    if (r < 0) {
+      PX_THROW_AND_LOG("AngelScript", std::runtime_error, "Failed to register class type ({}, {}, {}, {})",
+                       fmt::ptr(engine), name, size, flags);
+    }
   }
 
   void priv::registerClassBehaviour(asIScriptEngine *engine, const std::string &name,
                                     priv::ObjBehaviour::Enum behaviour, const std::string &declaration, void *funcPtr) {
     int r = engine->RegisterObjectBehaviour(name.c_str(), static_cast<asEBehaviours>(behaviour), declaration.c_str(),
                                             asFUNCTION(funcPtr), asCALL_CDECL_OBJFIRST);
-    assert(r >= 0);
+    if (r < 0) {
+      PX_THROW_AND_LOG("AngelScript", std::runtime_error, "Failed to register class behaviour ({}, {}, {}, {})",
+                       fmt::ptr(engine), name, declaration, fmt::ptr(funcPtr));
+    }
   }
 
   void priv::registerMethod(asIScriptEngine *engine, const std::string &name, const std::string &declaration,
                             DummyMethod funcPtr) {
     int r = engine->RegisterObjectMethod(name.c_str(), declaration.c_str(),
                                          asSMethodPtr<sizeof(DummyMethod)>::Convert(funcPtr), asCALL_THISCALL);
-    assert(r >= 0);
+    if (r < 0) {
+      PX_THROW_AND_LOG("AngelScript", std::runtime_error, "Failed to register method ({}, {}, {})",
+                       fmt::ptr(engine), name, declaration);
+    }
   }
 
   void priv::registerProxyMethod(asIScriptEngine *engine, const std::string &name, const std::string &declaration,
                                  void *funcPtr) {
     int r = engine->RegisterObjectMethod(name.c_str(), declaration.c_str(), asFUNCTION(funcPtr), asCALL_CDECL_OBJFIRST);
-    assert(r >= 0);
+    if (r < 0) {
+      PX_THROW_AND_LOG("AngelScript", std::runtime_error, "Failed to register proxy method ({}, {}, {}, {})",
+                       fmt::ptr(engine), name, declaration, fmt::ptr(funcPtr));
+    }
   }
 
   void priv::registerCdeclMethod(asIScriptEngine *engine, const std::string &name, const std::string &declaration,
                                  void *funcPtr) {
     int r = engine->RegisterObjectMethod(name.c_str(), declaration.c_str(), asFUNCTION(funcPtr), asCALL_CDECL);
-    assert(r >= 0);
+    if (r < 0) {
+      PX_THROW_AND_LOG("AngelScript", std::runtime_error, "Failed to register cdecl method ({}, {}, {}, {})",
+                       fmt::ptr(engine), name, declaration, fmt::ptr(funcPtr));
+    }
   }
 
   void priv::registerGenericMethod(asIScriptEngine *engine, const std::string &name, const std::string &declaration,
-  void *funcPtr, void *auxiliary) {
+                                   void *funcPtr, void *auxiliary) {
     auto *function = reinterpret_cast<asGENFUNC_t>(funcPtr);
-    int r = engine->RegisterObjectMethod(name.c_str(), declaration.c_str(), asFUNCTION(function), asCALL_GENERIC, auxiliary);
-    assert(r >= 0);
+    int r = engine->RegisterObjectMethod(name.c_str(), declaration.c_str(), asFUNCTION(function), asCALL_GENERIC,
+                                         auxiliary);
+    if (r < 0) {
+      PX_THROW_AND_LOG("AngelScript", std::runtime_error, "Failed to register generic method ({}, {}, {}, {})",
+                       fmt::ptr(engine), name, declaration, fmt::ptr(funcPtr));
+    }
   }
 
   void priv::registerProperty(asIScriptEngine *engine, const std::string &name, const std::string &declaration,
                               int offset) {
     int r = engine->RegisterObjectProperty(name.c_str(), declaration.c_str(), offset);
-    assert(r >= 0);
+    if (r < 0) {
+      PX_THROW_AND_LOG("AngelScript", std::runtime_error, "Failed to register property ({}, {}, {}, {})",
+                       fmt::ptr(engine), name, declaration, offset);
+    }
   }
 
   void priv::setCtxException(const char *msg) {

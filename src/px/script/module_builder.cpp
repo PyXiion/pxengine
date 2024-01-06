@@ -3,7 +3,6 @@
 //
 
 #include "module_builder.hpp"
-#include <cassert>
 #include "angel_script.hpp"
 #include "addons/scriptbuilder/scriptbuilder.h"
 
@@ -19,21 +18,30 @@ namespace px::script {
     CLOG(INFO, "AngelScript") << "Building AngelScript module " << name << "...";
 
     m_moduleName = name;
-    assert(m_builder->StartNewModule(m_as.getHandle(), name.c_str()) >= 0);
+
+    if (m_builder->StartNewModule(m_as.getHandle(), name.c_str()) < 0) {
+      PX_THROW_AND_LOG("AngelScript", std::runtime_error, "Failed to create new module named {}", name);
+    }
 
     return *this;
   }
 
   ModuleBuilder &ModuleBuilder::codeFromFile(const std::string &filename) {
     CLOG(INFO, "AngelScript") << "Loading " << filename << " to AngelScript module " << m_moduleName;
-    assert(m_builder->AddSectionFromFile(filename.c_str()) >= 0);
+
+    if (m_builder->AddSectionFromFile(filename.c_str()) < 0) {
+      PX_THROW_AND_LOG("AngelScript", std::runtime_error, "Failed to load script from \"{}\"", filename);
+    }
 
     return *this;
   }
 
   ModuleBuilder &ModuleBuilder::code(const std::string &code, const std::string &sourceName) {
     CLOG(INFO, "AngelScript") << "Loading a code to AngelScript module " << m_moduleName;
-    assert(m_builder->AddSectionFromMemory(sourceName.c_str(), code.c_str()));
+
+    if (m_builder->AddSectionFromMemory(sourceName.c_str(), code.c_str()) < 0) {
+      PX_THROW_AND_LOG("AngelScript", std::runtime_error, "Failed to load code (sourceName: {})", sourceName);
+    }
 
     return *this;
   }

@@ -7,7 +7,6 @@
 #include "angel_script.hpp"
 #include <angelscript.h>
 #include <mutex>
-#include <cassert>
 #include "addons/scriptarray/scriptarray.h"
 #include "addons/scriptstdstring/scriptstdstring.h"
 
@@ -55,11 +54,19 @@ namespace px::script {
   }
 
   void AngelScript::registerGlobalFunction(const std::string &funSign, void *funPtr) {
-    assert(m_handle->RegisterGlobalFunction(funSign.c_str(), asFUNCTION(funPtr), asCALL_CDECL) >= 0);
+    const int r = m_handle->RegisterGlobalFunction(funSign.c_str(), asFUNCTION(funPtr), asCALL_CDECL);
+
+    if (r < 0) {
+      PX_THROW_AND_LOG("AngelScript", std::runtime_error, "Failed to register global function ({}, {})", funSign, fmt::ptr(funPtr));
+    }
   }
 
   void AngelScript::registerGlobalVariable(const std::string &signature, void *ptr) {
-    assert(m_handle->RegisterGlobalProperty(signature.c_str(), ptr) >= 0);
+    const int r = m_handle->RegisterGlobalProperty(signature.c_str(), ptr);
+
+    if (r < 0) {
+      PX_THROW_AND_LOG("AngelScript", std::runtime_error, "Failed to register global function ({}, {})", signature, fmt::ptr(ptr));
+    }
   }
 
   asIScriptEngine *AngelScript::getHandle() {
