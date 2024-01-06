@@ -54,7 +54,7 @@ namespace px {
   private:
     T m_handle;
 
-    inline void destroy() {
+    void destroy() {
       EASY_BLOCK(__PRETTY_FUNCTION__)
       if (bgfx::isValid(m_handle)) {
         bgfx::destroy(m_handle);

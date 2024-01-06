@@ -17,7 +17,6 @@
 
 
 px::Window::Window()
-  : m_windowHandle(nullptr)
 {
 
 }

@@ -52,7 +52,7 @@ namespace px
     };
 
     template <class T>
-    inline constexpr std::string_view getObjectDefaultName() {
+    constexpr std::string_view getObjectDefaultName() {
       if constexpr (HasDefaultName<T>)
         return T::defaultName;
       else

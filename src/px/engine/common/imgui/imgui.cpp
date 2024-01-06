@@ -313,9 +313,9 @@ namespace px {
       auto italic  = resources.get<std::vector<char>>("core.font.roboto.italic");
       auto bold    = resources.get<std::vector<char>>("core.font.roboto.bold");
 
-      io.Fonts->AddFontFromMemoryTTF((void*)regular->data(), regular->size(), 16.0f, &config, ranges);
-      io.Fonts->AddFontFromMemoryTTF((void*)italic->data(),  italic->size(),  16.0f, &config, ranges);
-      io.Fonts->AddFontFromMemoryTTF((void*)bold->data(),    bold->size(),    16.0f, &config, ranges);
+      io.Fonts->AddFontFromMemoryTTF(regular->data(), regular->size(), 16.0f, &config, ranges);
+      io.Fonts->AddFontFromMemoryTTF(italic->data(),  italic->size(),  16.0f, &config, ranges);
+      io.Fonts->AddFontFromMemoryTTF(bold->data(),    bold->size(),    16.0f, &config, ranges);
     }
     CLOG(INFO, "PXEngine") << "Loaded ImGui resources";
 
@@ -374,7 +374,7 @@ namespace px {
     const auto freq = double(bx::getHPFrequency() );
     io.DeltaTime = float(double(frameTime)/freq);
 
-    io.AddMousePosEvent( (float)m_mouseX, (float)m_mouseY);
+    io.AddMousePosEvent( m_mouseX, m_mouseY);
     io.AddMouseButtonEvent(ImGuiMouseButton_Left,   getMouseButtonState(MouseButton::Left) );
     io.AddMouseButtonEvent(ImGuiMouseButton_Right,  getMouseButtonState(MouseButton::Right) );
     io.AddMouseButtonEvent(ImGuiMouseButton_Middle, getMouseButtonState(MouseButton::Middle) );

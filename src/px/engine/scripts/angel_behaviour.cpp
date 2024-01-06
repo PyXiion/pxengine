@@ -12,7 +12,7 @@ namespace px {
   std::once_flag AngelBehaviour::staticInit;
 
   void AngelBehaviour::init() {
-    auto &engine = px::Engine::getInstance();
+    auto &engine = Engine::getInstance();
     auto &as = engine.getScriptEngine();
     auto module = as.getExistingModule("core/angel_behaviour.as");
 

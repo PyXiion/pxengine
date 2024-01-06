@@ -10,7 +10,6 @@
 #include <string>
 #include <fstream>
 #include <memory>
-#include "px/raw_memory.hpp"
 
 namespace px {
 
@@ -20,7 +19,7 @@ namespace px {
   using Resource = std::shared_ptr<T>;
 
   template<class T, class ...TArgs>
-  inline Resource<T> makeResource(TArgs &&...args) {
+  Resource<T> makeResource(TArgs &&...args) {
     return std::make_shared<T>(std::forward<TArgs>(args)...);
   }
 
@@ -88,7 +87,7 @@ namespace px {
     const std::string &getCurrentResourceId();
 
     template<class Traits>
-    inline std::string getPath(const std::string &root, const std::string &resourceId) {
+    std::string getPath(const std::string &root, const std::string &resourceId) {
       if constexpr (HasResourceTraitGetPath<Traits>) {
         return Traits::getPath(root, resourceId);
       } else if constexpr (HasResourceTraitExtensions<Traits>) {
@@ -99,7 +98,7 @@ namespace px {
     }
 
     template<class Traits>
-    inline auto load(ResourceManager &rm, std::istream &istream) {
+    auto load(ResourceManager &rm, std::istream &istream) {
       if constexpr (LoadableResourceTraits<Traits>) {
         return Traits::load(istream);
       } else if constexpr (LoadableWithManagerResourceTraits<Traits>){

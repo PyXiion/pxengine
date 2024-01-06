@@ -15,7 +15,7 @@ namespace px {
     float m_z;
     uint32_t m_abgr;
 
-    inline static void init() {
+    static void init() {
       ms_layout
           .begin()
           .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)

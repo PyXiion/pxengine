@@ -30,6 +30,8 @@ namespace px {
     } else if (image.channels() == 2) {
       format = bgfx::TextureFormat::RGBA8;
       CLOG(INFO, "PXEngine") << "\tFormat: RGBA8";
+    } else {
+      format = bgfx::TextureFormat::Unknown;
     }
 
     auto res =

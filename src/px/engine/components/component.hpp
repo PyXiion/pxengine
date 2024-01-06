@@ -25,7 +25,7 @@ namespace px {
 
     virtual ~Component() = default;
 
-    virtual void guiEditor() {};
+    virtual void guiEditor() {}
 
     [[nodiscard]] virtual bool checkComponentType(std::uint32_t type) const;
     [[nodiscard]] virtual const std::string_view &getComponentId() const;
@@ -52,10 +52,10 @@ namespace px {
     inline static constexpr std::uint32_t componentTypeId = px::crc32(ID.value);
     inline static constexpr std::string_view componentId = ID.value;
 
-    [[nodiscard]] inline bool checkComponentType(std::uint32_t type) const override {
-      return (componentTypeId == type) or TParent::checkComponentType(type);
+    [[nodiscard]] bool checkComponentType(std::uint32_t type) const override {
+      return componentTypeId == type or TParent::checkComponentType(type);
     }
-    [[nodiscard]] inline const std::string_view &getComponentId() const override {
+    [[nodiscard]] const std::string_view &getComponentId() const override {
       return componentId;
     }
   };

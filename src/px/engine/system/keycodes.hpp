@@ -11,7 +11,7 @@ namespace px
     Count
   };
 
-  inline static constexpr MouseButton getGlfwMouseButton(int btn) {
+  static constexpr MouseButton getGlfwMouseButton(int btn) {
     switch (btn) {
       case GLFW_MOUSE_BUTTON_LEFT:
         return MouseButton::Left;
@@ -145,7 +145,7 @@ namespace px
     KeyCode_Count
   };
 
-  inline static constexpr KeyCode getGlfwKeyCode(int key) {
+  static constexpr KeyCode getGlfwKeyCode(int key) {
     return static_cast<KeyCode>(key);
   }
 

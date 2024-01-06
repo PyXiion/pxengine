@@ -87,10 +87,10 @@ namespace px::script {
                              void *funcPtr);
 
     void registerCdeclMethod(asIScriptEngine *engine, const std::string &name, const std::string &declaration,
-    void *funcPtr);
+                             void *funcPtr);
 
     void registerGenericMethod(asIScriptEngine *engine, const std::string &name, const std::string &declaration,
-                             void *funcPtr, void *auxiliary);
+                               void *funcPtr, void *auxiliary);
 
     void registerProperty(asIScriptEngine *engine, const std::string &name, const std::string &declaration, int offset);
 

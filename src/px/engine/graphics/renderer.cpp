@@ -69,7 +69,7 @@ namespace px {
     EASY_BLOCK("Renderer::beginFrame")
     bgfx::touch(m_viewId);
 
-    bgfx::setDebug(m_debugStats ? BGFX_DEBUG_STATS : (BGFX_DEBUG_TEXT));
+    bgfx::setDebug(m_debugStats ? BGFX_DEBUG_STATS : BGFX_DEBUG_TEXT);
 
     if (m_debugStats)
       debug();

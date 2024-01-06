@@ -11,8 +11,8 @@
 #include "../event_fabric.hpp"
 
 namespace px {
-  struct KeyEvent final : public BaseEvent<KeyEvent, "core.event.key"> {
-    inline KeyEvent(KeyCode code, bool pressed)
+  struct KeyEvent final : BaseEvent<KeyEvent, "core.event.key"> {
+    KeyEvent(KeyCode code, bool pressed)
       : code(code), pressed(pressed) {}
     ~KeyEvent() override = default;
 
@@ -21,14 +21,14 @@ namespace px {
   };
 
   struct KeyReleasedEvent final : public BaseEvent<KeyReleasedEvent, "core.event.key.up"> {
-    inline explicit KeyReleasedEvent(KeyCode code)
+    explicit KeyReleasedEvent(KeyCode code)
     : code(code) {}
     ~KeyReleasedEvent() override = default;
     KeyCode code{};
   };
 
   struct KeyPressedEvent final : public BaseEvent<KeyPressedEvent, "core.event.key.down"> {
-    inline explicit KeyPressedEvent(KeyCode code)
+    explicit KeyPressedEvent(KeyCode code)
     : code(code) {}
     ~KeyPressedEvent() override = default;
     KeyCode code{};

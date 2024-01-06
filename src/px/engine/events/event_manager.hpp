@@ -59,7 +59,7 @@ namespace px
     
     /**
      * @brief Возвращает внутренний числовой ID события по его строковому ID.
-     * @param newEventStrId Строковой ID события.
+     * @param eventStrId Строковой ID события.
      * @return Внутренний числовой ID события. 
      * @throw std::out_of_range если строковой ID не существует.
      */

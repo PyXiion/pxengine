@@ -34,7 +34,7 @@ namespace px {
     struct Traits<Texture> {
       static std::vector<std::string> extensions;
 
-      static Resource<Texture> load(std::istream &ifs);;
+      static Resource<Texture> load(std::istream &ifs);
     };
   }
 } // px

@@ -41,7 +41,7 @@ namespace px {
 
   typedef std::shared_ptr<Model> ModelPtr;
   template <class ...TArgs>
-  inline static ModelPtr makeModel(TArgs &&...args) { return std::make_shared<Model>(std::forward<TArgs>(args)...); }
+  static ModelPtr makeModel(TArgs &&...args) { return std::make_shared<Model>(std::forward<TArgs>(args)...); }
 
   namespace resources {
     template<>

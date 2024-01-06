@@ -7,4 +7,4 @@ add_executable(02_scripts
     player.cpp
     player.hpp
 )
-target_link_libraries(02_scripts px_engine px easyloggingpp)
+target_link_libraries(02_scripts fmt px easyloggingpp)

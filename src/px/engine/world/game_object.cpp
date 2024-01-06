@@ -24,7 +24,7 @@ px::World *px::GameObject::getWorld()
 }
 
 px::Engine *px::GameObject::getEngine() {
-  return (m_world) ? &m_world->m_engine : nullptr;
+  return m_world ? &m_world->m_engine : nullptr;
 }
 
 void px::GameObject::setName(const std::string &name)

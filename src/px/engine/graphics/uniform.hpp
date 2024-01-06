@@ -32,7 +32,7 @@ namespace px {
   typedef std::shared_ptr<Uniform> UniformPtr;
 
   template<class ...TArgs>
-  inline UniformPtr makeUniform(TArgs ...args) {
+  UniformPtr makeUniform(TArgs ...args) {
     return std::make_shared<Uniform>(std::forward<TArgs>(args)...);
   }
 

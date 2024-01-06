@@ -21,19 +21,19 @@ namespace px::script {
     ~AngelScript();
 
     template<class T>
-    inline void registerGlobalVariable(std::string_view &&name, T *ptr);
+    void registerGlobalVariable(std::string_view &&name, T *ptr);
 
     template<FunctionSignature T>
-    inline void registerGlobalFunction(std::string_view &&name, T *fun);
+    void registerGlobalFunction(std::string_view &&name, T *fun);
 
     template<FunctionSignature T>
-    inline void registerGlobalFunctionWithDecl(const std::string &decl, T *&&fun);
+    void registerGlobalFunctionWithDecl(const std::string &decl, T *&&fun);
 
     template<class T>
-    inline AsTypeBuilder<T> registerObjectType();
+    AsTypeBuilder<T> registerObjectType();
 
     template<class T>
-    inline AsTypeBuilder<T> registerObjectType(std::string &&name);
+    AsTypeBuilder<T> registerObjectType(std::string &&name);
 
     asIScriptEngine *getHandle();
     asIScriptContext *getContext();

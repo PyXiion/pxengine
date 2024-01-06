@@ -95,6 +95,6 @@ namespace px {
   }
 
   const std::string &Module::getScriptCode(const std::string &scriptId) {
-    return *(m_engine.getResourceManager().get<std::string>(scriptId));
+    return *m_engine.getResourceManager().get<std::string>(scriptId);
   }
 } // px

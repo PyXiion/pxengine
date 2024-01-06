@@ -26,7 +26,7 @@ namespace px {
   typedef std::shared_ptr<Shader> ShaderPtr;
 
   template <class ...TArgs>
-  inline static ShaderPtr makeShader(TArgs ...args) { return std::make_shared<Shader>(std::forward<TArgs>(args)...); }
+  static ShaderPtr makeShader(TArgs ...args) { return std::make_shared<Shader>(std::forward<TArgs>(args)...); }
 
   namespace resources {
     template<>

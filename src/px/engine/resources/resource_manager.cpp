@@ -12,7 +12,6 @@ namespace fs = std::filesystem;
 
 px::ResourceManager::ResourceManager(std::string rootDir)
   : m_rootDir(std::move(rootDir))
-  , m_cached()
 {
 }
 

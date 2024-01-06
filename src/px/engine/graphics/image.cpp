@@ -69,6 +69,6 @@ namespace px {
 
   int Image::eof(void *user) {
     auto stream = (std::istream*)user;
-    return (stream->eof()) ? 1 : 0;
+    return stream->eof() ? 1 : 0;
   }
 } // px

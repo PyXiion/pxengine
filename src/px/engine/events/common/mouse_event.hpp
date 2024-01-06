@@ -10,8 +10,8 @@
 #include "../event_fabric.hpp"
 
   namespace px {
-    struct MouseEvent final : public BaseEvent<MouseEvent, "core.event.mouse"> {
-      inline MouseEvent(float x, float y)
+    struct MouseEvent final : BaseEvent<MouseEvent, "core.event.mouse"> {
+      MouseEvent(float x, float y)
         : x(x), y(y) {}
       ~MouseEvent() override = default;
 
