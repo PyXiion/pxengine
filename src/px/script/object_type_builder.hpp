@@ -13,6 +13,7 @@
 #include <new>
 #include "easylogging++.h"
 #include "common.hpp"
+#include "px/px.hpp"
 #include "template/signatures.hpp"
 
 namespace px::script {
@@ -167,6 +168,11 @@ namespace px::script {
     T &assigment(T &self, const U &other) {
       return self = other;
     }
+
+    template<class T>
+    T getCopy(const T other) {
+      return T(other);
+    }
   }
 
   template<class T>
@@ -175,22 +181,12 @@ namespace px::script {
   namespace priv {
     template<class Handle>
     class AsTypeBuilderBase {
-    public:
-      explicit AsTypeBuilderBase(asIScriptEngine *engine)
-        : AsTypeBuilderBase(engine, std::string(getTypeAsName<Handle>())) {}
-
+    protected:
       AsTypeBuilderBase(asIScriptEngine *engine, std::string &&name)
         : m_engine(engine)
-      , m_name(std::move(name)) {
-        CLOG(INFO, "AngelScript") << "New AngelScript type \"" << m_name << "\"" << " with size " << sizeof(Handle);
-        priv::registerClassType(m_engine, std::string(m_name), sizeof(Handle),
-                                static_cast<priv::ObjTypeFlags::Enum>(
-                                  priv::ObjTypeFlags::Value | priv::getClassFlags<Handle>()));
-        registerBehaviour();
-      }
+      , m_name(std::move(name)) {}
 
-    protected:
-      asIScriptEngine *m_engine;
+      asIScriptEngine *m_engine{};
       std::string m_name;
 
       void registerBehaviour() {
@@ -229,6 +225,18 @@ namespace px::script {
     template<class Base, class Handle = Base>
     class AsTypeBuilderCommon : public AsTypeBuilderBase<Handle> {
     public:
+      explicit AsTypeBuilderCommon(asIScriptEngine *engine)
+        : AsTypeBuilderCommon(engine, std::string(getTypeAsName<Handle>())) {}
+
+      AsTypeBuilderCommon(asIScriptEngine *engine, std::string &&name)
+        : AsTypeBuilderBase<Handle>(engine, std::move(name)) {
+        CLOG(INFO, "AngelScript") << "New AngelScript type \"" << m_name << "\"" << " with size " << sizeof(Handle);
+        registerClassType(m_engine, std::string(m_name), sizeof(Handle),
+                          static_cast<ObjTypeFlags::Enum>(
+                            ObjTypeFlags::Value | priv::getClassFlags<Handle>()));
+        registerBehaviour();
+      }
+
       // constructor
       using AsTypeBuilderBase<Handle>::AsTypeBuilderBase;
 
@@ -274,30 +282,83 @@ namespace px::script {
     protected:
       using AsTypeBuilderBase<Handle>::m_engine;
       using AsTypeBuilderBase<Handle>::m_name;
+
+      using AsTypeBuilderBase<Handle>::registerBehaviour;
     };
 
     template<MethodPtrType PtrType, class ...PrefixArgs>
     struct GetProxyTypeImpl;
 
     template<class TClass, class TReturn, class ...TArgs, class ...PrefixArgs>
-    struct GetProxyTypeImpl<TReturn (TClass::*)(TArgs...), PrefixArgs...> {
-      using Type = TReturn (*)(PrefixArgs..., TArgs...);
+    struct GetProxyTypeImpl<TReturn (TClass::*)(TArgs ...), PrefixArgs ...> {
+      using Type = TReturn (*)(PrefixArgs ..., TArgs ...);
     };
 
     template<class TClass, class TReturn, class ...TArgs, class ...PrefixArgs>
-    struct GetProxyTypeImpl<TReturn (TClass::*)(TArgs...) const, PrefixArgs...> {
-      using Type = TReturn (*)(PrefixArgs..., TArgs...);
+    struct GetProxyTypeImpl<TReturn (TClass::*)(TArgs ...) const, PrefixArgs ...> {
+      using Type = TReturn (*)(PrefixArgs ..., TArgs ...);
     };
 
+    template<class T, class U>
+    struct ReplaceSmartPtrImpl;
+
+    template<template<class> class SmartPtrType, class OldType, class NewType>
+    struct ReplaceSmartPtrImpl<SmartPtrType<OldType>, NewType> {
+      using Type = SmartPtrType<NewType>;
+    };
+
+    template<class Base, class ...New>
+    using ReplaceSmartPtrType = typename ReplaceSmartPtrImpl<Base, New ...>::Type;
+
     template<class T, class ...TArgs>
-    using GetProxyType = typename GetProxyTypeImpl<T, TArgs...>::Type;
+    using GetProxyType = typename GetProxyTypeImpl<T, TArgs ...>::Type;
+
+    template<class LeftHandle, class RightHandle = LeftHandle>
+    static LeftHandle &handleAssigment(LeftHandle &left, const RightHandle &right) {
+      if constexpr (std::is_same_v<LeftHandle, RightHandle>) {
+        return left = right;
+      } else {
+        return left = std::dynamic_pointer_cast<typename LeftHandle::element_type>(right);
+      }
+    }
+
+    template<class LeftHandle, class RightHandle = LeftHandle>
+    static bool handleEqual(const LeftHandle *left, const RightHandle *right) {
+      return left == right
+             or (left and right
+                 and PX_ANYTHING_TO_VOID_PTR(left->get()) == PX_ANYTHING_TO_VOID_PTR(right->get()));
+    }
 
     // Base is the type from which we register methods and fields.
     // Handle is a smart ptr type
     template<class Base, SmartPointerTypeFor<Base> Handle>
     class AsTypeBuilderSmartPtr : public AsTypeBuilderBase<Handle> {
     public:
+      explicit AsTypeBuilderSmartPtr(asIScriptEngine *engine)
+        : AsTypeBuilderSmartPtr(engine, std::string(getTypeAsName<Handle>())) {}
+
+      AsTypeBuilderSmartPtr(asIScriptEngine *engine, std::string &&name)
+        : AsTypeBuilderBase<Handle>(engine, std::move(name)) {
+        CLOG(INFO, "AngelScript") << "New AngelScript type \"" << m_name << "\"" << " with size " << sizeof(Handle);
+        registerClassType(m_engine, std::string(m_name), sizeof(Handle),
+                          static_cast<ObjTypeFlags::Enum>(
+                            ObjTypeFlags::Value | ObjTypeFlags::AsHandle | priv::getClassFlags<Handle>()));
+        registerBehaviour();
+      }
+
       using AsTypeBuilderBase<Handle>::AsTypeBuilderBase;
+
+      template<class Parent> requires std::is_base_of_v<Parent, Base>
+      void derived() {
+        using ParentHandle = ReplaceSmartPtrType<Handle, Parent>;
+        // @parent = @this
+        handleAssigmentOp<ParentHandle, Handle>();
+        // @this = @parent
+        handleAssigmentOp<Handle, ParentHandle>();
+
+        // this is parent
+        handleEqualsOp<Handle, ParentHandle>();
+      }
 
       template<MethodPtrTypeOf<Base> auto method>
       void method(const std::string &&name) {
@@ -309,17 +370,17 @@ namespace px::script {
 
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wreturn-type"
-        ProxyPtrType proxyPtr = []<class ...TArgs>(const Handle &handle, TArgs &&...args) -> ReturnType {
+        ProxyPtrType proxyPtr = []<class ...TArgs>(const Handle &handle, TArgs && ...args) -> ReturnType {
           if (not handle) {
             setCtxException("Calling nullptr object");
           } else {
-            return (*handle.*method)(std::forward<TArgs>(args)...);
+            return (*handle.*method)(std::forward<TArgs>(args) ...);
           }
         };
         #pragma GCC diagnostic pop
 
         std::string declaration = getProxySignature<ProxyPtrType>(name, Traits::is_const);
-        registerProxyMethod(m_engine, m_name, declaration, reinterpret_cast<void*>(proxyPtr));
+        registerProxyMethod(m_engine, m_name, declaration, reinterpret_cast<void *>(proxyPtr));
 
         CLOG(INFO, "AngelScript") << "\t" << declaration << " (proxied)";
       }
@@ -337,11 +398,32 @@ namespace px::script {
       }
 
     protected:
+      template<class Left = Handle, class Right = Left>
+      void handleAssigmentOp() {
+        std::string base{getTypeAsName<Left>()};
+        auto declaration = fmt::format("{0} &opHndlAssign(const {1} &in)", base, getTypeAsName<Right>());
+        auto funcPtr     = reinterpret_cast<void *>(&handleAssigment<Left, Right>);
+
+        priv::registerProxyMethod(m_engine, base, declaration, funcPtr);
+        CLOG(INFO, "AngelScript") << "\t" << declaration;
+        CLOG(INFO, "AngelScript") << "\t\tat" << funcPtr;
+      }
+
+      template<class Left = Handle, class Right = Left>
+      void handleEqualsOp() {
+        auto declaration = fmt::format("bool opEquals(const {} &in) const", getTypeAsName<Right>());
+        auto funcPtr     = reinterpret_cast<void *>(&handleEqual<Handle>);
+
+        priv::registerProxyMethod(m_engine, std::string(getTypeAsName<Left>()), declaration, funcPtr);
+        CLOG(INFO, "AngelScript") << "\t" << declaration;
+        CLOG(INFO, "AngelScript") << "\t\tat" << funcPtr;
+      }
+
       template<bool isConst, PropertyPtrTypeOf<Base> PtrType>
       void getter(const std::string &name, PtrType property) {
         using Traits = field_traits<PtrType>;
         using Type = std::remove_const_t<typename Traits::type>;
-        auto offset = reinterpret_cast<void*>(getPropertyOffset(property));
+        auto offset = reinterpret_cast<void *>(getPropertyOffset(property));
 
         static_assert(Traits::is_const <= isConst);
         constexpr std::string_view pattern = [] {
@@ -352,27 +434,31 @@ namespace px::script {
           }
         }();
 
-
         auto declaration = fmt::format(pattern, getTypeAsName<Type>(), name);
-        registerGenericMethod(m_engine, m_name, declaration, reinterpret_cast<void*>(&getterGenericProxy), offset);
+        auto funcPtr = reinterpret_cast<void *>(&getterGenericProxy);
+        registerGenericMethod(m_engine, m_name, declaration, funcPtr, offset);
 
         CLOG(INFO, "AngelScript") << "\t" << declaration;
+        CLOG(INFO, "AngelScript") << "\t\tat" << funcPtr << " with offset " << offset;
       }
 
       template<PropertyPtrTypeOf<Base> PtrType>
       void setter(const std::string &name, PtrType property) {
         using Type = typename field_traits<PtrType>::type;
-        auto offset = reinterpret_cast<void*>(getPropertyOffset(property));
+        auto offset = reinterpret_cast<void *>(getPropertyOffset(property));
 
         auto declaration = fmt::format("void set_{1}({0}) property", getTypeAsName<Type>(), name);
-        registerGenericMethod(m_engine, m_name, declaration, reinterpret_cast<void*>(&setterGenericProxy<Type>), offset);
+        auto funcPtr     = reinterpret_cast<void *>(&setterGenericProxy<Type>);
+        registerGenericMethod(m_engine, m_name, declaration, funcPtr,
+                              offset);
 
         CLOG(INFO, "AngelScript") << "\t" << declaration;
+        CLOG(INFO, "AngelScript") << "\t\tat" << funcPtr << " with offset " << offset;
       }
 
       static void getterGenericProxy(GenericManipulator generic) {
         const auto offset = reinterpret_cast<std::ptrdiff_t>(generic.getAuxiliary());
-        auto *handle = static_cast<Handle *>(generic.getObject());
+        auto *handle      = static_cast<Handle *>(generic.getObject());
 
         generic.setReturnAddress(reinterpret_cast<std::byte *>(handle->get()) + offset);
       }
@@ -380,15 +466,45 @@ namespace px::script {
       template<class Type>
       static void setterGenericProxy(GenericManipulator generic) {
         const auto offset = reinterpret_cast<std::ptrdiff_t>(generic.getAuxiliary());
-        auto *handle = static_cast<Handle *>(generic.getObject());
+        auto *handle      = static_cast<Handle *>(generic.getObject());
 
-        auto *value = reinterpret_cast<Type *>(reinterpret_cast<std::byte *>(handle->get()) + offset);
+        auto *value   = reinterpret_cast<Type *>(reinterpret_cast<std::byte *>(handle->get()) + offset);
         auto newValue = generic.getArg<Type>(0);
-        *value = newValue;
+        *value        = std::move(newValue);
       }
 
       using AsTypeBuilderBase<Handle>::m_engine;
       using AsTypeBuilderBase<Handle>::m_name;
+      using AsTypeBuilderBase<Handle>::registerBehaviour;
+
+    private:
+      void registerBehaviour() {
+        AsTypeBuilderBase<Handle>::registerBehaviour();
+
+        // @this = @otherThis
+        handleAssigmentOp();
+        // this is otherThis
+        handleEqualsOp();
+
+        // TODO this is null
+      }
+    };
+
+    template<class T>
+    class AsTypeBuilderPointerNoCount {
+    public:
+      explicit AsTypeBuilderPointerNoCount(asIScriptEngine *engine)
+        : AsTypeBuilderPointerNoCount(engine, std::string(getTypeAsName<T>())) {}
+
+      AsTypeBuilderPointerNoCount(asIScriptEngine *engine, std::string &&name)
+        : m_engine(engine)
+      , m_name(std::move(name)) {
+        CLOG(INFO, "AngelScript") << "New AngelScript type (NOCOUNT) \"" << m_name << "\"" << " with size " << sizeof(T);
+      }
+
+    protected:
+      asIScriptEngine *m_engine;
+      std::string m_name;
     };
   }
 
@@ -415,7 +531,7 @@ namespace px::script {
   };
 
   template<class T>
-  class AsTypeBuilder<T *>{
+  class AsTypeBuilder<T *> {
   public:
   };
 
