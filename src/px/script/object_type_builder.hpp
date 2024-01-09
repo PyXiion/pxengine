@@ -15,6 +15,7 @@
 #include "common.hpp"
 #include "px/px.hpp"
 #include "template/signatures.hpp"
+#include "exceptions.hpp"
 
 namespace px::script {
   namespace priv {
@@ -220,8 +221,10 @@ namespace px::script {
       }
     };
 
-    // Base is the type from which we register methods and fields.
-    // Handle is a type where we register constructors, destructors and operators.
+    /**
+     * \brief Allows you to easily register types for AngelScript using metaprogramming. Used for value types only.
+     * \tparam Base The type whose methods and properties we register.
+     */
     template<class Base, class Handle = Base>
     class AsTypeBuilderCommon : public AsTypeBuilderBase<Handle> {
     public:
@@ -240,6 +243,13 @@ namespace px::script {
       // constructor
       using AsTypeBuilderBase<Handle>::AsTypeBuilderBase;
 
+      /**
+       * \brief Registers the type method.
+       * \tparam PtrType type of method pointer.
+       * \param name name of the method.
+       * \param method method pointer.
+       * \throw RegisterClassMethodError
+       */
       template<MethodPtrTypeOf<Base> PtrType>
       void method(const std::string &&name, PtrType method) {
         const std::string declaration = getSignature<PtrType>(std::forward<decltype(name)>(name));
@@ -248,6 +258,13 @@ namespace px::script {
         CLOG(INFO, "AngelScript") << "\t" << declaration;
       }
 
+      /**
+       * \brief Registers the type property.
+       * \tparam PtrType type of property pointer.
+       * \param name property name.
+       * \param property pointer to the property.
+       * \throw RegisterClassPropertyError
+       */
       template<PropertyPtrTypeOf<Base> PtrType>
       void property(const std::string &&name, PtrType property) {
         const std::string declaration = getPropertySignature<PtrType>(std::forward<decltype(name)>(name));
@@ -258,11 +275,19 @@ namespace px::script {
         CLOG(INFO, "AngelScript") << "\t\twith offset " << offset;
       }
 
+      /**
+       * \brief Registers the type method via proxy function.
+       * If the function has `Base *` or `Base &` as its first argument, the object itself will be passed in.
+       * If `const Base *` or `const Base &`, the method will be constant.
+       * If there are no such arguments, the method will be registered correctly, but without using the object.
+       * \tparam T function signature.
+       * \param name method name.
+       * \param proxy pointer to the proxy function.
+       * \throw RegisterClassProxyMethodError
+       */
       template<FunctionSignature T>
       void proxy(const std::string &&name, T *proxy) {
         auto *ptr = reinterpret_cast<void *>(proxy);
-
-        static_assert(FunctionSignatureWith<void (int *), int *>);
 
         constexpr bool hasPtrOrRef   = FunctionSignatureWith<T, Base *> or FunctionSignatureWith<T, Base &>;
         constexpr bool hasCPtrOrCRef = FunctionSignatureWith<T, const Base *> or FunctionSignatureWith<T, const Base &>;
@@ -348,6 +373,11 @@ namespace px::script {
 
       using AsTypeBuilderBase<Handle>::AsTypeBuilderBase;
 
+      /**
+       * \brief
+       * \tparam Parent Parent type of  Base
+       * \throw RegisterClassProxyMethodError
+       */
       template<class Parent> requires std::is_base_of_v<Parent, Base>
       void derived() {
         using ParentHandle = ReplaceSmartPtrType<Handle, Parent>;
@@ -398,6 +428,12 @@ namespace px::script {
       }
 
     protected:
+      /**
+       * \brief Overloads the AngelScript handle assigment operator for type lvalue, allowing smart pointers to be assigned.
+       * \tparam Left lvalue type and type name
+       * \tparam Right rvalue type that can be assigned to this value
+       * \throw RegisterClassProxyMethodError
+       */
       template<class Left = Handle, class Right = Left>
       void handleAssigmentOp() {
         std::string base{getTypeAsName<Left>()};
@@ -409,6 +445,12 @@ namespace px::script {
         CLOG(INFO, "AngelScript") << "\t\tat" << funcPtr;
       }
 
+      /**
+       * \brief Overloads the AngelScript handle equals operator for type lvalue, allowing smart pointers to be compared.
+       * \tparam Left lvalue type and type name
+       * \tparam Right rvalue type that can be compared to this value
+       * \throw RegisterClassProxyMethodError
+       */
       template<class Left = Handle, class Right = Left>
       void handleEqualsOp() {
         auto declaration = fmt::format("bool opEquals(const {} &in) const", getTypeAsName<Right>());
@@ -419,6 +461,12 @@ namespace px::script {
         CLOG(INFO, "AngelScript") << "\t\tat" << funcPtr;
       }
 
+      /**
+       * \brief Registers getter function for a property of a class.
+       * \tparam isConst whether the getter function should be const or not.
+       * \tparam PtrType the type of the property pointer.
+       * \throw RegisterClassGenericMethodError
+        */
       template<bool isConst, PropertyPtrTypeOf<Base> PtrType>
       void getter(const std::string &name, PtrType property) {
         using Traits = field_traits<PtrType>;
@@ -435,13 +483,20 @@ namespace px::script {
         }();
 
         auto declaration = fmt::format(pattern, getTypeAsName<Type>(), name);
-        auto funcPtr = reinterpret_cast<void *>(&getterGenericProxy);
+        auto funcPtr     = reinterpret_cast<void *>(&getterGenericProxy);
         registerGenericMethod(m_engine, m_name, declaration, funcPtr, offset);
 
         CLOG(INFO, "AngelScript") << "\t" << declaration;
         CLOG(INFO, "AngelScript") << "\t\tat" << funcPtr << " with offset " << offset;
       }
 
+      /**
+       * \brief Registers setter function for a property of a class.
+       * \tparam PtrType the type of the property pointer.
+       * \param name property name
+       * \param property pointer to the property
+       * \throw RegisterClassGenericMethodError
+       */
       template<PropertyPtrTypeOf<Base> PtrType>
       void setter(const std::string &name, PtrType property) {
         using Type = typename field_traits<PtrType>::type;
@@ -499,7 +554,8 @@ namespace px::script {
       AsTypeBuilderPointerNoCount(asIScriptEngine *engine, std::string &&name)
         : m_engine(engine)
       , m_name(std::move(name)) {
-        CLOG(INFO, "AngelScript") << "New AngelScript type (NOCOUNT) \"" << m_name << "\"" << " with size " << sizeof(T);
+        CLOG(INFO, "AngelScript") << "New AngelScript type (NOCOUNT) \"" << m_name << "\"" << " with size " << sizeof(
+          T);
       }
 
     protected:
