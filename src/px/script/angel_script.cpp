@@ -9,6 +9,7 @@
 #include <mutex>
 #include "addons/scriptarray/scriptarray.h"
 #include "addons/scriptstdstring/scriptstdstring.h"
+#include "addons/scripttypeof/c_script_type_of.hpp"
 
 namespace px::script {
 
@@ -23,7 +24,8 @@ namespace px::script {
     logger->configure(conf);
   }
 
-  AngelScript::AngelScript() {
+  AngelScript::AngelScript()
+    : m_ctx(nullptr) {
     std::call_once(createLoggerFlag, createLogger);
 
     m_handle = asCreateScriptEngine();
@@ -47,7 +49,10 @@ namespace px::script {
 
     RegisterStdString(m_handle);
     RegisterStdStringUtils(m_handle);
-    CLOG(INFO, "AngelScript") << "Registered AngelScript addons array, string, string utils";
+
+    RegisterTypeOf(m_handle);
+
+    CLOG(INFO, "AngelScript") << "Registered AngelScript addons array, string, string utils and typeof";
 
     m_ctx = m_handle->CreateContext();
     CLOG(INFO, "AngelScript") << "Created the AngelScript context.";
