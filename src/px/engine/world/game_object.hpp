@@ -3,35 +3,46 @@
 #include <list>
 #include <string>
 #include <vector>
+#include <px/engine/events/event_listener.hpp>
+
 #include "../components/component.hpp"
+#include "px/memory/ref.hpp"
+#include "px/memory/ref_counting.hpp"
+#include "px/memory/weak_ref.hpp"
 
 #define PX_OBJECT_NAME(name) constexpr inline static std::string_view defaultName = name;
 
-namespace px
-{
+namespace px {
   class Engine;
   class World;
   class GameObject;
 
-  typedef std::shared_ptr<GameObject> GameObjectPtr;
-  typedef std::weak_ptr<GameObject> GameObjectWeakPtr;
+  // typedef std::shared_ptr<GameObject> GameObjectPtr;
+  // typedef std::weak_ptr<GameObject> GameObjectWeakPtr;
 
-  class GameObject
-  {
+  class GameObject : public EventListener, public RefCounting {
+  public:
+    using Ptr = Ref<GameObject>;
+    using WeakPtr = WeakRef<GameObject>;
+
+  private:
     friend class Component;
     friend class World;
-    using GameObjectIter = std::list<GameObjectPtr>::iterator;
+    using GameObjectIter = std::list<Ptr>::iterator;
 
   public:
     GameObject();
-    virtual ~GameObject() = default;
-    
+
+    ~GameObject() override;
+
     World *getWorld();
+
     Engine *getEngine();
 
     /// @brief Установить имя (идентификатор) объекту.
     /// @param name 
     void setName(const std::string &name);
+
     [[nodiscard]] const std::string &getName() const;
 
     /// @brief Удалить объект из мира.
@@ -40,37 +51,37 @@ namespace px
     virtual void guiEditor();
 
     /// Create new component
-    template <ComponentType T, typename ...TArgs>
-    T *addComponent(TArgs &&...args);
+    template<ComponentType T, typename ...TArgs>
+    T *addComponent(TArgs && ...args);
 
     /// Get a component of a certain type
     /// \return Pointer to the component if successful, otherwise nullptr
-    template <ComponentType T>
+    template<ComponentType T>
     T *getComponent();
 
     /// Get a list of components of a certain type
     /// \return A vector of components
-    template <ComponentType T>
+    template<ComponentType T>
     std::vector<T *> getComponents();
 
     /// Remove a component of a certain type
     /// \return true if successful, otherwise false
-    template <ComponentType T>
+    template<ComponentType T>
     bool removeComponent();
 
     /// Remove the component
     /// \param component Component to be removed
     /// \return true if successful, otherwise false
-    bool removeComponent(Component *component);
+    bool removeComponent(const Component *component);
 
     /// Remove a bunch of component of a certain type
     /// \return Amount of removed components
-    template <ComponentType T>
+    template<ComponentType T>
     std::size_t removeComponents();
 
   private:
     static thread_local GameObject *currentGameObject;
-    px::Component::List m_components;
+    Component::List m_components;
 
     std::string m_name;
 
@@ -78,18 +89,21 @@ namespace px
     GameObjectIter m_self;
   };
 
-  template<ComponentType T, typename... TArgs>
-  T *GameObject::addComponent(TArgs &&... args) {
+  using GameObjectPtr = GameObject::Ptr;
+  using GameObjectWeakPtr = GameObject::WeakPtr;
+
+  template<ComponentType T, typename ...TArgs>
+  T *GameObject::addComponent(TArgs && ...args) {
     // Set the pointer to this game object (this)
     currentGameObject = this;
 
     // Create component
-    auto component = std::make_unique<T>(std::forward<TArgs>(args)...);
-    auto ptr = component.get();
+    auto component = std::make_unique<T>(std::forward<TArgs>(args) ...);
+    auto ptr       = component.get();
 
     // Push a shared ptr to vector and assign the iterator
     m_components.push_back(std::move(component));
-    auto it = --m_components.end();
+    auto it       = --m_components.end();
     ptr->m_handle = it;
 
     return ptr;
@@ -99,7 +113,7 @@ namespace px
   T *GameObject::getComponent() {
     for (auto &component : m_components) {
       if (component->checkComponentType(T::componentTypeId)) {
-        return static_cast<T*>(component.get());
+        return static_cast<T *>(component.get());
       }
     }
     return nullptr;
@@ -151,5 +165,4 @@ namespace px
 
     return numRemoved;
   }
-
 }
