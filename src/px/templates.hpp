@@ -12,74 +12,68 @@
 
 namespace px {
   /// https://stackoverflow.com/questions/34672441/stdis-base-of-for-template-classes
-  template<template <class...> class base, class derived>
+  template<template <class ...> class base, class derived>
   struct is_base_of_template_impl {
-    template<class... Ts>
-    static constexpr std::true_type test(const base<Ts...> *);
+    template<class ...Ts>
+    static constexpr std::true_type test(const base<Ts ...> *);
 
     static constexpr std::false_type test(...);
 
     using type = decltype(test(std::declval<derived *>()));
   };
 
-  template<template <class...> class base, class derived>
+  template<template <class ...> class base, class derived>
   using is_base_of_template = typename is_base_of_template_impl<base, derived>::type;
 
-  template<template <class...> class base, class derived>
+  template<template <class ...> class base, class derived>
   constexpr bool is_base_of_template_v = is_base_of_template<base, derived>::value;
 
   template<typename>
   struct function_traits;
 
   template<typename T>
-  struct function_traits : public function_traits<decltype(&std::remove_reference_t<T>::operator())> {
-  };
+  struct function_traits : public function_traits<decltype(&std::remove_reference_t<T>::operator())> {};
 
   template<typename T>
-  struct function_traits<std::function<T> > : public function_traits<T> {
-  };
+  struct function_traits<std::function<T>> : public function_traits<T> {};
 
-  template<typename Return, typename... Args>
-  struct function_traits<Return (*)(Args...)> : public function_traits<Return (Args...)> {
-  };
+  template<typename Return, typename ...Args>
+  struct function_traits<Return (*)(Args ...)> : public function_traits<Return (Args ...)> {};
 
-  template<typename Return, typename... Args>
-  struct function_traits<Return (Args...) const> : public function_traits<Return (Args...)> {
-  };
+  template<typename Return, typename ...Args>
+  struct function_traits<Return (Args ...) const> : public function_traits<Return (Args ...)> {};
 
-  template<typename TClass, typename Return, typename... Args>
-  struct function_traits<Return (TClass::*)(Args...)> : public function_traits<Return (Args...)> {
+  template<typename TClass, typename Return, typename ...Args>
+  struct function_traits<Return (TClass::*)(Args ...)> : public function_traits<Return (Args ...)> {
     typedef TClass instance_type;
 
     constexpr static bool is_member = true; // override
   };
 
-  template<typename TClass, typename Return, typename... Args>
-  struct function_traits<Return (TClass::* const)(Args...)> : public function_traits<Return (TClass::*)(Args...)> {
-  };
+  template<typename TClass, typename Return, typename ...Args>
+  struct function_traits<Return (TClass::* const)(Args ...)> : public function_traits<Return (TClass::*)(Args ...)> {};
 
-  template<typename TClass, typename Return, typename... Args>
-  struct function_traits<Return (TClass::*)(Args...) const> : public function_traits<Return (TClass::*)(Args...)> {
+  template<typename TClass, typename Return, typename ...Args>
+  struct function_traits<Return (TClass::*)(Args ...) const> : public function_traits<Return (TClass::*)(Args ...)> {
     constexpr static bool is_const = true; // override
   };
 
-  template<typename TClass, typename Return, typename... Args>
+  template<typename TClass, typename Return, typename ...Args>
   struct function_traits<Return (TClass::*
-        const)(Args...) const> : public function_traits<Return (TClass::*)(Args...) const> {
-  };
+        const)(Args ...) const> : public function_traits<Return (TClass::*)(Args ...) const> {};
 
-  template<typename Return, typename... Args>
-  struct function_traits<Return (Args...)> {
-    typedef Return (*signature)(Args...);
+  template<typename Return, typename ...Args>
+  struct function_traits<Return (Args ...)> {
+    typedef Return (*signature)(Args ...);
 
     typedef Return return_type;
 
-    typedef std::tuple<Args...> arguments;
+    typedef std::tuple<Args ...> arguments;
 
     static constexpr size_t argument_count = sizeof...(Args);
 
     constexpr static bool is_member = false;
-    constexpr static bool is_const = false;
+    constexpr static bool is_const  = false;
   };
 
   template<typename T>
@@ -91,6 +85,7 @@ namespace px {
   template<class TClass, class T>
   struct field_traits<T (TClass::*)> {
     typedef TClass instance_type;
+    typedef TClass instance_type_with_extra;
     typedef T type;
 
     inline constexpr static bool is_const = false;
@@ -99,6 +94,7 @@ namespace px {
   template<class TClass, class T>
   struct field_traits<T const (TClass::*)> {
     typedef TClass instance_type;
+    typedef const TClass instance_type_with_extra;
     typedef const T type;
 
     inline constexpr static bool is_const = true;
@@ -108,78 +104,61 @@ namespace px {
   namespace priv {
     // Function signature
     template<class T>
-    struct function_signature_impl : std::false_type {
-    };
+    struct function_signature_impl : std::false_type {};
 
-    template<class T, class... TArgs>
-    struct function_signature_impl<T (TArgs...)> : std::true_type {
-    };
+    template<class T, class ...TArgs>
+    struct function_signature_impl<T (TArgs ...)> : std::true_type {};
 
-    template<class T, class... TArgs>
-    struct function_signature_impl<T (TArgs...) noexcept> : std::true_type {
-    };
+    template<class T, class ...TArgs>
+    struct function_signature_impl<T (TArgs ...) noexcept> : std::true_type {};
 
     // Function signature with smth
-    template<class T, class... WithArgs>
-    struct function_signature_with_impl : std::false_type {
-    };
+    template<class, class ...>
+    struct function_signature_with_impl : std::false_type {};
 
-    template<class T, class... WithArgs>
-    struct function_signature_with_impl<T (WithArgs...), WithArgs...> : std::true_type {
-    };
+    template<class T, class ...StartsWith>
+    struct function_signature_starts_with_impl {
+      template<class TReturn, class ...TArgs>
+      static constexpr std::true_type test(TReturn (*)(StartsWith ..., TArgs ...));
 
-    template<class T, class... WithArgs>
-    struct function_signature_with_impl<T (WithArgs...) noexcept, WithArgs...> : std::true_type {
-    };
+      static constexpr std::false_type test(...);
 
-    template<class T, class... TArgs, class... WithArgs>
-    struct function_signature_with_impl<T (WithArgs..., TArgs...), WithArgs...> : std::true_type {
-    };
-
-    template<class T, class... TArgs, class... WithArgs>
-    struct function_signature_with_impl<T (WithArgs..., TArgs...) noexcept, WithArgs...> : std::true_type {
+      using Type = decltype(test(std::declval<T>()));
     };
 
     // Method Pointer Type
     template<class T>
-    struct method_pointer_type_impl : std::false_type {
-    };
+    struct method_pointer_type_impl : std::false_type {};
 
-    template<class Base, class T, class... TArgs>
-    struct method_pointer_type_impl<T (Base::*)(TArgs...)> : std::true_type {
-    };
+    template<class Base, class T, class ...TArgs>
+    struct method_pointer_type_impl<T (Base::*)(TArgs ...)> : std::true_type {};
 
-    template<class Base, class T, class... TArgs>
-    struct method_pointer_type_impl<T (Base::*)(TArgs...) noexcept> : std::true_type {
-    };
+    template<class Base, class T, class ...TArgs>
+    struct method_pointer_type_impl<T (Base::*)(TArgs ...) noexcept> : std::true_type {};
 
-    template<class Base, class T, class... TArgs>
-    struct method_pointer_type_impl<T (Base::*)(TArgs...) const> : std::true_type {
-    };
+    template<class Base, class T, class ...TArgs>
+    struct method_pointer_type_impl<T (Base::*)(TArgs ...) const> : std::true_type {};
 
-    template<class Base, class T, class... TArgs>
-    struct method_pointer_type_impl<T (Base::*)(TArgs...) const noexcept> : std::true_type {
-    };
+    template<class Base, class T, class ...TArgs>
+    struct method_pointer_type_impl<T (Base::*)(TArgs ...) const noexcept> : std::true_type {};
 
     // Property Pointer Type
     template<class T>
-    struct property_pointer_type_impl : std::false_type {
-    };
+    struct property_pointer_type_impl : std::false_type {};
 
     template<class Base, class T>
-    struct property_pointer_type_impl<T (Base::*)> : std::true_type {
-    };
+    struct property_pointer_type_impl<T (Base::*)> : std::true_type {};
 
     template<class Base, class T>
-    struct property_pointer_type_impl<T const (Base::*)> : std::true_type {
-    };
+    struct property_pointer_type_impl<T const (Base::*)> : std::true_type {};
   }
 
   template<class T>
   concept FunctionSignature = priv::function_signature_impl<T>::value;
 
-  template<class T, class... TArgs>
-  concept FunctionSignatureWith = priv::function_signature_with_impl<T, TArgs...>::value;
+  template<class FunctionSignature, class ...RequiredFirstArgs>
+  concept FunctionSignatureStartsWith = priv::function_signature_starts_with_impl<
+    FunctionSignature, RequiredFirstArgs ...>::Type::value; // The function does not start with the required arguments.
 
   template<class T>
   concept MethodPtrType = priv::method_pointer_type_impl<T>::value;
@@ -198,7 +177,8 @@ namespace px {
   template<PropertyPtrType T>
   std::ptrdiff_t getPropertyOffset(T property) {
     typedef typename field_traits<T>::instance_type Class;
-    return reinterpret_cast<size_t>(reinterpret_cast<const void*>(&(reinterpret_cast<Class *>(reinterpret_cast<void*>(100000))->*property))) - 100000;
+    return reinterpret_cast<size_t>(reinterpret_cast<const void *>(&(
+             reinterpret_cast<Class *>(reinterpret_cast<void *>(100000))->*property))) - 100000;
   }
 
   // Lord, save the StackOverflow
@@ -233,10 +213,10 @@ namespace px {
   }
 
   template<class T, class Base>
-  concept SmartPointerTypeFor = requires (T ptr) {
-    { ptr.get() } -> std::convertible_to<const Base*>;
-    { *ptr } -> std::convertible_to<const Base&>;
-    { ptr.operator->() } -> std::convertible_to<const Base*>;
+  concept SmartPointerTypeFor = requires(T ptr) {
+    { ptr.get() } -> std::convertible_to<const Base *>;
+    { *ptr } -> std::convertible_to<const Base &>;
+    { ptr.operator->() } -> std::convertible_to<const Base *>;
     { ptr.operator bool() };
   };
 }
