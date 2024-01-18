@@ -41,6 +41,14 @@ set(PX_LIB_SOURCES
     px/script/object_type_builder.hpp
     px/script/exceptions.hpp
     px/script/common.cpp
+    px/script/addons/scripttypeof/c_script_type_of.cpp
+    px/script/addons/scripttypeof/c_script_type_of.hpp
+    px/memory/ref_counting.cpp
+    px/memory/ref_counting.hpp
+    px/memory/ref.cpp
+    px/memory/ref.hpp
+    px/memory/weak_ref.cpp
+    px/memory/weak_ref.hpp
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
