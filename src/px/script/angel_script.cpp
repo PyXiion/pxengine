@@ -31,6 +31,8 @@ namespace px::script {
     m_handle = asCreateScriptEngine();
     CLOG(INFO, "AngelScript") << "Created the AngelScript engine";
 
+    m_handle->SetEngineProperty(asEP_ALLOW_UNICODE_IDENTIFIERS, 1);
+
     init();
   }
 
