@@ -91,7 +91,7 @@ namespace px::script {
 
           // some logging
           if constexpr (std::is_convertible_v<TArgs, std::string>) {
-            CVLOG(2, "AngelScript") << "\t\tHuman readable: \"" << args << "\"";
+            CVLOG(9, "AngelScript") << "\t\tHuman readable: \"" << args << "\"";
           }
           i += 1;
         }(), ...);
@@ -127,7 +127,7 @@ namespace px::script {
     }
 
     TReturn call(TArgs... args) {
-      CVLOG(1, "AngelScript") << "Calling the function \"" << m_handle.getDeclaration() << "\"";
+      CVLOG(9, "AngelScript") << "Calling the function \"" << m_handle.getDeclaration() << "\"";
       m_handle.prepare();
 
       m_handle.setArgs(std::forward<TArgs>(args)...);
@@ -164,8 +164,8 @@ namespace px::script {
     }
 
     TReturn call(asIScriptObject *self, TArgs... args) {
-      CVLOG(1, "AngelScript") << "Calling method \"" << m_handle.getDeclaration() << "\"";
-      CVLOG(1, "AngelScript") << "\tSelf: " << self;
+      CVLOG(9, "AngelScript") << "Calling method \"" << m_handle.getDeclaration() << "\"";
+      CVLOG(9, "AngelScript") << "\tSelf: " << self;
 
       m_handle.setThis(self);
       m_handle.prepare();
