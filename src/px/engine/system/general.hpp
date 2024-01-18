@@ -24,23 +24,6 @@
   #define PX_OS_WINDOWS64
 #endif
 
-
-// Is Debug or Release?
-#ifdef NDEBUG
-  #define PX_RELEASE
-#else
-  #define PX_DEBUG
-#endif
-
-// Debug macros
-#ifdef PX_DEBUG
-  #define PX_IF_DEBUG(...) __VA_ARGS__
-  #define PX_IF_RELEASE(...)
-#else
-  #define PX_IF_DEBUG(...)
-  #define PX_IF_RELEASE(...) __VA_ARGS__
-#endif
-
 namespace px
 {
   long long getUsedMemory();
