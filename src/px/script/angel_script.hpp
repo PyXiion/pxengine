@@ -13,6 +13,10 @@
 #include "object_type_builder.hpp"
 #include "easylogging++.h"
 
+#include "type_builder/ref.hpp"
+#include "type_builder/value.hpp"
+#include "type_builder/weak_ref.hpp"
+
 namespace px::script {
 
   class AngelScript {
