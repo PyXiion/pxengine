@@ -127,6 +127,14 @@ void px::DebugInfoWindow::onGuiDraw()
         m_worldSelectedObject->guiEditor();
 
         ImGui::BeginGroup(); {
+          ImGui::SeparatorText("Ref info");
+          ImGui::TextFmt("References count: {}", m_worldSelectedObject->getReferenceCount());
+
+          if (m_worldSelectedObject->hasWeakData())
+            ImGui::TextFmt("Weak references count: {}", m_worldSelectedObject->getReferenceCount());
+          else
+            ImGui::TextFmt("Weak references count: -");
+
           auto components = m_worldSelectedObject->getComponents<Component>();
           for (int i = 0; i < components.size(); i++) {
             auto &component = components[i];
