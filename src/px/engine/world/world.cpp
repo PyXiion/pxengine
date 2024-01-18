@@ -4,9 +4,9 @@
 
 thread_local px::World *px::World::current_world;
 
-px::World::World(px::Engine &engine)
+px::World::World(Engine &engine)
   : m_engine(engine) {
-  CLOG(INFO, "PXEngine") << "Created an empty world";
+  CLOG(INFO, "PXEngine") << "Created an empty world at " << this;
 }
 
 px::World::~World() {
@@ -18,12 +18,12 @@ px::Engine &px::World::getEngine()
   return m_engine;
 }
 
-px::GameObjectPtr px::World::getObjectByName(const std::string &name) {
+px::GameObject *px::World::getObjectByName(const std::string &name) {
   EASY_BLOCK("px::World::getObjectByName")
   auto it = m_gameObjectsByName.find(name);
   if (it != m_gameObjectsByName.end())
   {
-    return it->second.lock();
+    return it->second.lock().get();
   }
   throw std::out_of_range(fmt::format("Объект с именем \"{}\" не существует!", name));
 }
@@ -42,7 +42,7 @@ void px::World::updateObjectName(GameObjectPtr &gameObject, const std::string &n
   std::string oldName = gameObject->getName();
 
   // удалить старое имя, если оно есть
-  auto oldIterator = m_gameObjectsByName.find(oldName);
+  const auto oldIterator = m_gameObjectsByName.find(oldName);
   if (oldIterator != m_gameObjectsByName.end())
     m_gameObjectsByName.erase(oldIterator);
 

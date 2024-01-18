@@ -11,6 +11,10 @@
 #include "px/engine/events/event_listener.hpp"
 
 namespace px {
+  namespace script {
+    class Module;
+  }
+
   class Engine;
 
   class Module : public EventListener {
@@ -25,9 +29,12 @@ namespace px {
 
   public:
     PX_NO_COPY(Module)
+
     Module(Engine &engine, std::string folder);
 
     void load();
+
+    void afterLoad();
 
   private:
     void loadMeta();
@@ -39,16 +46,17 @@ namespace px {
     Engine &m_engine;
     std::string m_folder;
 
+    std::unique_ptr<script::Module> m_scriptModule;
+
     Meta m_meta;
   };
 
   typedef std::unique_ptr<Module> ModulePtr;
 
   template<class ...TArgs>
-  decltype(auto) makeModule(TArgs &&...args) {
-    return std::make_unique<Module>(std::forward<TArgs>(args)...);
+  decltype(auto) makeModule(TArgs && ...args) {
+    return std::make_unique<Module>(std::forward<TArgs>(args) ...);
   }
-
 } // px
 
 #endif //PX_ENGINE_MODULE_HPP

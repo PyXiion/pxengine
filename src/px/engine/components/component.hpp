@@ -19,8 +19,8 @@ namespace px {
 
   class Component {
     friend class GameObject;
-  public:
 
+  public:
     Component();
 
     virtual ~Component() = default;
@@ -28,38 +28,47 @@ namespace px {
     virtual void guiEditor() {}
 
     [[nodiscard]] virtual bool checkComponentType(std::uint32_t type) const;
+
+    [[nodiscard]] virtual std::uint32_t getComponentTypeId() const;
+
     [[nodiscard]] virtual const std::string_view &getComponentId() const;
+
     static const std::uint32_t componentTypeId;
 
   protected:
     GameObject *getGameObject();
 
   private:
-    using List = std::list<std::unique_ptr<px::Component>>;
+    using List = std::list<std::unique_ptr<Component>>;
     using Handle = List::iterator;
 
     Handle m_handle;
     GameObject *m_gameObject;
   };
 
-  template <class T>
+  template<class T>
   concept ComponentType = std::is_base_of_v<Component, T> or std::is_same_v<Component, T>;
 
-  template<px::string_literal ID, ComponentType TParent = Component>
+  template<string_literal ID, ComponentType TParent = Component>
   class BaseComponent : public TParent {
   public:
     virtual ~BaseComponent() = default;
+
     inline static constexpr std::uint32_t componentTypeId = px::crc32(ID.value);
-    inline static constexpr std::string_view componentId = ID.value;
+    inline static constexpr std::string_view componentId  = ID.value;
 
     [[nodiscard]] bool checkComponentType(std::uint32_t type) const override {
       return componentTypeId == type or TParent::checkComponentType(type);
     }
+
     [[nodiscard]] const std::string_view &getComponentId() const override {
       return componentId;
     }
-  };
 
+    [[nodiscard]] std::uint32_t getComponentTypeId() const override {
+      return componentTypeId;
+    }
+  };
 } // px
 
 #endif //ENGINE_COMPONENT_HPP

@@ -3,9 +3,9 @@
 //
 // Created by pyxiion on 05.01.24.
 //
-#include "common.hpp"
 
 #include <angelscript.h>
+#include "common.hpp"
 
 namespace px::script {
   GenericManipulator::GenericManipulator(asIScriptGeneric *generic)
@@ -21,6 +21,10 @@ namespace px::script {
 
   void GenericManipulator::setReturnAddress(void *ptr) {
     m_generic->SetReturnAddress(ptr);
+  }
+
+  void *GenericManipulator::getAddressOfArg(unsigned index) {
+    return m_generic->GetAddressOfArg(index);
   }
 
   void *GenericManipulator::getArgAddress(unsigned index) {

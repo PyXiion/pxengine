@@ -35,11 +35,11 @@ public:
     renderer->setModel("example.model.cube");
 
     px::RenderStates states = engine.getRenderer().getDefaultRenderStates();
-    states.shaderPtr = engine.getResourceManager().get<px::Shader>("core.shaders.cube");
+    states.shaderPtr        = engine.getResourceManager().get<px::Shader>("core.shaders.cube");
     renderer->setRenderStates(states);
 
     m_camera = world.createGameObject<px::Camera>();
-    m_camera->perspective(60.0f, 16.0f/9.0f);
+    m_camera->perspective(60.0f, 16.0f / 9.0f);
     m_camera->setPosition(10, 0, 0);
     m_camera->lookAt(0, 0, 0);
 
@@ -61,15 +61,13 @@ public:
 
     if (m_controls and m_engine.getWindow().isCursorHidden()) {
       m_camera->updateRotation(
-          m_controls->getAxis(px::ControlAxis::MouseX) * dt,
-          m_controls->getAxis(px::ControlAxis::MouseY) * dt
-          );
+        m_controls->getAxis(px::ControlAxis::MouseX) * dt,
+        m_controls->getAxis(px::ControlAxis::MouseY) * dt
+      );
     }
   }
 
-  void gui() {
-
-  }
+  void gui() {}
 
 private:
   px::Engine &m_engine;

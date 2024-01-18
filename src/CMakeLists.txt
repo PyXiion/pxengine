@@ -30,15 +30,12 @@ set(PX_LIB_SOURCES
     px/script/module_builder.cpp
     px/script/module_builder.hpp
     px/script/function.cpp
-    px/script/object_type_builder.cpp
-    px/script/object_type_builder.hpp
     px/utils/static_warning.hpp
     px/px.cpp
     px/script/object_type.cpp
     px/script/object_type.hpp
     px/script/as_counter.hpp
     px/script/as_counter.cpp
-    px/script/object_type_builder.hpp
     px/script/exceptions.hpp
     px/script/common.cpp
     px/script/as_weak_ref_flag.cpp
@@ -60,6 +57,8 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   message("DEBUG")
   add_compile_definitions(PX_DEBUG)
 endif ()
+
+add_compile_definitions(PX_MEMORY_USE_ANGEL_SCRIPT_ILOCKABLE_BOOL)
 
 add_library(px ${PX_LIB_SOURCES})
 

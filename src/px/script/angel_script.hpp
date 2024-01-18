@@ -10,7 +10,6 @@
 #include "common.hpp"
 #include "template/signatures.hpp"
 #include "module_builder.hpp"
-#include "object_type_builder.hpp"
 #include "easylogging++.h"
 
 #include "type_builder/ref.hpp"
@@ -78,7 +77,7 @@ namespace px::script {
 
   template<class T>
   AsTypeBuilder<T> AngelScript::registerObjectType(std::string &&name) {
-    return AsTypeBuilder<T>(m_handle, std::forward<decltype(name)>(name));
+    return AsTypeBuilder<T>(m_handle);
   }
 
   template<class T>

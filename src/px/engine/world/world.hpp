@@ -24,9 +24,9 @@ namespace px
 
     template<class T = GameObject, class ...TArgs>
       requires std::is_base_of_v<px::GameObject, T>
-    std::shared_ptr<T> createGameObject(TArgs... args);
+    Ref<T> createGameObject(TArgs... args);
 
-    GameObjectPtr getObjectByName(const std::string &name);
+    GameObject *getObjectByName(const std::string &name);
 
     const std::list<GameObjectPtr> &getAllGameObjects() const;
 
@@ -38,12 +38,13 @@ namespace px
 
     std::mutex m_gameObjectsMutex;
 
-    friend class px::GameObject;
+    friend class GameObject;
     static thread_local World *current_world;
 
     void updateObjectName(GameObjectPtr &gameObject, const std::string &newName);
     void destroyObject(GameObjectIter &iterator);
   };
+  using WorldPtr = std::shared_ptr<World>;
 
   namespace priv {
     template <class T>
@@ -63,7 +64,7 @@ namespace px
 
 template<class T, class ...TArgs>
   requires std::is_base_of_v<px::GameObject, T>
-std::shared_ptr<T> px::World::createGameObject(TArgs... args)
+px::Ref<T> px::World::createGameObject(TArgs... args)
 {
   EASY_BLOCK(__PRETTY_FUNCTION__)
 
@@ -71,18 +72,24 @@ std::shared_ptr<T> px::World::createGameObject(TArgs... args)
   current_world = this;
 
   // Create object
-  auto ptr = std::make_shared<T>(std::forward<TArgs>(args)...);
+  // auto ptr = std::make_shared<T>(std::forward<TArgs>(args)...);
+  auto ptr = Ref<T>::make(std::forward<TArgs>(args)...);
 
   // Append it to inner list
   {
     std::lock_guard lk(m_gameObjectsMutex);
     m_gameObjects.push_front(ptr);
+
+    // set iterator to itself, so it can delete itself from the list
     ptr->m_self = m_gameObjects.begin();
   }
 
-  // Name it
+  // Name it with default name
   constexpr auto name = priv::getObjectDefaultName<T>();
   ptr->setName(fmt::format(name, ++unnamedUid));
+
+  // Reset the pointer to this world
+  current_world = nullptr;
 
   return ptr;
 }

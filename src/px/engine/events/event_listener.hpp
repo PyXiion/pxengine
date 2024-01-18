@@ -22,10 +22,7 @@ namespace px {
 
   public:
     EventListener() = default;
-    ~EventListener() {
-      for (const auto& f : m_destructors)
-        f();
-    }
+    virtual ~EventListener();
 
   protected:
 
@@ -83,15 +80,13 @@ namespace px {
       });
     }
 
+    void unsubscribeAll();
+
   private:
     std::vector<std::function<void()>> m_destructors;
 
-    inline void appendDestructor(std::function<void()> &&f);
+    void appendDestructor(std::function<void()> &&f);
   };
-
-  void EventListener::appendDestructor(std::function<void()> &&f) {
-    m_destructors.push_back(f);
-  }
 
 } // px
 

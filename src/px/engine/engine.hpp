@@ -25,7 +25,7 @@
 
 namespace px
 {
-  class Engine : private EventListener
+  class Engine : public EventListener
   {
   public:
     using UpdateCallback = eventpp::CallbackList<void (float)>;
@@ -33,7 +33,7 @@ namespace px
 
   public:
     Engine();
-    ~Engine();
+    ~Engine() override;
 
     Engine(const Engine &) = delete;
     Engine &operator=(const Engine &) = delete;
@@ -107,7 +107,7 @@ namespace px
 
     BS::thread_pool m_threadPool;
 
-    script::AngelScript m_scriptEngine;
+    std::unique_ptr<script::AngelScript> m_scriptEngine;
     EventManager m_eventManager;
 
     std::unique_ptr<ImGuiCtx> m_imgui;

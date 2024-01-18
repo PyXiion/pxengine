@@ -58,6 +58,7 @@ namespace px::script {
       throw std::runtime_error("Failed to build an AS module.");
     }
     CLOG(INFO, "AngelScript") << "Successfully builded an AngelScript module " << m_moduleName;
+
     return Module(m_as.getContext(), m_as.getHandle()->GetModule(m_moduleName.c_str()));
   }
 } // px::script

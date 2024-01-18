@@ -9,11 +9,15 @@
 const std::uint32_t px::Component::componentTypeId = std::hash<std::string>()("Component");
 
 px::Component::Component() {
-  m_gameObject = px::GameObject::currentGameObject;
+  m_gameObject = GameObject::currentGameObject;
 }
 
 bool px::Component::checkComponentType(std::uint32_t type) const {
   return componentTypeId == type;
+}
+
+std::uint32_t px::Component::getComponentTypeId() const {
+  return componentTypeId;
 }
 
 px::GameObject *px::Component::getGameObject() {

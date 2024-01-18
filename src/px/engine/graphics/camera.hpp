@@ -64,7 +64,7 @@ namespace px {
     void recalculate();
   };
 
-  typedef std::shared_ptr<Camera> CameraPtr;
+  typedef Ref<Camera> CameraPtr;
 
 } // px
 

@@ -12,29 +12,35 @@
 #include "px/script/object_type.hpp"
 
 namespace px {
+  namespace script {
+    class AngelScript;
+  }
 
   class AngelBehaviour final : public BaseComponent<"core.angel_behaviour"> {
-  private:
     using Method = script::Method<void ()>;
 
   public:
-    AngelBehaviour();
-    explicit AngelBehaviour(const std::string &scriptId);
+    explicit AngelBehaviour(asIScriptObject *object);
+
+    ~AngelBehaviour() override;
 
     void loadFromScript(const std::string &scriptId);
+
     void loadFromAsType(script::ObjectType);
 
+    static void bindToEngine(script::AngelScript &as);
+
   private:
-    // TODO caching methods
-    Method m_start;
-    Method m_update;
-    Method m_finish;
+    PX_NO_COPY(AngelBehaviour)
 
-    static std::unique_ptr<script::ObjectType> baseAngelBehaviourType;
-    static std::once_flag staticInit;
-    static void init();
+    static std::shared_ptr<AngelBehaviour> factory();
+
+    asIScriptObject *m_obj;
+    asILockableSharedBool *m_isDead;
   };
-
+  using AngelBehaviourPtr = std::shared_ptr<AngelBehaviour>;
 } // px
+
+PX_AS_TYPENAME(px::AngelBehaviourPtr, "AngelBehaviour_t")
 
 #endif //PX_ENGINE_ANGEL_BEHAVIOUR_HPP

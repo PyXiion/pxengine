@@ -78,6 +78,9 @@ set(PX_ENGINE_SOURCES
     scripts/angel_behaviour.cpp
     resources/resource_traits.cpp
     resources/resource_traits.hpp
+    scripts/angel_behaviour_type.cpp
+    scripts/angel_behaviour_type.hpp
+    events/event_listener.cpp
 )
 
 foreach(SHADER ${PX_ENGINE_SHADER_SOURCES})

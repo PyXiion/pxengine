@@ -9,8 +9,10 @@
 #include "px/engine/events/common/key_event.hpp"
 #include "px/engine/scripts/binding.hpp"
 #include "px/engine/resources/localization.hpp"
+#include "scripts/angel_behaviour.hpp"
 
 static std::once_flag createLoggerFlag;
+
 static void createLogger() {
   auto logger = el::Loggers::getLogger("PXEngine");
 
@@ -23,23 +25,21 @@ static void createLogger() {
 
 px::Engine::Engine()
   : m_maxFps(60)
-  , m_maxTps(10)
-  , m_deltaTime(1.0f / float(m_maxFps))
-  , m_tickDeltaTime(1.0f / float(m_maxTps))
-  , m_tickThreadShouldStop(false)
-  , m_debugInfoWindow(*this)
-  , m_settingsWindow(*this)
-{
+, m_maxTps(10)
+, m_deltaTime(1.0f / float(m_maxFps))
+, m_tickDeltaTime(1.0f / float(m_maxTps))
+, m_tickThreadShouldStop(false)
+, m_debugInfoWindow(*this)
+, m_settingsWindow(*this) {
   std::call_once(createLoggerFlag, createLogger);
   instance = this;
-  CLOG(INFO, "PXEngine") << "Created an engine instance";
+  CLOG(INFO, "PXEngine") << "Created an engine instance at " << this;
   CLOG(INFO, "PXEngine") << "The orking directory is " << std::filesystem::current_path();
 
   EASY_PROFILER_ENABLE
 }
 
-px::Engine::~Engine()
-{
+px::Engine::~Engine() {
   // Destruct the world and its objects before other things
   m_world.reset();
 
@@ -47,16 +47,14 @@ px::Engine::~Engine()
   CLOG(INFO, "PXEngine") << "The profile is dumped";
 }
 
-void px::Engine::run()
-{
+void px::Engine::run() {
   init();
   CLOG(INFO, "PXEngine") << "The engine is fully initialised";
 
   m_fpsLimiter.reset();
-  while (!m_window->isShouldClose())
-  {
+  while (!m_window->isShouldClose()) {
     loop();
-//    m_deltaTime = m_fpsLimiter.sleep();
+    //    m_deltaTime = m_fpsLimiter.sleep();
   }
   m_window->close();
 
@@ -64,6 +62,9 @@ void px::Engine::run()
 
   m_tickThreadShouldStop = true;
   m_tickLoopThread->join();
+
+  // Destroy modules
+  m_modules.clear();
 
   onExit(*this);
 }
@@ -82,17 +83,17 @@ void px::Engine::reloadSettings() {
   CLOG(INFO, "PXEngine") << "The settings have been reloaded";
 }
 
-void px::Engine::init()
-{
+void px::Engine::init() {
   EASY_BLOCK("px::Engine::init", profiler::colors::Orange)
 
   registerEventTypes();
-  CLOG(INFO, "PXEngine") << "";
 
   m_resourceManager = std::make_unique<ResourceManager>("./data");
 
-  // set default language
+  // load language
   auto lang = m_resourceManager->get<Localization>("core.lang.ru");
+
+  // set default language
   m_resourceManager->set("core.lang", lang);
 
   m_window = std::make_unique<Window>("PXE", 1280, 720);
@@ -102,29 +103,40 @@ void px::Engine::init()
   m_renderer = std::make_unique<Renderer>(*m_window);
   m_renderer->setDebugEnabled(false);
 
-  listen(m_window->onKeyPressed, [this](auto keycode, auto mods) {
-    if (m_renderer && keycode == KeyCode_F1) {
-      m_renderer->setDebugEnabled(!m_renderer->isDebugEnabled());
-    }
-  });
+  PX_IF_DEBUG {
+    // switch render debug info on F1
+    listen(m_window->onKeyPressed, [this](auto keycode, auto mods) {
+      if (m_renderer && keycode == KeyCode_F1) {
+        m_renderer->setDebugEnabled(!m_renderer->isDebugEnabled());
+      }
+    });
+  }
 
+  // Create GUI
   m_imgui = std::make_unique<ImGuiCtx>(*this, *m_window);
   m_imgui->Create();
 
+  // Thread for game ticks
   m_tickLoopThread = std::make_unique<std::thread>([this] { tickThread(); });
 
-  bind::bindEngine(m_scriptEngine);
+  // bind::bindEngine(m_scriptEngine);
 
+  // Redirect the window events to the event manager
   proxyEvents();
 
   // Core module
   loadModule("./data/core");
+
+  // Bind scripts in modules
+  for (const auto &module : m_modules)
+    module->afterLoad();
 
   // Инициализация всего остального
   EASY_BLOCK("Init event", profiler::colors::LightBlue)
   onInit(*this);
 }
 
+// Registering default events
 void px::Engine::registerEventTypes() {
   m_eventManager.registerEventClass<MouseEvent>();
 
@@ -135,11 +147,11 @@ void px::Engine::registerEventTypes() {
 
 void px::Engine::proxyEvents() {
   if (m_window) {
-    m_window->onMouseMoved.append([this] (float x, float y) {
+    m_window->onMouseMoved.append([this](float x, float y) {
       m_eventManager.emplaceEvent<MouseEvent>(x, y);
     });
 
-    m_window->onKey.append([this] (KeyCode key, bool pressed, KeyModifiers::Enum mods) {
+    m_window->onKey.append([this](KeyCode key, bool pressed, KeyModifiers::Enum mods) {
       m_eventManager.emplaceEvent<KeyEvent>(key, pressed);
 
       if (pressed)
@@ -150,8 +162,7 @@ void px::Engine::proxyEvents() {
   }
 }
 
-void px::Engine::loop()
-{
+void px::Engine::loop() {
   EASY_BLOCK("px::Engine::loop")
 
   EASY_BLOCK("Polling events")
@@ -174,8 +185,7 @@ void px::Engine::loop()
   draw();
 }
 
-void px::Engine::draw()
-{
+void px::Engine::draw() {
   if (!m_renderer)
     return;
   EASY_BLOCK("px::Engine::draw")
@@ -192,8 +202,7 @@ void px::Engine::draw()
   m_renderer->renderFrame();
 }
 
-void px::Engine::drawImGui()
-{
+void px::Engine::drawImGui() {
   EASY_BLOCK("px::Engine::drawImGui")
   m_imgui->BeginFrame(255);
 
@@ -202,20 +211,17 @@ void px::Engine::drawImGui()
   m_imgui->EndFrame();
 }
 
-void px::Engine::tickThread()
-{
+void px::Engine::tickThread() {
   EASY_THREAD_SCOPE("Tick thread");
   FrameLimiter tickLimiter(m_maxTps);
 
-  while (!m_tickThreadShouldStop)
-  {
+  while (!m_tickThreadShouldStop) {
     tickLoop();
     m_tickDeltaTime = tickLimiter.sleep();
   }
 }
 
-void px::Engine::tickLoop()
-{
+void px::Engine::tickLoop() {
   EASY_BLOCK("px::Engine::tickLoop");
 
   m_eventManager.process();
@@ -225,23 +231,19 @@ void px::Engine::tickLoop()
   onPostTick(m_tickDeltaTime);
 }
 
-px::Window &px::Engine::getWindow() const
-{
+px::Window &px::Engine::getWindow() const {
   return *m_window;
 }
 
-px::ResourceManager &px::Engine::getResourceManager() const
-{
+px::ResourceManager &px::Engine::getResourceManager() const {
   return *m_resourceManager;
 }
 
-px::EventManager &px::Engine::getEventManager()
-{
+px::EventManager &px::Engine::getEventManager() {
   return m_eventManager;
 }
 
-px::Controls &px::Engine::getControls()
-{
+px::Controls &px::Engine::getControls() {
   return *m_controls;
 }
 
@@ -249,13 +251,11 @@ px::Renderer &px::Engine::getRenderer() {
   return *m_renderer;
 }
 
-BS::thread_pool &px::Engine::getThreadPool()
-{
+BS::thread_pool &px::Engine::getThreadPool() {
   return m_threadPool;
 }
 
-px::World *px::Engine::getWorld() const
-{
+px::World *px::Engine::getWorld() const {
   return m_world.get();
 }
 
@@ -268,11 +268,10 @@ px::SettingsWindow &px::Engine::getSettingsWindow() {
 }
 
 px::script::AngelScript &px::Engine::getScriptEngine() {
-  return m_scriptEngine;
+  return *m_scriptEngine;
 }
 
-px::World &px::Engine::createNewWorld()
-{
+px::World &px::Engine::createNewWorld() {
   EASY_BLOCK("px::Engine::createNewWorld");
   m_world = std::make_unique<World>(*this);
   return *m_world;
