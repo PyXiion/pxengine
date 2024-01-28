@@ -1,0 +1,7 @@
+hello-world: Привет, мир!
+version: Версия
+build: Сборка
+mem-used: Использовано памяти
+average-x: Среднее значение
+controls: Управление
+debug-window: Окно разработчика
