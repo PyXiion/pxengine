@@ -33,6 +33,7 @@ set(PX_ENGINE_SOURCES
     components/transform.cpp components/transform.hpp
 
     components/graphics/model_renderer.cpp components/graphics/model_renderer.hpp
+    components/graphics/sprite_renderer.cpp components/graphics/sprite_renderer.hpp
 
     events/event.hpp
     events/event_fabric.hpp
@@ -72,15 +73,10 @@ set(PX_ENGINE_SOURCES
 
     world/game_object.cpp world/game_object.hpp
     world/world.cpp world/world.hpp
-    scripts/binding.cpp
-    scripts/binding.hpp
-    scripts/angel_behaviour.hpp
-    scripts/angel_behaviour.cpp
-    resources/resource_traits.cpp
-    resources/resource_traits.hpp
-    scripts/angel_behaviour_type.cpp
-    scripts/angel_behaviour_type.hpp
+    resources/resource_traits.cpp resources/resource_traits.hpp
     events/event_listener.cpp
+    scripts/script_engine.cpp
+    scripts/script_engine.hpp
 )
 
 foreach(SHADER ${PX_ENGINE_SHADER_SOURCES})

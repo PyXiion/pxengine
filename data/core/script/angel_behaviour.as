@@ -2,18 +2,22 @@
  * Copyright (c) 2023.
  */
 
-shared interface IAngelBehaviour {
-    void start();
-    void update();
-    void finish();
-}
+shared class AngelBehaviour {
+    AngelBehaviour() {
+        @self = AngelBehaviour_t();
+    }
 
-shared class AngelBehaviour : IAngelBehaviour {
     void start() {}
+
     void update() {}
+
+    void tick() {}
+
     void finish() {}
 
-    protected GameObject getGameObject() {
-        // TODO
+    GameObject @get_gameObject() property {
+        return self.getGameObject();
     }
+
+    private AngelBehaviour_t @self;
 }

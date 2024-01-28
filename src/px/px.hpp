@@ -22,6 +22,8 @@
                                         \
   PX_NO_MOVE(classname)
 
+#define PX_LOG(type, logger, message, ...) CLOG(type, logger) << fmt::format(message, ##__VA_ARGS__)
+
 #define PX_THROW_AND_LOG(logger, errorType, message, ...) \
   do { auto msg = fmt::format(message, ##__VA_ARGS__); CLOG(ERROR, logger) << msg; throw errorType(msg); } while (0)
 

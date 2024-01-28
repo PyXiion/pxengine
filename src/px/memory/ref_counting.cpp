@@ -8,19 +8,15 @@
 
 #include <easylogging++.h>
 
-#ifdef PX_MEMORY_USE_ANGEL_SCRIPT_ILOCKABLE_BOOL
-#include <angelscript.h>
-#endif
 
 namespace px {
-  #ifndef PX_MEMORY_USE_ANGEL_SCRIPT_ILOCKABLE_BOOL
   std::mutex RefCounting::createWeakRefCountMutex;
 
-  void RefCounting::WeakData::addRef() {
+  void RefCounting::WeakData::AddRef() {
     m_count += 1;
   }
 
-  void RefCounting::WeakData::release() {
+  void RefCounting::WeakData::Release() {
     m_count -= 1;
 
     if (m_count == 0) {
@@ -28,10 +24,17 @@ namespace px {
     }
   }
 
+  bool RefCounting::WeakData::Get() const {
+    return m_isDestroyed;
+  }
+
+  void RefCounting::WeakData::Set(bool v) {
+    m_isDestroyed = v;
+  }
+
   std::uint32_t RefCounting::WeakData::getReferenceCount() const {
     return m_count;
   }
-  #endif
 
   RefCounting::RefCounting()
     : m_refCount(0)
@@ -50,23 +53,11 @@ namespace px {
 
   RefCounting::WeakData *RefCounting::getWeakData() const {
     if (not m_weakData) {
-      #ifdef PX_MEMORY_USE_ANGEL_SCRIPT_ILOCKABLE_BOOL
-      asAcquireExclusiveLock();
-
-      if (not m_weakData) {
-        m_weakData = asCreateLockableSharedBool();
-      }
-
-      asReleaseExclusiveLock();
-      #else
-
       std::lock_guard lk(createWeakRefCountMutex);
 
       if (not m_weakData) {
         m_weakData = new WeakData;
       }
-
-      #endif
     }
 
     return m_weakData;

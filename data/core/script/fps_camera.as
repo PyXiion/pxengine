@@ -11,6 +11,10 @@ shared class FpsCamera : AngelBehaviour {
 
     }
 
+    void tick() {
+
+    }
+
     void finish() {
 
     }

@@ -1,0 +1,5 @@
+name: Example
+
+scripts:
+  sources:
+    - script.main

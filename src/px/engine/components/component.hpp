@@ -54,9 +54,6 @@ namespace px {
   public:
     virtual ~BaseComponent() = default;
 
-    inline static constexpr std::uint32_t componentTypeId = px::crc32(ID.value);
-    inline static constexpr std::string_view componentId  = ID.value;
-
     [[nodiscard]] bool checkComponentType(std::uint32_t type) const override {
       return componentTypeId == type or TParent::checkComponentType(type);
     }
@@ -68,6 +65,9 @@ namespace px {
     [[nodiscard]] std::uint32_t getComponentTypeId() const override {
       return componentTypeId;
     }
+
+    inline static constexpr std::uint32_t componentTypeId = px::crc32(ID.value);
+    inline static constexpr std::string_view componentId  = ID.value;
   };
 } // px
 

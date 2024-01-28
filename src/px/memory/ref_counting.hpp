@@ -6,35 +6,26 @@
 #define PX_REF_COUNTING_HPP
 #include <atomic>
 
-#ifdef PX_MEMORY_USE_ANGEL_SCRIPT_ILOCKABLE_BOOL
-#include "px/script/common.hpp"
-#endif
-
 
 namespace px {
   class RefCounting {
   public:
-    #ifndef PX_MEMORY_USE_ANGEL_SCRIPT_ILOCKABLE_BOOL
     class WeakData {
     public:
-      bool isDestroyed{false};
-
       void AddRef();
 
       void Release();
 
-      bool Get() const;
+      [[nodiscard]] bool Get() const;
 
-      void Set(bool) const;
+      void Set(bool);
 
       [[nodiscard]] std::uint32_t getReferenceCount() const;
 
     private:
+      bool m_isDestroyed{false};
       std::uint32_t m_count{1};
     };
-    #else
-    using WeakData = asILockableSharedBool;
-    #endif
 
   public:
     RefCounting();
@@ -55,9 +46,7 @@ namespace px {
     mutable std::atomic_uint32_t m_refCount;
     mutable WeakData *m_weakData;
 
-    #ifndef PX_MEMORY_USE_ANGEL_SCRIPT_ILOCKABLE_BOOL
     static std::mutex createWeakRefCountMutex;
-    #endif
   };
 } // px
 

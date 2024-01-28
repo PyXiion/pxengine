@@ -57,11 +57,10 @@ namespace px
     World *getWorld() const;
     Settings &getSettings();
     SettingsWindow &getSettingsWindow();
-    script::AngelScript &getScriptEngine();
 
     static Engine &getInstance();
 
-    px::World &createNewWorld();
+    World &createNewWorld();
 
     void setCamera(CameraPtr camera);
     CameraPtr getCamera() const;
@@ -107,7 +106,6 @@ namespace px
 
     BS::thread_pool m_threadPool;
 
-    std::unique_ptr<script::AngelScript> m_scriptEngine;
     EventManager m_eventManager;
 
     std::unique_ptr<ImGuiCtx> m_imgui;

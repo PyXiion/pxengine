@@ -124,7 +124,7 @@ void px::Engine::init() {
   // Redirect the window events to the event manager
   proxyEvents();
 
-  // Core module
+  // Load core module
   loadModule("./data/core");
 
   // Bind scripts in modules
@@ -265,10 +265,6 @@ px::Settings &px::Engine::getSettings() {
 
 px::SettingsWindow &px::Engine::getSettingsWindow() {
   return m_settingsWindow;
-}
-
-px::script::AngelScript &px::Engine::getScriptEngine() {
-  return *m_scriptEngine;
 }
 
 px::World &px::Engine::createNewWorld() {
