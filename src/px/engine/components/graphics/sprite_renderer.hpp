@@ -14,18 +14,19 @@
 #include "px/engine/components/transform.hpp"
 
 namespace px {
-
   class SpriteRenderer : public BaseComponent<"core.sprite_renderer">, EventListener {
   public:
     SpriteRenderer();
+
     explicit SpriteRenderer(const std::string &texture) {
       setTexture(texture);
     }
 
     void setTexture(const std::string &texture);
-    void setTexture(TexturePtr texture);
 
-    TexturePtr texture;
+    void setTexture(Ref<Texture> texture);
+
+    Ref<Texture> texture;
 
   private:
     Transform *m_transform{};
@@ -34,13 +35,14 @@ namespace px {
     void draw();
 
     void subscribeEvents();
+
     void guiEditor() override;
 
     static Mesh mesh;
     static std::once_flag initMeshOnceFlag;
+
     static void generateMesh();
   };
-
 } // px
 
 #endif //PX_ENGINE_SPRITE_RENDERER_HPP

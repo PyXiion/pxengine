@@ -16,6 +16,7 @@
 #include "../../events/event_listener.hpp"
 #include "../../graphics/shader.hpp"
 #include "../../math/vector.hpp"
+#include "px/memory/ref.hpp"
 
 namespace px {
   class Engine;
@@ -56,8 +57,8 @@ namespace px {
     ImGuiContext *m_imgui{};
     bgfx::VertexLayout m_layout;
 
-    ShaderPtr m_shader;
-    ShaderPtr m_imageShader;
+    Ref<Shader> m_shader;
+    Ref<Shader> m_imageShader;
 
     BgfxUniqueTextureHandle m_texture;
     BgfxUniqueUniformHandle s_tex;

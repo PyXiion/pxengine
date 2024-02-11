@@ -3,13 +3,17 @@
 #include <filesystem>
 
 #include <easy/profiler.h>
+#include <yaml-cpp/node/node.h>
+#include <yaml-cpp/node/parse.h>
+
 #include "easylogging++.h"
 #include "common/frame_limiter.hpp"
+#include "common/utils.hpp"
+#include "px/px.hpp"
 #include "px/engine/events/common/mouse_event.hpp"
 #include "px/engine/events/common/key_event.hpp"
-#include "px/engine/scripts/binding.hpp"
 #include "px/engine/resources/localization.hpp"
-#include "scripts/angel_behaviour.hpp"
+#include "utils/bgfx_utils.hpp"
 
 static std::once_flag createLoggerFlag;
 
@@ -28,9 +32,7 @@ px::Engine::Engine()
 , m_maxTps(10)
 , m_deltaTime(1.0f / float(m_maxFps))
 , m_tickDeltaTime(1.0f / float(m_maxTps))
-, m_tickThreadShouldStop(false)
-, m_debugInfoWindow(*this)
-, m_settingsWindow(*this) {
+, m_tickThreadShouldStop(false) {
   std::call_once(createLoggerFlag, createLogger);
   instance = this;
   CLOG(INFO, "PXEngine") << "Created an engine instance at " << this;
@@ -40,9 +42,6 @@ px::Engine::Engine()
 }
 
 px::Engine::~Engine() {
-  // Destruct the world and its objects before other things
-  m_world.reset();
-
   profiler::dumpBlocksToFile("./profile");
   CLOG(INFO, "PXEngine") << "The profile is dumped";
 }
@@ -63,19 +62,13 @@ void px::Engine::run() {
   m_tickThreadShouldStop = true;
   m_tickLoopThread->join();
 
-  // Destroy modules
-  m_modules.clear();
-
   onExit(*this);
+
+  // Destruct the world and its objects before other things
+  m_world.reset();
 }
 
-void px::Engine::loadModule(const std::string &pathToModule) {
-  ModulePtr ptr = makeModule(*this, pathToModule);
-
-  ptr->load();
-
-  m_modules.push_back(std::move(ptr));
-}
+void px::Engine::loadModule(const std::string &pathToModule) {}
 
 void px::Engine::reloadSettings() {
   // graphics
@@ -88,13 +81,7 @@ void px::Engine::init() {
 
   registerEventTypes();
 
-  m_resourceManager = std::make_unique<ResourceManager>("./data");
-
-  // load language
-  auto lang = m_resourceManager->get<Localization>("core.lang.ru");
-
-  // set default language
-  m_resourceManager->set("core.lang", lang);
+  m_registries = std::make_unique<Registries>();
 
   m_window = std::make_unique<Window>("PXE", 1280, 720);
 
@@ -102,6 +89,8 @@ void px::Engine::init() {
 
   m_renderer = std::make_unique<Renderer>(*m_window);
   m_renderer->setDebugEnabled(false);
+
+  loadCoreResources();
 
   PX_IF_DEBUG {
     // switch render debug info on F1
@@ -127,13 +116,59 @@ void px::Engine::init() {
   // Load core module
   loadModule("./data/core");
 
-  // Bind scripts in modules
-  for (const auto &module : m_modules)
-    module->afterLoad();
-
   // Инициализация всего остального
   EASY_BLOCK("Init event", profiler::colors::LightBlue)
   onInit(*this);
+
+  m_debugInfoWindow = std::make_unique<DebugInfoWindow>(*this);
+  m_settingsWindow = std::make_unique<SettingsWindow>(*this);
+}
+
+void px::Engine::loadCoreResources() {
+  auto loadShader = [this](const std::string &id, const std::string &name) {
+    const std::string vsPath = fmt::format("./data/core/shaders/{}/vs_{}.bin",
+                                           Shader::getCurrentRendererTypeSuffix(), name);
+    const std::string fsPath = fmt::format("./data/core/shaders/{}/fs_{}.bin",
+                                           Shader::getCurrentRendererTypeSuffix(), name);
+
+    std::string vsShaderCode    = io::loadFileToString(vsPath);
+    const bgfx::Memory *vsMem   = utils::bgfx::stringToMemory(vsShaderCode);
+    bgfx::ShaderHandle vsShader = bgfx::createShader(vsMem);
+
+    std::string fsShaderCode    = io::loadFileToString(fsPath);
+    const bgfx::Memory *fsMem   = utils::bgfx::stringToMemory(fsShaderCode);
+    bgfx::ShaderHandle fsShader = bgfx::createShader(fsMem);
+
+    auto shader = Ref<Shader>::make(vsShader, fsShader);
+    m_registries->SHADERS.set(id, std::move(shader));
+  };
+
+  loadShader("core.cube", "cube");
+  loadShader("core.imgui_image", "imgui_image");
+  loadShader("core.imgui", "ocornut_imgui");
+  loadShader("core.mesh", "mesh");
+
+  auto loadFont = [this](const std::string &id, const std::string &name) {
+    std::ifstream ifs(fmt::format("./data/core/font/{}.ttf", name));
+    std::vector<char> data{std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>()};
+    m_registries->FONTS.set(id, std::move(data));
+  };
+
+  loadFont("core.roboto", "roboto/regular");
+  loadFont("core.roboto.italic", "roboto/italic");
+  loadFont("core.roboto.bold", "roboto/bold");
+
+  auto loadLocalization = [this](const std::string &id, const std::string &name) {
+    auto localization = Ref<Localization>::make();
+    std::ifstream ifs(fmt::format("./data/core/lang/{}.yaml", name));
+    localization->loadLanguage(ifs);
+    m_registries->LOCALIZATIONS.set(id, std::move(localization));
+  };
+
+  loadLocalization("core.ru", "ru");
+  loadLocalization("core.en", "en");
+
+  m_registries->LOCALIZATIONS.copy("core", "core.ru");
 }
 
 // Registering default events
@@ -235,10 +270,6 @@ px::Window &px::Engine::getWindow() const {
   return *m_window;
 }
 
-px::ResourceManager &px::Engine::getResourceManager() const {
-  return *m_resourceManager;
-}
-
 px::EventManager &px::Engine::getEventManager() {
   return m_eventManager;
 }
@@ -264,7 +295,11 @@ px::Settings &px::Engine::getSettings() {
 }
 
 px::SettingsWindow &px::Engine::getSettingsWindow() {
-  return m_settingsWindow;
+  return *m_settingsWindow;
+}
+
+px::Registries &px::Engine::getRegistries() const {
+  return *m_registries;
 }
 
 px::World &px::Engine::createNewWorld() {

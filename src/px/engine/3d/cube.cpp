@@ -43,7 +43,7 @@ namespace px {
     std::call_once(initVertices, &PosColorVertex::init);
     createBuffers();
 
-    m_shader = px::Engine::getInstance().getResourceManager().get<Shader>("core.shaders.cube");
+    m_shader = px::Engine::getInstance().getRegistries().SHADERS.get("core.cube");
   }
   Cube::~Cube() = default;
 
@@ -62,9 +62,9 @@ namespace px {
         bgfx::makeRef(s_cubeTriList, sizeof(s_cubeTriList) )
     );
 
-    auto &rm = Engine::getInstance().getResourceManager();
-    rm["core.cube.vb"] = m_vbh;
-    rm["core.cube.ib"] = m_ibh;
+    auto &registries = Engine::getInstance().getRegistries();
+    registries.VERTEX_BUFFERS.set("core.cube", m_vbh);
+    registries.INDEX_BUFFERS.set("core.cube",m_ibh);
   }
 
   void Cube::draw([[maybe_unused]] int i) {

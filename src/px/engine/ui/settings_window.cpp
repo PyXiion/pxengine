@@ -15,7 +15,7 @@ namespace px {
     , m_tab(Tab::Graphics) {
     engine.onInit.append([this](Engine &engine) {
       EASY_BLOCK("px::SettingsWindow::SettingsWindow -> px::Engine::onInit")
-      m_localization = engine.getResourceManager().get<Localization>("core.lang");
+      m_localization = engine.getRegistries().LOCALIZATIONS.get("core");
       m_settings = &engine.getSettings();
     });
     listen(engine.onGuiDraw, [this] { onGuiDraw(); });

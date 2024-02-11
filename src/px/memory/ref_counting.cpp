@@ -76,7 +76,7 @@ namespace px {
     m_refCount -= 1;
 
     if (m_refCount == 0) {
-      m_weakData->Set(true);
+      if (m_weakData) m_weakData->Set(true);
       delete this;
     }
   }

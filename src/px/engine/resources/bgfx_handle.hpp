@@ -9,6 +9,8 @@
 #include <bgfx/bgfx.h>
 #include <easy/profiler.h>
 
+#include "px/px.hpp"
+
 namespace px {
 
   template<class T>
@@ -23,8 +25,7 @@ namespace px {
       return *this;
     }
 
-    BgfxUniqueHandle(const BgfxUniqueHandle<T> &other) = delete;
-    BgfxUniqueHandle<T> &operator=(const BgfxUniqueHandle<T> &other) = delete;
+    PX_NO_COPY(BgfxUniqueHandle)
 
     BgfxUniqueHandle(BgfxUniqueHandle<T> &&other) noexcept {
       m_handle = other.m_handle;
@@ -55,7 +56,6 @@ namespace px {
     T m_handle;
 
     void destroy() {
-      EASY_BLOCK(__PRETTY_FUNCTION__)
       if (bgfx::isValid(m_handle)) {
         bgfx::destroy(m_handle);
       }

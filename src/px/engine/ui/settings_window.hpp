@@ -9,7 +9,7 @@
 
 #include "px/engine/events/event_listener.hpp"
 #include "px/engine/settings.hpp"
-#include "px/engine/resources/resource_traits.hpp"
+#include "px/memory/ref.hpp"
 
 namespace px {
   class Engine;
@@ -29,8 +29,8 @@ namespace px {
 
   private:
     Engine &m_engine;
-    Resource<Localization> m_localization;
     Settings *m_settings;
+    Ref<Localization> m_localization;
 
     Tab m_tab;
     bool m_opened;

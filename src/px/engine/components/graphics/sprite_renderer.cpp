@@ -43,11 +43,11 @@ namespace px {
   }
 
   void SpriteRenderer::setTexture(const std::string &textureId) {
-    auto &rm = getGameObject()->getEngine()->getResourceManager();
-    setTexture(rm.get<Texture>(textureId));
+    auto &textures = getGameObject()->getEngine()->getRegistries().TEXTURES;
+    setTexture(textures.get(textureId));
   }
 
-  void SpriteRenderer::setTexture(TexturePtr newTexture) {
+  void SpriteRenderer::setTexture(Ref<Texture> newTexture) {
     texture = std::move(newTexture);
   }
 

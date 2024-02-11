@@ -8,8 +8,6 @@
 #include <utility>
 
 namespace px {
-  class RefCounting;
-
   template<class T>
   class Ref final {
   public:

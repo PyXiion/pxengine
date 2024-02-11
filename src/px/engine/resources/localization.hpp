@@ -8,11 +8,12 @@
 #define PX_ENGINE_LOCALIZATION_HPP
 #include <unordered_map>
 #include <string>
-#include "resource_traits.hpp"
+
+#include "px/memory/ref_counting.hpp"
 
 namespace px {
 
-  class Localization {
+  class Localization final : public RefCounting {
   public:
     Localization() = default;
 
@@ -26,16 +27,6 @@ namespace px {
   private:
     std::unordered_map<std::string, std::string> m_dict;
   };
-
-  namespace resources {
-    template<>
-    struct Traits<Localization> {
-      static std::vector<std::string> extensions;
-
-      static Resource<Localization> load(std::istream &is);
-    };
-
-  }
 } // px
 
 #endif //PX_ENGINE_LOCALIZATION_HPP

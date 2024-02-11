@@ -10,11 +10,11 @@
 #include <bgfx/bgfx.h>
 #include "../resources/bgfx_handle.hpp"
 #include "image.hpp"
-#include "px/engine/resources/resource_traits.hpp"
+#include "px/memory/ref_counting.hpp"
 
 namespace px {
 
-  class Texture {
+  class Texture : public RefCounting {
   public:
     void loadFromFile(const std::string &filename);
     void loadFromImage(const Image &image);
@@ -24,19 +24,6 @@ namespace px {
   private:
     BgfxUniqueTextureHandle m_handle;
   };
-
-  typedef std::shared_ptr<Texture> TexturePtr;
-  constexpr auto makeTexture = std::make_shared<Texture>;
-
-
-  namespace resources {
-    template<>
-    struct Traits<Texture> {
-      static std::vector<std::string> extensions;
-
-      static Resource<Texture> load(std::istream &ifs);
-    };
-  }
 } // px
 
 #endif //PX_ENGINE_TEXTURE_HPP

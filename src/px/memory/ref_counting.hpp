@@ -6,9 +6,10 @@
 #define PX_REF_COUNTING_HPP
 #include <atomic>
 
+#include "i_ref_counting.hpp"
 
 namespace px {
-  class RefCounting {
+  class RefCounting : public IRefCounting {
   public:
     class WeakData {
     public:
@@ -30,7 +31,7 @@ namespace px {
   public:
     RefCounting();
 
-    virtual ~RefCounting();
+    ~RefCounting() override;
 
     [[nodiscard]] unsigned int getReferenceCount() const;
 
@@ -38,9 +39,9 @@ namespace px {
 
     bool hasWeakData() const;
 
-    void addRef() const;
+    void addRef() const final;
 
-    void release() const;
+    void release() const final;
 
   private:
     mutable std::atomic_uint32_t m_refCount;

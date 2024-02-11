@@ -284,11 +284,11 @@ namespace px {
         | ImGuiConfigFlags_NavEnableKeyboard
         ;
 
-    auto &rm = px::Engine::getInstance().getResourceManager();
-    m_shader = rm.get<Shader>("core.shaders.imgui");
+    auto &shaders = px::Engine::getInstance().getRegistries().SHADERS;
+    m_shader = shaders.get("core.imgui");
 
     u_imageLodEnabled = bgfx::createUniform("u_imageLodEnabled", bgfx::UniformType::Vec4);
-    m_imageShader = rm.get<Shader>("core.shaders.imgui_image");
+    m_imageShader = shaders.get("core.imgui_image");
 
 
     m_layout
@@ -307,15 +307,15 @@ namespace px {
 
       const ImWchar *ranges = io.Fonts->GetGlyphRangesCyrillic();
 
-      auto &resources = m_engine.getResourceManager();
+      auto &fonts = m_engine.getRegistries().FONTS;
 
-      auto regular = resources.get<std::vector<char>>("core.font.roboto.regular");
-      auto italic  = resources.get<std::vector<char>>("core.font.roboto.italic");
-      auto bold    = resources.get<std::vector<char>>("core.font.roboto.bold");
+      auto &regular = fonts.get("core.roboto");
+      auto &italic  = fonts.get("core.roboto.italic");
+      auto &bold    = fonts.get("core.roboto.bold");
 
-      io.Fonts->AddFontFromMemoryTTF(regular->data(), regular->size(), 16.0f, &config, ranges);
-      io.Fonts->AddFontFromMemoryTTF(italic->data(),  italic->size(),  16.0f, &config, ranges);
-      io.Fonts->AddFontFromMemoryTTF(bold->data(),    bold->size(),    16.0f, &config, ranges);
+      io.Fonts->AddFontFromMemoryTTF(regular.data(), regular.size(), 16.0f, &config, ranges);
+      io.Fonts->AddFontFromMemoryTTF(italic.data(),  italic.size(),  16.0f, &config, ranges);
+      io.Fonts->AddFontFromMemoryTTF(bold.data(),    bold.size(),    16.0f, &config, ranges);
     }
     CLOG(INFO, "PXEngine") << "Loaded ImGui resources";
 

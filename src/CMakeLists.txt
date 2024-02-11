@@ -24,6 +24,8 @@ set(PX_LIB_SOURCES
     px/memory/ref.hpp
     px/memory/weak_ref.cpp
     px/memory/weak_ref.hpp
+    px/memory/i_ref_counting.cpp
+    px/memory/i_ref_counting.hpp
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")

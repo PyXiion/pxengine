@@ -6,6 +6,7 @@
 #define ENGINE_CUBE_HPP
 #include <bgfx/bgfx.h>
 #include "px/engine/graphics/shader.hpp"
+#include "px/memory/ref.hpp"
 
 namespace px {
 
@@ -38,7 +39,7 @@ namespace px {
 
     bgfx::VertexBufferHandle m_vbh{};
     bgfx::IndexBufferHandle m_ibh{};
-    ShaderPtr m_shader;
+    Ref<Shader> m_shader;
   };
 
 } // px

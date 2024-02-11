@@ -16,9 +16,7 @@ px::DebugInfoWindow::DebugInfoWindow(px::Engine &engine)
   , m_worldSelectedObject(nullptr)
 {
   EASY_BLOCK("px::DebugInfoWindow::DebugInfoWindow")
-  m_engine.onInit.append([this](px::Engine &engine) {
-    m_localization = engine.getResourceManager().get<Localization>("core.lang");
-  });
+  m_localization = engine.getRegistries().LOCALIZATIONS.get("core");
 
   listen(m_engine.onPostUpdate, &DebugInfoWindow::onUpdate);
   listen(m_engine.onPostTick,   &DebugInfoWindow::onTick);

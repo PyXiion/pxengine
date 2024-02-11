@@ -56,21 +56,4 @@ namespace px {
   bgfx::TextureHandle Texture::getHandle() const {
     return m_handle;
   }
-
-  namespace resources {
-    std::vector<std::string> Traits<Texture>::extensions {
-        ".png", ".jpg", ".jpeg", ".tga", ".bmp",
-        ".gif", ".hdr", ".pic", ".ppm", ".pgm"
-    };
-
-    Resource<Texture> Traits<Texture>::load(std::istream &is) {
-      auto image = Image();
-      image.loadFromStream(is);
-
-      auto texture = makeResource<Texture>();
-      texture->loadFromImage(image);
-
-      return texture;
-    }
-  }
 } // px

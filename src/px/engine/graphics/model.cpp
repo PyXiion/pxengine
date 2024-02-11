@@ -7,9 +7,13 @@
 #include "model.hpp"
 #include <stack>
 #include <easylogging++.h>
+#include <filesystem>
 
 namespace px {
   void Model::loadFromFile(const std::string &path) {
+    if (not std::filesystem::exists(path)) {
+      PX_THROW_AND_LOG("PXEngine", std::runtime_error, "File \"{}\" not found", path);
+    }
     CLOG(INFO, "PXEngine") << "Loading new model from " << path;
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
@@ -73,7 +77,7 @@ namespace px {
   Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
     std::vector<Vertex> vertices;
     std::vector<IndexType> indices;
-    std::vector<TexturePtr> textures;
+    std::vector<Ref<Texture>> textures;
 
     bool hasTexCoords = mesh->mTextureCoords[0];
 
@@ -108,12 +112,12 @@ namespace px {
     if (mesh->mMaterialIndex >= 0) {
       aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
 
-      std::vector<TexturePtr> diffuseMaps = loadMaterialTextures(material,
+      std::vector<Ref<Texture>> diffuseMaps = loadMaterialTextures(material,
                                                                  aiTextureType_DIFFUSE,
                                                                  "texture_diffuse");
       textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
-      std::vector<TexturePtr> specularMaps = loadMaterialTextures(material,
+      std::vector<Ref<Texture>> specularMaps = loadMaterialTextures(material,
                                                                   aiTextureType_SPECULAR,
                                                                  "texture_specular");
       textures.insert(specularMaps.end(), specularMaps.begin(), specularMaps.end());
@@ -122,13 +126,13 @@ namespace px {
     return {std::move(vertices), std::move(indices), std::move(textures)};
   }
 
-  std::vector<TexturePtr> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type, [[maybe_unused]] const std::string &path) {
-    std::vector<TexturePtr> textures;
+  std::vector<Ref<Texture>> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type, [[maybe_unused]] const std::string &path) {
+    std::vector<Ref<Texture>> textures;
     for (uint i = 0; i < mat->GetTextureCount(type); i++) {
       aiString str;
       mat->GetTexture(type, i, &str);
 
-      TexturePtr texture = makeTexture();
+      Ref<Texture> texture = Ref<Texture>::make();
       texture->loadFromFile(str.C_Str());
       textures.push_back(std::move(texture));
     }
@@ -138,15 +142,5 @@ namespace px {
 
   const std::vector<Mesh> &Model::getMeshes() {
     return m_meshes;
-  }
-
-  std::vector<std::string> resources::Traits<Model>::extensions {
-    ".obj"
-  };
-
-  Resource<Model> resources::Traits<Model>::load(ResourceManager &rm, std::istream &stream) {
-    auto model = makeModel();
-    model->loadFromStream(stream);
-    return model;
   }
 } // pc

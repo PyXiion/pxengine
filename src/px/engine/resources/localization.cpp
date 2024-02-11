@@ -11,7 +11,6 @@
 #include <fmt/format.h>
 #include <easy/profiler.h>
 #include <easylogging++.h>
-#include "resource_traits.hpp"
 #include "px/px.hpp"
 
 namespace px {
@@ -73,14 +72,5 @@ namespace px {
 
   const char *Localization::getc(const std::string &key) const {
     return (*this)[key].c_str();
-  }
-
-  std::vector<std::string> resources::Traits<Localization>::extensions {
-      ".yml", ".yaml"
-  };
-  Resource<Localization> resources::Traits<Localization>::load(std::istream &is) {
-    auto loc = makeResource<Localization>();
-    loc->loadLanguage(is);
-    return loc;
   }
 } // px

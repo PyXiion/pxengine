@@ -11,14 +11,14 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#include "px/engine/resources/resource_traits.hpp"
 #include "mesh.hpp"
 #include "shader.hpp"
 #include "render_states.hpp"
+#include "px/memory/ref_counting.hpp"
 
 namespace px {
 
-  class Model {
+  class Model : public RefCounting {
   public:
     Model() = default;
     explicit Model(const std::string &path) { loadFromFile(path); }
@@ -36,21 +36,8 @@ namespace px {
     void processNodes(aiNode *rootNode, const aiScene *scene);
     static Mesh processMesh(aiMesh *mesh, const aiScene *scene);
 
-    static std::vector<TexturePtr> loadMaterialTextures(aiMaterial *mat, aiTextureType type, [[maybe_unused]] const std::string &path);
+    static std::vector<Ref<Texture>> loadMaterialTextures(aiMaterial *mat, aiTextureType type, [[maybe_unused]] const std::string &path);
   };
-
-  typedef std::shared_ptr<Model> ModelPtr;
-  template <class ...TArgs>
-  static ModelPtr makeModel(TArgs &&...args) { return std::make_shared<Model>(std::forward<TArgs>(args)...); }
-
-  namespace resources {
-    template<>
-    struct Traits<Model> {
-      static std::vector<std::string> extensions;
-
-      static Resource<Model> load(ResourceManager &rm, std::istream &stream);
-    };
-  }
 } // px
 
 #endif //PX_ENGINE_MODEL_HPP

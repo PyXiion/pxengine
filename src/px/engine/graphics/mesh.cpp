@@ -25,7 +25,7 @@ namespace px {
   Mesh::Mesh() {
   }
 
-  Mesh::Mesh(std::vector<Vertex> vertices, std::vector<IndexType> indices, std::vector<TexturePtr> textures)
+  Mesh::Mesh(std::vector<Vertex> vertices, std::vector<IndexType> indices, std::vector<Ref<Texture>> textures)
     : m_vertices(std::move(vertices))
     , m_indices(std::move(indices))
     , m_textures(std::move(textures)) {
@@ -39,7 +39,7 @@ namespace px {
     }
   }
 
-  void Mesh::create(std::vector<Vertex> vertices, std::vector<IndexType> indices, std::vector<TexturePtr> textures) {
+  void Mesh::create(std::vector<Vertex> vertices, std::vector<IndexType> indices, std::vector<Ref<Texture>> textures) {
     std::call_once(layoutInitOnce, initLayout);
     m_vertices = std::move(vertices);
     m_indices = std::move(indices);
@@ -99,7 +99,7 @@ namespace px {
     return handle;
   }
 
-  void Mesh::setTexture(std::size_t i, TexturePtr texture) {
+  void Mesh::setTexture(std::size_t i, Ref<Texture> texture) {
     if (m_textures.size() < i) {
       m_textures[i] = std::move(texture);
     } else {
@@ -109,11 +109,11 @@ namespace px {
     }
   }
 
-  void Mesh::setTextures(std::vector<TexturePtr> textures) {
+  void Mesh::setTextures(std::vector<Ref<Texture>> textures) {
     m_textures = std::move(textures);
   }
 
-  std::vector<TexturePtr> Mesh::getTextures() const {
+  std::vector<Ref<Texture>> Mesh::getTextures() const {
     return m_textures;
   }
 

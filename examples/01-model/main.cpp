@@ -19,6 +19,7 @@ public:
   }
 
   void init(px::Engine &engine) {
+    loadResources();
     u_time = px::makeUniform("u_time", bgfx::UniformType::Vec4);
 
     // create world
@@ -32,10 +33,10 @@ public:
     transform->setPosition({0, 0, 0});
 
     auto renderer = gameObject->addComponent<px::ModelRenderer>();
-    renderer->setModel("example.model.cube");
+    renderer->setModel("example.cube");
 
     px::RenderStates states = engine.getRenderer().getDefaultRenderStates();
-    states.shaderPtr        = engine.getResourceManager().get<px::Shader>("core.shaders.cube");
+    states.shaderPtr        = engine.getRegistries().SHADERS.get("core.cube");
     renderer->setRenderStates(states);
 
     m_camera = world.createGameObject<px::Camera>();
@@ -80,6 +81,13 @@ private:
   float m_time = 0;
 
   float m;
+
+  void loadResources() {
+    px::Registries &registries = m_engine.getRegistries();
+
+    auto model = px::Ref<px::Model>::make("./data/example/model/cube.obj");
+    registries.MODELS.set("example.cube", std::move(model));
+  }
 };
 
 int main(int argc, char *argv[]) {

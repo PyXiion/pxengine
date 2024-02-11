@@ -3,7 +3,6 @@
 #include <atomic>
 #include "../../world/game_object.hpp"
 #include "../../events/event_listener.hpp"
-#include "px/engine/resources/resource_traits.hpp"
 
 namespace px
 {
@@ -19,7 +18,7 @@ namespace px
     const int kGraphPointCount = 50;
 
     Engine &m_engine;
-    Resource<Localization> m_localization;
+    Ref<Localization> m_localization;
 
     std::atomic<float> m_frameDeltaTime;
     std::atomic<float> m_tickDeltaTime;

@@ -12,28 +12,29 @@
 #include "texture.hpp"
 #include "render_states.hpp"
 #include "uniform.hpp"
+#include "px/memory/ref.hpp"
 
 namespace px {
 
   class Mesh {
   public:
     Mesh();
-    Mesh(std::vector<Vertex> vertices, std::vector<IndexType> indices, std::vector<TexturePtr> textures);
+    Mesh(std::vector<Vertex> vertices, std::vector<IndexType> indices, std::vector<Ref<Texture>> textures);
 
-    void create(std::vector<Vertex> vertices, std::vector<IndexType> indices, std::vector<TexturePtr> textures);
+    void create(std::vector<Vertex> vertices, std::vector<IndexType> indices, std::vector<Ref<Texture>> textures);
 
     void submit(const RenderStates &renderStates) const;
 
-    void setTexture(std::size_t i, TexturePtr texture);
+    void setTexture(std::size_t i, Ref<Texture> texture);
 
-    void setTextures(std::vector<TexturePtr> textures);
+    void setTextures(std::vector<Ref<Texture>> textures);
 
-    [[nodiscard]] std::vector<TexturePtr> getTextures() const;
+    [[nodiscard]] std::vector<Ref<Texture>> getTextures() const;
 
   private:
     std::vector<Vertex> m_vertices;
     std::vector<IndexType> m_indices;
-    std::vector<TexturePtr> m_textures;
+    std::vector<Ref<Texture>> m_textures;
 
     Uniform s_texture;
 

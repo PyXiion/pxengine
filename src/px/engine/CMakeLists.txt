@@ -15,7 +15,6 @@ set(PX_ENGINE_SHADER_SOURCES
 )
 set(PX_ENGINE_SOURCES
     engine.cpp engine.hpp
-    module.cpp module.hpp
     general.hpp
     settings.hpp
 
@@ -38,6 +37,7 @@ set(PX_ENGINE_SOURCES
     events/event.hpp
     events/event_fabric.hpp
     events/event_manager.cpp events/event_manager.hpp
+    events/event_listener.cpp events/event_listener.hpp
 
     events/common/key_event.hpp
     events/common/mouse_event.hpp
@@ -58,7 +58,8 @@ set(PX_ENGINE_SOURCES
 
     resources/bgfx_handle.hpp
     resources/localization.cpp resources/localization.hpp
-    resources/resource_manager.cpp resources/resource_manager.hpp
+    resources/registries.cpp resources/registries.hpp
+    resources/registry.cpp resources/registry.hpp
 
     system/general.cpp system/general.hpp
     system/keycodes.hpp
@@ -73,10 +74,7 @@ set(PX_ENGINE_SOURCES
 
     world/game_object.cpp world/game_object.hpp
     world/world.cpp world/world.hpp
-    resources/resource_traits.cpp resources/resource_traits.hpp
-    events/event_listener.cpp
-    scripts/script_engine.cpp
-    scripts/script_engine.hpp
+
 )
 
 foreach(SHADER ${PX_ENGINE_SHADER_SOURCES})

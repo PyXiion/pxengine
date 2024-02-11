@@ -30,13 +30,13 @@ namespace px {
     }
   }
 
-  void ModelRenderer::setModel(ModelPtr model) {
+  void ModelRenderer::setModel(Ref<Model> model) {
     m_model = std::move(model);
   }
 
   void ModelRenderer::setModel(const std::string &model) {
-    auto &resources = getGameObject()->getEngine()->getResourceManager();
-    setModel(resources.get<Model>(model));
+    auto &models = getGameObject()->getEngine()->getRegistries().MODELS;
+    setModel(models.get(model));
   }
 
   void ModelRenderer::setRenderStates(RenderStates renderStates) {
